@@ -1,0 +1,4 @@
+*.cm[ioax]
+*.cmxa
+*.annot
+.depend.ocaml
