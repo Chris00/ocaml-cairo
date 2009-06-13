@@ -16,6 +16,7 @@
    LICENSE for more details. */
 
 #include <cairo.h>
+#include "cairo_macros.c"
 
 #include <caml/mlvalues.h>
 #include <caml/alloc.h>
@@ -68,12 +69,10 @@ static long caml_cairo_hash_pointer(value v)
 
 DEFINE_CUSTOM_OPERATIONS(cairo, cairo_destroy, CAIRO_VAL)
 
-/* For non Raise the corresponding OCaml exception. */
-static void caml_check_status(cairo_t *cr)
+/* raise [Error] if the status indicates a failure. */
+static void caml_raise_Error(cairo_status_t status)
 {
   static value * exn = NULL;
-  cairo_status_t status = cairo_status(cr);
-
   if (status != CAIRO_STATUS_SUCCESS) {
     if (exn == NULL) {
       /* First time around, look up by name */
@@ -88,6 +87,13 @@ static void caml_check_status(cairo_t *cr)
       caml_raise_with_arg(*exn, Val_int(status - 2));
   }
 }
+
+/* For non Raise the corresponding OCaml exception. */
+static void caml_check_status(cairo_t *cr)
+{
+  caml_raise_Error(cairo_status(cr));
+}
+
 
 CAMLexport value caml_cairo_status_to_string(value vstatus)
 {
@@ -140,23 +146,8 @@ CAMLexport value caml_cairo_create(value vsurf)
   CAMLreturn(vcontext);
 }
 
-CAMLexport value caml_cairo_save(value vcr)
-{
-  CAMLparam1(vcr);
-  cairo_t *cr = CAIRO_VAL(vcr);
-  cairo_save(cr);
-  caml_check_status(cr);
-  CAMLreturn(Val_unit);
-}
-
-CAMLexport value caml_cairo_restore(value vcr)
-{
-  CAMLparam1(vcr);
-  cairo_t *cr = CAIRO_VAL(vcr);
-  cairo_restore(cr);
-  caml_check_status(cr);
-  CAMLreturn(Val_unit);
-}
+DO_FUNCTION(cairo_save)
+DO_FUNCTION(cairo_restore)
 
 CAMLexport value caml_cairo_get_target(value vcr)
 {
@@ -169,14 +160,7 @@ CAMLexport value caml_cairo_get_target(value vcr)
   CAMLreturn(vsurf);
 }
 
-CAMLexport value caml_cairo_push_group(value vcr)
-{
-  CAMLparam1(vcr);
-  cairo_t *cr = CAIRO_VAL(vcr);
-  cairo_push_group(cr);
-  caml_check_status(cr);
-  CAMLreturn(Val_unit);
-}
+DO_FUNCTION(cairo_push_group)
 
 CAMLexport value caml_cairo_push_group_with_content(value vcr, value vcontent)
 {
@@ -200,14 +184,7 @@ CAMLexport value caml_cairo_pop_group(value vcr)
   CAMLreturn(vpat);
 }
 
-CAMLexport value caml_cairo_pop_group_to_source(value vcr)
-{
-  CAMLparam1(vcr);
-  cairo_t *cr = CAIRO_VAL(vcr);
-  cairo_pop_group_to_source(cr);
-  caml_check_status(cr);
-  CAMLreturn(Val_unit);
-}
+DO_FUNCTION(cairo_pop_group_to_source)
 
 CAMLexport value caml_cairo_get_group_target(value vcr)
 {
@@ -241,14 +218,7 @@ CAMLexport value caml_cairo_set_source_rgba(
   CAMLreturn(Val_unit);
 }
 
-CAMLexport value caml_cairo_set_source(value vcr, value vpat)
-{
-  CAMLparam2(vcr, vpat);
-  cairo_t* cr = CAIRO_VAL(vcr);
-  cairo_set_source(cr, PATTERN_VAL(vpat));
-  caml_check_status(cr);
-  CAMLreturn(Val_unit);
-}
+SET_FUNCTION(cairo_set_source, PATTERN_VAL)
 
 CAMLexport value caml_cairo_get_source(value vcr)
 {
@@ -261,25 +231,12 @@ CAMLexport value caml_cairo_get_source(value vcr)
   CAMLreturn(vpat);
 }
 
+
 #define ANTIALIAS_VAL(v) Int_val(v)
+#define VAL_ANTIALIAS(v) Val_int(v)
 
-CAMLexport value caml_cairo_set_antialias(value vcr, value vantialias)
-{
-  CAMLparam2(vcr, vantialias);
-  cairo_t* cr = CAIRO_VAL(vcr);
-  cairo_set_antialias(cr, ANTIALIAS_VAL(vantialias));
-  caml_check_status(cr);
-  CAMLreturn(Val_unit);
-}
-
-CAMLexport value caml_cairo_get_antialias(value vcr)
-{
-  CAMLparam1(vcr);
-  cairo_t* cr = CAIRO_VAL(vcr);
-  cairo_antialias_t antialias = cairo_get_antialias(cr);
-  caml_check_status(cr);
-  CAMLreturn(Val_int(antialias));
-}
+SET_FUNCTION(cairo_set_antialias, ANTIALIAS_VAL)
+GET_FUNCTION(cairo_get_antialias, VAL_ANTIALIAS, cairo_antialias_t)
 
 CAMLexport value caml_cairo_set_dash(value vcr, value vdashes, value voffset)
 {
@@ -322,7 +279,109 @@ CAMLexport value caml_cairo_get_dash(value vcr)
   CAMLreturn(couple);
 }
 
+#define FILL_RULE_VAL(v) Int_val(v)
+#define VAL_FILL_RULE(v) Val_int(v)
 
+SET_FUNCTION(cairo_set_fill_rule, FILL_RULE_VAL)
+GET_FUNCTION(cairo_get_fill_rule, VAL_FILL_RULE, cairo_fill_rule_t)
+
+#define LINE_CAP_VAL(v) Int_val(v)
+#define VAL_LINE_CAP(v) Val_int(v)
+
+SET_FUNCTION(cairo_set_line_cap, FILL_RULE_VAL)
+GET_FUNCTION(cairo_get_line_cap, VAL_LINE_CAP, cairo_line_cap_t)
+
+#define LINE_JOIN_VAL(v) Int_val(v)
+#define VAL_LINE_JOIN(v) Val_int(v)
+
+SET_FUNCTION(cairo_set_line_join, LINE_JOIN_VAL)
+GET_FUNCTION(cairo_get_line_join, VAL_LINE_JOIN, cairo_line_join_t)
+
+SET_FUNCTION(cairo_set_line_width, Double_val)
+GET_FUNCTION(cairo_get_line_width, caml_copy_double, double)
+
+SET_FUNCTION(cairo_set_miter_limit, Double_val)
+GET_FUNCTION(cairo_get_miter_limit, caml_copy_double, double)
+
+#define OPERATOR_VAL(v) Int_val(v)
+#define VAL_OPERATOR(v) Val_int(v)
+
+SET_FUNCTION(cairo_set_operator, OPERATOR_VAL)
+GET_FUNCTION(cairo_get_operator, VAL_OPERATOR, cairo_operator_t)
+
+SET_FUNCTION(cairo_set_tolerance, Double_val)
+GET_FUNCTION(cairo_get_tolerance, caml_copy_double, double)
+
+DO_FUNCTION(cairo_clip)
+DO_FUNCTION(cairo_clip_preserve)
+
+CAMLexport value caml_cairo_clip_extents(value vcr)
+{
+  CAMLparam1(vcr);
+  CAMLlocal1(bb);
+  cairo_t* cr = CAIRO_VAL(vcr);
+  double x1, y1, x2, y2;
+  cairo_clip_extents(cr, &x1, &y1, &x2, &y2);
+  caml_check_status(cr);
+  /* Create record (optimized by OCaml to an array of floats) */
+  bb = caml_alloc(4 * Double_wosize, Double_array_tag);
+  Store_double_field(bb, 0, x1);
+  Store_double_field(bb, 1, y1);
+  Store_double_field(bb, 2, x2);
+  Store_double_field(bb, 3, y2);
+  CAMLreturn(bb);
+}
+
+DO_FUNCTION(cairo_reset_clip)
+
+CAMLexport value caml_cairo_copy_clip_rectangle_list(value vcr)
+{
+  CAMLparam1(vcr);
+  CAMLlocal3(vlist, vrec, cons);
+  cairo_t* cr = CAIRO_VAL(vcr);
+  cairo_rectangle_list_t* list = cairo_copy_clip_rectangle_list(cr);
+  int i;
+  cairo_rectangle_t *r;
+  /* assert(list != NULL); */
+  caml_raise_Error(list->status);
+  vlist = Val_int(0); /* [] */
+  for(i = 0, r = list->rectangles;  i < list->num_rectangles;  i++, r++) {
+    /* New rectangle (pure float record) */
+    vrec = caml_alloc(4 * Double_wosize, Double_array_tag);
+    Store_double_field(vrec, 0, r->x);
+    Store_double_field(vrec, 1, r->y);
+    Store_double_field(vrec, 2, r->width);
+    Store_double_field(vrec, 3, r->height);
+    /* New cons cell */
+    cons = caml_alloc_tuple(2);
+    caml_modify(&Field(cons, 0), vrec);
+    caml_modify(&Field(cons, 1), vlist);
+    vlist = cons;
+  }
+  cairo_rectangle_list_destroy(list);
+  CAMLreturn(vlist);
+}
+
+
+DO_FUNCTION(cairo_fill)
+DO_FUNCTION(cairo_fill_preserve)
+
+CAMLexport value caml_cairo_fill_extents(value vcr)
+{
+  CAMLparam1(vcr);
+  CAMLlocal1(bb);
+  cairo_t* cr = CAIRO_VAL(vcr);
+  double x1, y1, x2, y2;
+  cairo_fill_extents(cr, &x1, &y1, &x2, &y2);
+  caml_check_status(cr);
+  /* Create record (of only floats) */
+  bb = caml_alloc(4 * Double_wosize, Double_array_tag);
+  Store_double_field(bb, 0, x1);
+  Store_double_field(bb, 1, y1);
+  Store_double_field(bb, 2, x2);
+  Store_double_field(bb, 3, y2);
+  CAMLreturn(bb);
+}
 
 
 

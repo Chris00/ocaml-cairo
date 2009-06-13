@@ -303,8 +303,17 @@ type fill_rule =
                  total number of intersections is odd, the point will
                  be filled. *)
 
-val set_fill_rule : t -> fill_rule -> unit
-val get_fill_rule : t -> fill_rule
+external set_fill_rule : t -> fill_rule -> unit = "caml_cairo_set_fill_rule"
+    (** [set_fill_rule cr fill_rule] sets the current fill rule within
+        the cairo context [cr].  The fill rule is used to determine
+        which regions are inside or outside a complex (potentially
+        self-intersecting) path. The current fill rule affects both
+        {!Cairo.fill} and {!Cairo.clip}.  See {!Cairo.fill_rule} for
+        details on the semantics of each available fill rule.  *)
+
+external get_fill_rule : t -> fill_rule = "caml_cairo_get_fill_rule"
+    (** Gets the current fill rule, as set by [set_fill_rule]. *)
+
 
 (** Specifies how to render the endpoints of the path when stroking.
     The default line cap style is [BUTT].  *)
@@ -313,8 +322,20 @@ type line_cap =
   | ROUND (** use a round ending, the center of the circle is the end point *)
   | SQUARE (** use squared ending, the center of the square is the end point *)
 
-val set_line_cap : t -> line_cap -> unit
-val get_line_cap : t -> line_cap
+external set_line_cap : t -> line_cap -> unit = "caml_cairo_set_line_cap"
+    (** [set_line_cap cr line_cap] sets the current line cap style
+        within the cairo context [cr].  See {!Cairo.line_cap} for
+        details about how the available line cap styles are drawn.
+
+        As with the other stroke parameters, the current line cap
+        style is examined by {!Cairo.stroke}, {!Cairo.stroke_extents},
+        and {!Cairo.stroke_to_path}, but does not have any effect
+        during path construction.
+
+        The default line cap style is [BUTT].  *)
+external get_line_cap : t -> line_cap = "caml_cairo_get_line_cap"
+    (** Gets the current line cap style, as set by {!Cairo.set_line_cap}. *)
+
 
 (** Specifies how to render the junction of two lines when stroking.
     The default line join style is [MITER]. *)
@@ -325,14 +346,77 @@ type line_join =
   | BEVEL (** use a cut-off join, the join is cut off at half the line
               width from the joint point *)
 
-val set_line_join : t -> line_join -> unit
-val get_line_join : t -> line_join
+external set_line_join : t -> line_join -> unit = "caml_cairo_set_line_join"
+    (** Sets the current line join style within the cairo context.
+        See {!Cairo.line_join} for details about how the available
+        line join styles are drawn.
 
-val set_line_width : t -> float -> unit
-val get_line_width : t -> float
+        As with the other stroke parameters, the current line join
+        style is examined by {!Cairo.stroke}, {!Cairo.stroke_extents},
+        and {!Cairo.stroke_to_path}, but does not have any effect
+        during path construction.
 
-val set_miter_limit : t -> float -> unit
-val get_miter_limit : t -> float
+        The default line join style is [MITER]. *)
+external get_line_join : t -> line_join = "caml_cairo_get_line_join"
+    (** Gets the current line join style, as set by {!Cairo.set_line_join}. *)
+
+
+external set_line_width : t -> float -> unit = "caml_cairo_set_line_width"
+    (** Sets the current line width within the cairo context. The line
+        width value specifies the diameter of a pen that is circular in
+        user space, (though device-space pen may be an ellipse in general
+        due to scaling/shear/rotation of the CTM).
+
+        Note: When the description above refers to user space and CTM
+        it refers to the user space and CTM in effect at the time of
+        the stroking operation, not the user space and CTM in effect
+        at the time of the call to [set_line_width].  The simplest
+        usage makes both of these spaces identical.  That is, if there
+        is no change to the CTM between a call to [set_line_with] and
+        the stroking operation, then one can just pass user-space
+        values to [set_line_width] and ignore this note.
+
+        As with the other stroke parameters, the current line width is
+        examined by {!Cairo.stroke}, {!Cairo.stroke_extents}, and
+        {!Cairo.stroke_to_path}, but does not have any effect during
+        path construction.
+
+        The default line width value is [2.0].  *)
+external get_line_width : t -> float = "caml_cairo_get_line_width"
+    (** This function returns the current line width value exactly as
+        set by {!Cairo.set_line_width}.  Note that the value is
+        unchanged even if the CTM has changed between the calls to
+        [set_line_width] and [get_line_width]. *)
+
+external set_miter_limit : t -> float -> unit = "caml_cairo_set_miter_limit"
+    (** Sets the current miter limit within the cairo context.
+
+        If the current line join style is set to [MITER] (see
+        {!Cairo.set_line_join}), the miter limit is used to determine
+        whether the lines should be joined with a bevel instead of a
+        miter.  Cairo divides the length of the miter by the line
+        width.  If the result is greater than the miter limit, the
+        style is converted to a bevel.
+
+        As with the other stroke parameters, the current line miter
+        limit is examined by {!Cairo.stroke}, {!Cairo.stroke_extents},
+        and {!Cairo.stroke_to_path}, but does not have any effect
+        during path construction.
+
+        The default miter limit value is [10.0], which will convert
+        joins with interior angles less than 11 degrees to bevels
+        instead of miters.  For reference, a miter limit of 2.0 makes
+        the miter cutoff at 60 degrees, and a miter limit of 1.414
+        makes the cutoff at 90 degrees.
+
+        A miter limit for a desired angle can be computed as: miter
+        limit = 1/sin(angle/2).  *)
+
+external get_miter_limit : t -> float = "caml_cairo_get_miter_limit"
+    (** Gets the current miter limit, as set by {!Cairo.set_miter_limit}. *)
+
+
+(** {3 Drawing operations} *)
 
 (** Compositing operator for all cairo drawing operations.
 
@@ -348,8 +432,7 @@ val get_miter_limit : t -> float
     fully transparent or fully opaque. The actual implementation
     works for translucent layers too. For a more detailed
     explanation of the effects of each operator, including the
-    mathematical definitions, see
-    http://cairographics.org/operators/ *)
+    mathematical definitions, see http://cairographics.org/operators/ *)
 type operator =
   | CLEAR (** clear destination layer (bounded)  *)
   | SOURCE (** replace destination layer (bounded) *)
@@ -370,12 +453,30 @@ type operator =
   | SATURATE (** like over, but assuming source and dest are
                  disjoint geometries *)
 
-val set_operator : t -> operator -> unit
-val get_operator : t -> operator
+external set_operator : t -> operator -> unit = "caml_cairo_set_operator"
+    (** Sets the compositing operator to be used for all drawing
+        operations.  See {!Cairo.operator} for details on the
+        semantics of each available compositing operator.
 
-val set_tolerance : t -> float -> unit
-val get_tolerance : t -> float
+        The default operator is [OVER]. *)
 
+external get_operator : t -> operator = "caml_cairo_get_operator"
+    (** Gets the current compositing operator for a cairo context.  *)
+
+external set_tolerance : t -> float -> unit = "caml_cairo_set_tolerance"
+    (** Sets the tolerance used when converting paths into trapezoids.
+        Curved segments of the path will be subdivided until the
+        maximum deviation between the original path and the polygonal
+        approximation is less than tolerance.  The default value is
+        [0.1].  A larger value will give better performance, a smaller
+        value, better appearance.  (Reducing the value from the
+        default value of [0.1] is unlikely to improve appearance
+        significantly.)  *)
+external get_tolerance : t -> float = "caml_cairo_get_tolerance"
+    (** Gets the current tolerance value, as set by {!Cairo.set_tolerance}. *)
+
+type bounding_box = { x1: float;  y1: float;  x2: float;  y2: float }
+type rectangle = { x:float; y:float; width:float; height:float }
 
 val clip : ?preserve:bool -> t -> unit
   (** Establishes a new clip region by intersecting the current clip
@@ -390,18 +491,58 @@ val clip : ?preserve:bool -> t -> unit
       means of temporarily restricting the clip region.
   *)
 
-val clip_extents : t -> float * float * float * float
-  (** Computes a bounding box [(x1, y1, x2, y2)] in user coordinates
-      covering the area inside the current clip.  *)
+external clip_extents : t -> bounding_box = "caml_cairo_clip_extents"
+  (** Computes a bounding box in user coordinates covering the area
+      inside the current clip.  *)
 
-type rectangle = { x:float; y:float; width:float; height:float }
+external clip_reset : t -> unit = "caml_cairo_reset_clip"
+  (** Reset the current clip region to its original, unrestricted
+      state.  That is, set the clip region to an infinitely large
+      shape containing the target surface.  Equivalently, if infinity is too
+      hard to grasp, one can imagine the clip region being reset to
+      the exact bounds of the target surface.
 
-val clip_rectangle_list : t -> rectangle list
+      Note that code meant to be reusable should not call [clip_reset]
+      as it will cause results unexpected by higher-level code which
+      calls {!Cairo.clip}.  Consider using {!Cairo.save} and
+      {!Cairo.restore} around {!Cairo.clip} as a more robust means of
+      temporarily restricting the clip region. *)
+
+external clip_rectangle_list : t -> rectangle list
+  = "caml_cairo_copy_clip_rectangle_list"
+  (** Gets the current clip region as a list of rectangles in user
+      coordinates.
+
+      Raises [Error(CLIP_NOT_REPRESENTABLE)] to indicate that the clip
+      region cannot be represented as a list of user-space rectangles.  *)
 
 
 val fill : ?preserve:bool -> t -> unit
+  (** A drawing operator that fills the current path according to the
+      current fill rule, (each sub-path is implicitly closed before
+      being filled).  After [fill], the current path will be cleared
+      from the cairo context unless [preserve] is [true] (default: [false]).
 
-val fill_extents : t -> float * float * float * float
+      See also {!Cairo.set_fill_rule}. *)
+
+val fill_extents : t -> bounding_box
+  (** Computes a bounding box in user coordinates covering the area
+      that would be affected, (the "inked" area), by a [fill]
+      operation given the current path and fill parameters.  If the
+      current path is empty, returns an empty rectangle [{ x1=0.;
+      y1=0.; x2=0.; y2=0. }].  Surface dimensions and clipping are not
+      taken into account.
+
+      Contrast with {!Cairo.path_extents}, which is similar, but
+      returns non-zero extents for some paths with no inked area,
+      (such as a simple line segment).
+
+      Note that [fill_extents] must necessarily do more work to
+      compute the precise inked areas in light of the fill rule, so
+      {!Cairo.path_extents} may be more desirable for sake of
+      performance if the non-inked path extents are desired.
+
+      See {!Cairo.fill} and {!Cairo.set_fill_rule}. *)
 
 val in_fill : t -> x:float -> y:float -> bool
   (** Tests whether the given point is inside the area that would be
@@ -420,7 +561,7 @@ val paint : ?alpha:float -> t -> unit
       @param alpha  alpha value, between 0 (transparent) and 1 (opaque)  *)
 
 val stroke : ?perserve:bool -> t -> unit
-val stroke_extents : t -> float * float * float * float
+val stroke_extents : t -> bounding_box
 
 val in_stroke : t -> x:float -> y:float -> bool
 

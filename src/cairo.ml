@@ -106,7 +106,47 @@ let set_dash cr ?(ofs=0.0) dashes = set_dash_stub cr ofs dashes
 
 external get_dash : t -> float array * float = "caml_cairo_get_dash"
 
+external set_fill_rule : t -> fill_rule -> unit = "caml_cairo_set_fill_rule"
+external get_fill_rule : t -> fill_rule = "caml_cairo_get_fill_rule"
 
+external set_line_cap : t -> line_cap -> unit = "caml_cairo_set_line_cap"
+external get_line_cap : t -> line_cap = "caml_cairo_get_line_cap"
+
+external set_line_join : t -> line_join -> unit = "caml_cairo_set_line_join"
+external get_line_join : t -> line_join = "caml_cairo_get_line_join"
+
+external set_line_width : t -> float -> unit = "caml_cairo_set_line_width"
+external get_line_width : t -> float = "caml_cairo_get_line_width"
+
+external set_miter_limit : t -> float -> unit = "caml_cairo_set_miter_limit"
+external get_miter_limit : t -> float = "caml_cairo_get_miter_limit"
+
+external set_operator : t -> operator -> unit = "caml_cairo_set_operator"
+external get_operator : t -> operator = "caml_cairo_get_operator"
+
+external set_tolerance : t -> float -> unit = "caml_cairo_set_tolerance"
+external get_tolerance : t -> float = "caml_cairo_get_tolerance"
+
+external clip_stub : t -> unit = "caml_cairo_clip"
+external clip_preserve : t -> unit = "caml_cairo_clip_preserve"
+
+let clip ?(preserve=false) cr =
+  if preserve then clip_preserve cr else clip_stub cr
+
+external clip_extents : t -> bounding_box = "caml_cairo_clip_extents"
+
+external clip_reset : t -> unit = "caml_cairo_reset_clip"
+
+external clip_rectangle_list : t -> rectangle list
+  = "caml_cairo_copy_clip_rectangle_list"
+
+external fill_stub : t -> unit = "caml_cairo_fill"
+external fill_preserve : t -> unit = "caml_cairo_fill_preserve"
+
+let fill ?(preserve=false) cr =
+  if preserve then fill_preserve cr else fill_stub cr
+
+external fill_extents : t -> bounding_box = "caml_cairo_fill_extents"
 
 
 
