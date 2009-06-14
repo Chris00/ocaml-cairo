@@ -16,6 +16,21 @@
    LICENSE for more details. *)
 
 
+(** Cairo: A Vector Graphics Library (bindings).
+
+
+    - Drawing:
+    {!cairo_t}: The cairo drawing context
+    {!Paths}: Creating paths and manipulating path data
+    {!Patterns}: Sources for drawing.
+    {!Transformations} Manipulating the current transformation matrix.
+    {!Text}: Rendering text and glyphs.
+
+    - Fonts:
+
+    - Surfaces:
+*)
+
 type status =
   | NO_MEMORY
   | INVALID_RESTORE
@@ -67,6 +82,7 @@ end
 
 (* ---------------------------------------------------------------------- *)
 
+(** {2:Patterns Sources for drawing} *)
 module Pattern :
 sig
   type t
@@ -75,9 +91,10 @@ sig
 end
 
 (* ---------------------------------------------------------------------- *)
-(** {2 Cairo.t: The cairo drawing context} *)
+(** {2:cairo_t The cairo drawing context} *)
 
 type t
+type context = t
   (** The cairo drawing context.  This is the main object used when
       drawing with cairo.  To draw with cairo, you create a [t], set
       the target surface, and drawing options for the [t], create
@@ -656,7 +673,304 @@ external show_page : t -> unit = "caml_cairo_show_page"
 
 
 (* ---------------------------------------------------------------------- *)
-(** {2 Creating paths and manipulating path data} *)
+(** {2:Paths Creating paths and manipulating path data}
+
+    Paths are the most basic drawing tools and are primarily used to
+    implicitly generate simple masks.
+*)
+
+type path
+type path_data =
+  | MOVE_TO of float * float
+  | LINE_TO of float * float
+  | CURVE_TO of float * float * float * float * float * float
+  | CLOSE_PATH
+
+module Path :
+sig
+  val copy : t -> path
+    (** Creates a copy of the current path. See cairo_path_data_t for
+        hints on how to iterate over the returned data structure.  *)
+
+  val copy_flat : t -> path
+    (** Gets a flattened copy of the current path.
+
+        This function is like {!Cairo.Path.copy} except that any
+        curves in the path will be approximated with piecewise-linear
+        approximations, (accurate to within the current tolerance
+        value).  That is, the result is guaranteed to not have any
+        elements of type [CURVE_TO] which will instead be replaced by
+        a series of [LINE_TO] elements.  *)
+
+  val append : t -> path -> unit
+    (** Append the path onto the current path.  The path may be either
+        the return value from one of {!Cairo.Path.copy} or
+        {!Cairo.Path.copy_flat} or it may be constructed manually.  *)
+
+  val get_current_point : t -> float * float
+    (** [get_current_point cr] gets the (x,y) coordinates of the
+        current point of the current path, which is conceptually the
+        final point reached by the path so far.  The current point is
+        returned in the user-space coordinate system.
+
+        Raise [Error NO_CURRENT_POINT] if there is no defined current
+        point.
+
+        Most path construction functions alter the current point.  See the
+        following for details on how they affect the current point:
+        {!Cairo.Path.make}, {!Cairo.Path.sub}, {!Cairo.Path.append},
+        {!Cairo.Path.close}, {!Cairo.move_to}, {!Cairo_line_to},
+        {!Cairo.curve_to}, {!Cairo.rel_move_to}, {!Cairo.rel_line_to},
+        {!Cairo.rel_curve_to}, {!Cairo.arc}, {!Cairo.arc_negative},
+        {!Cairo.rectangle}, {!Cairo.text_path}, {!Cairo.glyph_path}.
+
+        Some functions use and alter the current point but do not
+        otherwise change current path: {!Cairo.Text.show}.
+
+        Some functions unset the current path and as a result, current
+        point: {!Cairo.fill}, {!Cairo.stroke}. *)
+
+  val clear : t -> unit
+    (** Clears the current path. After this call there will be no path
+        and no current point. *)
+
+  val sub : t -> unit
+    (** Begin a new sub-path. Note that the existing path is not
+        affected. After this call there will be no current point.
+
+        In many cases, this call is not needed since new sub-paths are
+        frequently started with {!Cairo.move_to}.
+
+        A call to {!Cairo.Path.sub} is particularly useful when
+        beginning a new sub-path with one of the {!Cairo.arc} calls.
+        This makes things easier as it is no longer necessary to
+        manually compute the arc's initial coordinates for a call to
+        {!Cairo.move_to}. *)
+
+  val close : t -> unit
+    (** Adds a line segment to the path from the current point to the
+        beginning of the current sub-path, (the most recent point
+        passed to {!Cairo.move_to}), and closes this sub-path.  After
+        this call the current point will be at the joined endpoint of
+        the sub-path.
+
+        The behavior of {!Cairo.Path.close} is distinct from simply
+        calling {!Cairo.line_to} with the equivalent coordinate in the
+        case of stroking.  When a closed sub-path is stroked, there
+        are no caps on the ends of the sub-path.  Instead, there is a
+        line join connecting the final and initial segments of the
+        sub-path.
+
+        If there is no current point before the call to [close], this
+        function will have no effect.
+
+        Note: As of cairo version 1.2.4 any call to [close] will place
+        an explicit [MOVE_TO] element into the path immediately after
+        the [CLOSE_PATH] element, (which can be seen in
+        {!Cairo.Path.copy} for example).  This can simplify path
+        processing in some cases as it may not be necessary to save
+        the "last move_to point" during processing as the [MOVE_TO]
+        immediately after the [CLOSE_PATH] will provide that point. *)
+
+  val glyph : t -> Glyph.t array -> unit
+    (** Adds closed paths for the glyphs to the current path. The
+        generated path if filled, achieves an effect similar to that
+        of {!Cairo.Glyph.show}. *)
+
+  val text : t -> string -> unit
+    (** [text cr utf8] adds closed paths for text to the current path.
+        The generated path if filled, achieves an effect similar to
+        that of {!Cairo.Text.show}.
+
+        Text conversion and positioning is done similar to {!Cairo.Text.show}.
+
+        Like {!Cairo.Text.show}, after this call the current point is
+        moved to the origin of where the next glyph would be placed in
+        this same progression.  That is, the current point will be at
+        the origin of the final glyph offset by its advance values.
+        This allows for chaining multiple calls to to [text] without
+        having to set current point in between.
+
+        Note: The [text] function call is part of what the cairo
+        designers call the "toy" text API.  It is convenient for short
+        demos and simple programs, but it is not expected to be
+        adequate for serious text-using applications.  See
+        {!Cairo.Glyph.path} for the "real" text path API in cairo. *)
+
+  val extents : t -> bounding_box
+    (** Computes a bounding box in user-space coordinates covering the
+        points on the current path. If the current path is empty,
+        returns an empty rectangle [{ x1=0.; y1=0.; x2=0.; y2=0. }].
+        Stroke parameters, fill rule, surface dimensions and clipping
+        are not taken into account.
+
+        Contrast with {!Cairo.fill_extents} and
+        {!Cairo.stroke_extents} which return the extents of only the
+        area that would be "inked" by the corresponding drawing
+        operations.
+
+        The result of [Cairo.Path.extents] is defined as equivalent to
+        the limit of {!Cairo.stroke_extents} with [ROUND] as the line
+        width approaches 0.0, (but never reaching the empty-rectangle
+        returned by {!Cairo.stroke_extents} for a line width of 0.0).
+
+        Specifically, this means that zero-area sub-paths such as
+        {!Cairo.move_to}; {!Cairo.line_to} segments, (even degenerate
+        cases where the coordinates to both calls are identical), will
+        be considered as contributing to the extents.  However, a lone
+        {!Cairo.move_to} will not contribute to the results of
+        [Cairo.Path.extents]. *)
+
+  val to_array : path -> path_data array
+
+  val of_array : path_data array -> path
+end
+
+val arc : t -> x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
+  (** [arc xc yc radius angla1 angle2] adds a circular arc of the
+      given radius to the current path.  The arc is centered at [(xc,
+      yc)], begins at [angle1] and proceeds in the direction of
+      increasing angles to end at [angle2].  If [angle2] is less than
+      [angle1] it will be progressively increased by 2*PI until it is
+      greater than [angle1].
+
+      If there is a current point, an initial line segment will be
+      added to the path to connect the current point to the beginning
+      of the arc. If this initial line is undesired, it can be avoided
+      by calling {!Cairo.Path.sub} before calling [arc].
+
+      Angles are measured in radians.  An angle of 0.0 is in the
+      direction of the positive X axis (in user space). An angle of
+      PI/2.0 radians (90 degrees) is in the direction of the positive
+      Y axis (in user space).  Angles increase in the direction from
+      the positive X axis toward the positive Y axis. So with the
+      default transformation matrix, angles increase in a clockwise
+      direction.
+
+      (To convert from degrees to radians, use degrees * (PI / 180.).)
+
+      This function gives the arc in the direction of increasing
+      angles; see {!Cairo.arc_negative} to get the arc in the
+      direction of decreasing angles.
+
+      The arc is circular in user space.  To achieve an elliptical
+      arc, you can scale the current transformation matrix by
+      different amounts in the X and Y directions.  For example, to
+      draw an ellipse in the box given by [x], [y], [width], [height]
+      (we suppose [pi] holds the value of PI):
+      {[
+      open Cairo
+
+      save cr;
+      translate cr (x +. width /. 2.) (y +. height /. 2.);
+      scale cr (width /. 2.) (height /. 2.);
+      arc cr 0. 0. 1. 0. (2 * pi);
+      restore cr;
+      ]}
+  *)
+
+val arc_negative : t -> x:float -> y:float -> r:float ->
+  a1:float -> a2:float -> unit
+  (** [arc_negative xc yc radius angla1 angle2] adds a circular arc of
+      the given radius to the current path.  The arc is centered at
+      [(xc, yc)], begins at [angle1] and proceeds in the direction of
+      decreasing angles to end at [angle2].  If [angle2] is greater
+      than [angle1] it will be progressively decreased by 2*PI until
+      it is less than [angle1].
+
+      See {!Cairo.arc} for more details.  This function differs only
+      in the direction of the arc between the two angles. *)
+
+val curve_to : t -> x1:float -> y1:float -> x2:float -> y2:float ->
+  x3:float -> y3:float -> unit
+  (** Adds a cubic Bézier spline to the path from the current point to
+      position (x3, y3) in user-space coordinates, using (x1, y1) and
+      (x2, y2) as the control points.  After this call the current
+      point will be (x3, y3).
+
+      If there is no current point before the call to [curve_to] this
+      function will behave as if preceded by a call to
+      {!Cairo.move_to}[ cr x1 y1]. *)
+
+val line_to : t -> x:float -> y:float -> unit
+  (** Adds a line to the path from the current point to position (x,
+      y) in user-space coordinates. After this call the current point
+      will be (x, y).
+
+      If there is no current point before the call to cairo_line_to()
+      this function will behave as {!Cairo.move_to}[ cr x y]. *)
+
+val move_to : t -> x:float -> y:float -> unit
+  (** Begin a new sub-path.  After this call the current point will be
+      (x, y). *)
+
+val rectangle : t -> x:float -> y:float -> width:float -> height:float -> unit
+  (** Adds a closed sub-path rectangle of the given size to the
+      current path at position (x, y) in user-space coordinates.
+
+      This function is logically equivalent to:
+      {[
+      move_to cr x y;
+      rel_line_to cr width 0;
+      rel_line_to cr 0 height;
+      rel_line_to cr (-. width) 0;
+      close_path cr;
+      ]}
+  *)
+
+val rel_curve_to : t -> x1:float -> y1:float -> x2:float -> y2:float ->
+  x3:float -> y3:float -> unit
+  (** Relative-coordinate version of {!Cairo.curve_to}.  All offsets
+      are relative to the current point.  Adds a cubic Bézier spline
+      to the path from the current point to a point offset from the
+      current point by (dx3, dy3), using points offset by (dx1, dy1)
+      and (dx2, dy2) as the control points.  After this call the
+      current point will be offset by (dx3, dy3).
+
+      Given a current point of (x, y), [rel_curve_to cr dx1 dy1 dx2
+      dy2 dx3 dy3] is logically equivalent to [curve_to cr (x+.dx1)
+      (y+.dy1) (x+.dx2) (y+.dy2) (x+.dx3) (y+.dy3)].
+
+      It is an error to call this function with no current point.
+      Doing so will cause [Error NO_CURRENT_POINT] to be raised.  *)
+
+val rel_line_to : t -> x:float -> y:float -> unit
+  (** Relative-coordinate version of {!Cairo.line_to}.  Adds a line to
+      the path from the current point to a point that is offset from the
+      current point by (dx, dy) in user space. After this call the current
+      point will be offset by (dx, dy).
+
+      Given a current point of (x, y), [rel_line_to cr dx dy] is
+      logically equivalent to [line_to cr (x +. dx) (y +. dy)].
+
+      It is an error to call this function with no current point.
+      Doing so will cause [Error NO_CURRENT_POINT] to be raised.  *)
+
+val rel_move_to : t -> x:float -> y:float -> unit
+  (** Begin a new sub-path. After this call the current point will
+      offset by (x, y).
+
+      Given a current point of (x, y), [rel_move_to cr dx dy] is
+      logically equivalent to [move_to cr (x +. dx) (y +. dy)].
+
+      It is an error to call this function with no current point.
+      Doing so will cause [Error NO_CURRENT_POINT] to be raised. *)
+
+
+
+(* ---------------------------------------------------------------------- *)
+(** {2:Transformations Manipulating the current transformation matrix}
+
+    The current transformation matrix, {i ctm}, is a two-dimensional
+    affine transformation that maps all coordinates and other drawing
+    instruments from the {i user space} into the surface's canonical
+    coordinate system, also known as the {i device space}.  *)
+
+
+
+
+(* ---------------------------------------------------------------------- *)
+(** {2:Text Rendering text and glyphs} *)
 
 (* set_user_data *)
 (* get_user_data *)

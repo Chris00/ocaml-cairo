@@ -396,8 +396,10 @@ DO_FUNCTION(cairo_show_page)
 
 /* TODO: cairo_set_user_data, cairo_get_user_data */
 
-/* Creating paths and manipulating path data
+/* Paths -- Creating paths and manipulating path data
 ***********************************************************************/
+
+
 
 
 /* Local Variables: */
