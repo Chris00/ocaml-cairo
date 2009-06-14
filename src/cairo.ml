@@ -148,6 +148,32 @@ let fill ?(preserve=false) cr =
 
 external fill_extents : t -> bounding_box = "caml_cairo_fill_extents"
 
+external in_fill : t -> x:float -> y:float -> bool = "caml_cairo_in_fill"
+
+external mask : t -> pattern -> unit = "caml_cairo_mask"
+external mask_surface : t -> surface -> x:float -> y:float -> unit
+  = "caml_cairo_mask_surface"
+
+external paint_stub : t -> unit = "caml_cairo_paint"
+external paint_with_alpha : t -> float -> unit = "caml_cairo_paint_with_alpha"
+
+let paint ?alpha cr =
+  match alpha with
+  | None -> paint_stub cr
+  | Some a -> paint_with_alpha cr a
+
+external stroke_stub : t -> unit = "caml_cairo_stroke"
+external stroke_preserve : t -> unit = "caml_cairo_stroke_preserve"
+
+let stroke ?(preserve=false) cr =
+  if preserve then stroke_preserve cr else stroke_stub cr
+
+external stroke_extents : t -> bounding_box = "caml_cairo_stroke_extents"
+
+external in_stroke : t -> x:float -> y:float -> bool = "caml_cairo_in_stroke"
+
+external copy_page : t -> unit = "caml_cairo_copy_page"
+external show_page : t -> unit = "caml_cairo_show_page"
 
 
 (* ---------------------------------------------------------------------- *)

@@ -314,24 +314,7 @@ GET_FUNCTION(cairo_get_tolerance, caml_copy_double, double)
 
 DO_FUNCTION(cairo_clip)
 DO_FUNCTION(cairo_clip_preserve)
-
-CAMLexport value caml_cairo_clip_extents(value vcr)
-{
-  CAMLparam1(vcr);
-  CAMLlocal1(bb);
-  cairo_t* cr = CAIRO_VAL(vcr);
-  double x1, y1, x2, y2;
-  cairo_clip_extents(cr, &x1, &y1, &x2, &y2);
-  caml_check_status(cr);
-  /* Create record (optimized by OCaml to an array of floats) */
-  bb = caml_alloc(4 * Double_wosize, Double_array_tag);
-  Store_double_field(bb, 0, x1);
-  Store_double_field(bb, 1, y1);
-  Store_double_field(bb, 2, x2);
-  Store_double_field(bb, 3, y2);
-  CAMLreturn(bb);
-}
-
+GET_EXTENTS(cairo_clip_extents)
 DO_FUNCTION(cairo_reset_clip)
 
 CAMLexport value caml_cairo_copy_clip_rectangle_list(value vcr)
@@ -366,23 +349,55 @@ CAMLexport value caml_cairo_copy_clip_rectangle_list(value vcr)
 DO_FUNCTION(cairo_fill)
 DO_FUNCTION(cairo_fill_preserve)
 
-CAMLexport value caml_cairo_fill_extents(value vcr)
+GET_EXTENTS(cairo_fill_extents)
+
+CAMLexport value caml_cairo_in_fill(value vcr, value vx, value vy)
 {
-  CAMLparam1(vcr);
-  CAMLlocal1(bb);
+  CAMLparam3(vcr, vx, vy);
   cairo_t* cr = CAIRO_VAL(vcr);
-  double x1, y1, x2, y2;
-  cairo_fill_extents(cr, &x1, &y1, &x2, &y2);
+  cairo_bool_t b = cairo_in_fill(cr, Double_val(vx), Double_val(vy));
   caml_check_status(cr);
-  /* Create record (of only floats) */
-  bb = caml_alloc(4 * Double_wosize, Double_array_tag);
-  Store_double_field(bb, 0, x1);
-  Store_double_field(bb, 1, y1);
-  Store_double_field(bb, 2, x2);
-  Store_double_field(bb, 3, y2);
-  CAMLreturn(bb);
+  /* doc of cairo_bool_t: b=0 or 1 */
+  CAMLreturn(Val_int(b));
 }
 
+SET_FUNCTION(cairo_mask, PATTERN_VAL)
+
+CAMLexport value caml_cairo_mask_surface(value vcr, value vsurf,
+                                         value vx, value vy)
+{
+  CAMLparam4(vcr, vsurf, vx, vy);
+  cairo_t* cr = CAIRO_VAL(vcr);
+  cairo_mask_surface(cr, SURFACE_VAL(vsurf), Double_val(vx), Double_val(vy));
+  caml_check_status(cr);
+  CAMLreturn(Val_unit)
+}
+
+DO_FUNCTION(cairo_paint)
+SET_FUNCTION(cairo_paint_with_alpha, Double_val)
+
+DO_FUNCTION(cairo_stroke)
+DO_FUNCTION(cairo_stroke_preserve)
+
+GET_EXTENTS(cairo_stroke_extents)
+
+CAMLexport value caml_cairo_in_stroke(value vcr, value, vx, value vy)
+{
+  CAMLparam3(vcr, vx, vy);
+  cairo_t* cr = CAIRO_VAL(vcr);
+  cairo_bool_t b = cairo_in_stroke(cr, Double_val(vx), Double_val(vy));
+  caml_check_status(cr);
+  /* doc of cairo_bool_t: b=0 or 1 */
+  CAMLreturn(Val_int(b));
+}
+
+DO_FUNCTION(cairo_copy_page)
+DO_FUNCTION(cairo_show_page)
+
+/* TODO: cairo_set_user_data, cairo_get_user_data */
+
+/* Creating paths and manipulating path data
+***********************************************************************/
 
 
 /* Local Variables: */

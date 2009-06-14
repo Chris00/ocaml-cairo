@@ -75,7 +75,7 @@ sig
 end
 
 (* ---------------------------------------------------------------------- *)
-(** {2 Cairo_t} *)
+(** {2 Cairo.t: The cairo drawing context} *)
 
 type t
   (** The cairo drawing context.  This is the main object used when
@@ -340,11 +340,11 @@ external get_line_cap : t -> line_cap = "caml_cairo_get_line_cap"
 (** Specifies how to render the junction of two lines when stroking.
     The default line join style is [MITER]. *)
 type line_join =
-  | MITER (** use a sharp (angled) corner, see {!Cairo.set_miter_limit} *)
-  | ROUND (** use a rounded join, the center of the circle is the
-              joint point *)
-  | BEVEL (** use a cut-off join, the join is cut off at half the line
-              width from the joint point *)
+  | JOIN_MITER (** use a sharp (angled) corner, see {!Cairo.set_miter_limit} *)
+  | JOIN_ROUND (** use a rounded join, the center of the circle is the
+                   joint point *)
+  | JOIN_BEVEL (** use a cut-off join, the join is cut off at half the line
+                   width from the joint point *)
 
 external set_line_join : t -> line_join -> unit = "caml_cairo_set_line_join"
     (** Sets the current line join style within the cairo context.
@@ -475,7 +475,14 @@ external set_tolerance : t -> float -> unit = "caml_cairo_set_tolerance"
 external get_tolerance : t -> float = "caml_cairo_get_tolerance"
     (** Gets the current tolerance value, as set by {!Cairo.set_tolerance}. *)
 
-type bounding_box = { x1: float;  y1: float;  x2: float;  y2: float }
+(** Bounding box (aka extents). *)
+type bounding_box = {
+  x1: float;      (** left of the resulting extents *)
+  y1: float;      (** top of the resulting extents *)
+  x2: float;      (** right of the resulting extents  *)
+  y2: float;      (** bottom of the resulting extents  *)
+}
+
 type rectangle = { x:float; y:float; width:float; height:float }
 
 val clip : ?preserve:bool -> t -> unit
@@ -525,7 +532,7 @@ val fill : ?preserve:bool -> t -> unit
 
       See also {!Cairo.set_fill_rule}. *)
 
-val fill_extents : t -> bounding_box
+external fill_extents : t -> bounding_box = "caml_cairo_fill_extents"
   (** Computes a bounding box in user coordinates covering the area
       that would be affected, (the "inked" area), by a [fill]
       operation given the current path and fill parameters.  If the
@@ -544,31 +551,112 @@ val fill_extents : t -> bounding_box
 
       See {!Cairo.fill} and {!Cairo.set_fill_rule}. *)
 
-val in_fill : t -> x:float -> y:float -> bool
+external in_fill : t -> x:float -> y:float -> bool = "caml_cairo_in_fill"
   (** Tests whether the given point is inside the area that would be
       affected by a [fill] operation given the current path and
       filling parameters.  Surface dimensions and clipping are not
-      taken into account.  *)
+      taken into account.
 
-val mask : t -> Pattern.t -> unit
-val mask_surface : t -> Surface.t -> x:float -> y:float -> unit
+      See also {!Cairo.fill} and {!Cairo.set_fill_rule}.  *)
+
+external mask : t -> Pattern.t -> unit = "caml_cairo_mask"
+  (** [mask cr pattern]: a drawing operator that paints the current
+      source using the alpha channel of [pattern] as a mask.  (Opaque
+      areas of [pattern] are painted with the source, transparent
+      areas are not painted.) *)
+external mask_surface : t -> Surface.t -> x:float -> y:float -> unit
+  = "caml_cairo_mask_surface"
+  (** [mask_surface cr surface x y]: a drawing operator that paints
+      the current source using the alpha channel of [surface] as a
+      mask.  (Opaque areas of [surface] are painted with the source,
+      transparent areas are not painted.)
+
+      @param x  X coordinate at which to place the origin of [surface].
+      @param y  Y coordinate at which to place the origin of [surface]. *)
 
 val paint : ?alpha:float -> t -> unit
   (** A drawing operator that paints the current source everywhere
       within the current clip region.  If [alpha] is set, the drawing
       is faded out using the alpha value.
 
-      @param alpha  alpha value, between 0 (transparent) and 1 (opaque)  *)
+      @param alpha  alpha value, between 0 (transparent) and 1 (opaque).  *)
 
 val stroke : ?perserve:bool -> t -> unit
+  (** A drawing operator that strokes the current path according to
+      the current line width, line join, line cap, and dash settings.
+      After [stroke], the current path will be cleared from the cairo
+      context unless [preserve] is [true] (default: [false]).  See
+      {!Cairo.set_line_width}, {!Cairo.set_line_join},
+      {!Cairo.set_line_cap}, and {!Cairo.set_dash}.
+
+      Note: Degenerate segments and sub-paths are treated specially
+      and provide a useful result.  These can result in two different
+      situations:
+
+      1. Zero-length "on" segments set in {!Cairo.set_dash}.  If the
+      cap style is [ROUND] or [SQUARE] then these segments will be
+      drawn as circular dots or squares respectively.  In the case of
+      [SQUARE], the orientation of the squares is determined by the
+      direction of the underlying path.
+
+      2. A sub-path created by {!Cairo.move_to} followed by either a
+      {!Cairo.close_path} or one or more calls to {!Cairo.line_to} to
+      the same coordinate as the {!Cairo.move_to}.  If the cap style
+      is [ROUND] then these sub-paths will be drawn as circular dots.
+      Note that in the case of [SQUARE] line cap, a degenerate
+      sub-path will not be drawn at all, (since the correct
+      orientation is indeterminate).
+
+      In no case will a cap style of [BUTT] cause anything to be drawn
+      in the case of either degenerate segments or sub-paths. *)
+
 val stroke_extents : t -> bounding_box
+  (** Computes a bounding box in user coordinates covering the area
+      that would be affected, (the "inked" area), by a {!Cairo.stroke}
+      operation operation given the current path and stroke
+      parameters.  If the current path is empty, returns an empty
+      rectangle [{ x1=0.; y1=0.; x2=0.; y2=0. }].  Surface dimensions
+      and clipping are not taken into account.
 
-val in_stroke : t -> x:float -> y:float -> bool
+      Note that if the line width is set to exactly zero, then
+      [stroke_extents] will return an empty rectangle.  Contrast with
+      {!Cairo.path_extents} which can be used to compute the non-empty
+      bounds as the line width approaches zero.
+
+      Note that [stroke_extents] must necessarily do more work to
+      compute the precise inked areas in light of the stroke
+      parameters, so {!Cairo.path_extents} may be more desirable for
+      sake of performance if non-inked path extents are desired.
+
+      See {!Cairo.stroke}, {!Cairo.set_line_width}, {!Cairo.set_line_join},
+      {!Cairo.set_line_cap}, and {!Cairo.set_dash}. *)
+
+external in_stroke : t -> x:float -> y:float -> bool = "caml_cairo_in_stroke"
+  (** Tests whether the given point is inside the area that would be
+      affected by a {!Cairo.stroke} operation given the current path
+      and stroking parameters. Surface dimensions and clipping are not
+      taken into account.  *)
+
+external copy_page : t -> unit = "caml_cairo_copy_page"
+  (** [copy_page cr] emits the current page for backends that support
+      multiple pages, but doesn't clear it, so, the contents of the
+      current page will be retained for the next page too.  Use
+      {!Cairo.show_page} if you want to get an empty page after the
+      emission.
+
+      This is a convenience function that simply calls
+      {!Cairo.Surface.copy_page} on [cr]'s target. *)
+external show_page : t -> unit = "caml_cairo_show_page"
+  (** [show_page cr] emits and clears the current page for backends
+      that support multiple pages.  Use {!Cairo.copy_page} if you
+      don't want to clear the page.
+
+      This is a convenience function that simply calls
+      {!Cairo.Surface.show_page} on [cr]'s target. *)
 
 
-val copy_page : t -> unit
-val show_page : t -> unit
-
+(* ---------------------------------------------------------------------- *)
+(** {2 Creating paths and manipulating path data} *)
 
 (* set_user_data *)
 (* get_user_data *)

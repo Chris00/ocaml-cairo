@@ -26,6 +26,10 @@ tar:
 	bzr export /tmp/$(TARBALL) -r "tag:$(VERSION)"
 	@echo "Created tarball '/tmp/$(TARBALL)'."
 
+.PHONY: sync-scm
+sync-scm:
+	bzr push  svn+ssh://svn.forge.ocamlcore.org/svnroot/archimedes/cairo
+
 .PHONY: clean
 clean:
 	$(RM) -f $(wildcard *~)
