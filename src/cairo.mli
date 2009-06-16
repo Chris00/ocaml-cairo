@@ -90,6 +90,40 @@ sig
 
 end
 
+
+(* ---------------------------------------------------------------------- *)
+(** {2:Text Rendering text and glyphs} *)
+
+module Glyph :
+sig
+  (** The [Glyph.t} structure holds information about a single glyph
+      when drawing or measuring text.  A font is (in simple terms) a
+      collection of shapes used to draw text.  A glyph is one of these
+      shapes. There can be multiple glyphs for a single character
+      (alternates to be used in different contexts, for example), or a
+      glyph can be a ligature of multiple characters.  Cairo doesn't
+      expose any way of converting input text into glyphs, so in order
+      to use the Cairo interfaces that take arrays of glyphs, you must
+      directly access the appropriate underlying font system.
+
+      Note that the offsets given by x and y are not cumulative.  When
+      drawing or measuring text, each glyph is individually positioned
+      with respect to the overall origin. *)
+  type t = glyph = {
+    index: int; (** glyph index in the font. The exact interpretation
+                    of the glyph index depends on the font technology
+                    being used. *)
+    x: float; (** the offset in the X direction between the origin
+                  used for drawing or measuring the string and the
+                  origin of this glyph.  *)
+    y: float; (** the offset in the Y direction between the origin
+                  used for drawing or measuring the string and the
+                  origin of this glyph. *)
+  }
+
+end
+
+
 (* ---------------------------------------------------------------------- *)
 (** {2:cairo_t The cairo drawing context} *)
 
@@ -688,11 +722,11 @@ type path_data =
 
 module Path :
 sig
-  val copy : t -> path
+  external copy : t -> path = "caml_cairo_copy_path"
     (** Creates a copy of the current path. See cairo_path_data_t for
         hints on how to iterate over the returned data structure.  *)
 
-  val copy_flat : t -> path
+  external copy_flat : t -> path = "caml_cairo_copy_path_flat"
     (** Gets a flattened copy of the current path.
 
         This function is like {!Cairo.Path.copy} except that any
@@ -702,12 +736,13 @@ sig
         elements of type [CURVE_TO] which will instead be replaced by
         a series of [LINE_TO] elements.  *)
 
-  val append : t -> path -> unit
+  external append : t -> path -> unit = "caml_cairo_append_path"
     (** Append the path onto the current path.  The path may be either
         the return value from one of {!Cairo.Path.copy} or
         {!Cairo.Path.copy_flat} or it may be constructed manually.  *)
 
-  val get_current_point : t -> float * float
+  external get_current_point : t -> float * float
+    = "caml_cairo_get_current_point"
     (** [get_current_point cr] gets the (x,y) coordinates of the
         current point of the current path, which is conceptually the
         final point reached by the path so far.  The current point is
@@ -730,11 +765,11 @@ sig
         Some functions unset the current path and as a result, current
         point: {!Cairo.fill}, {!Cairo.stroke}. *)
 
-  val clear : t -> unit
+  external clear : t -> unit = "caml_cairo_new_path"
     (** Clears the current path. After this call there will be no path
         and no current point. *)
 
-  val sub : t -> unit
+  external sub : t -> unit = "caml_cairo_new_sub_path"
     (** Begin a new sub-path. Note that the existing path is not
         affected. After this call there will be no current point.
 
@@ -747,7 +782,7 @@ sig
         manually compute the arc's initial coordinates for a call to
         {!Cairo.move_to}. *)
 
-  val close : t -> unit
+  external close : t -> unit = "caml_cairo_close_path"
     (** Adds a line segment to the path from the current point to the
         beginning of the current sub-path, (the most recent point
         passed to {!Cairo.move_to}), and closes this sub-path.  After
@@ -772,15 +807,16 @@ sig
         the "last move_to point" during processing as the [MOVE_TO]
         immediately after the [CLOSE_PATH] will provide that point. *)
 
-  val glyph : t -> Glyph.t array -> unit
+  external glyph : t -> glyph array -> unit = "caml_cairo_glyph_path"
     (** Adds closed paths for the glyphs to the current path. The
         generated path if filled, achieves an effect similar to that
         of {!Cairo.Glyph.show}. *)
 
-  val text : t -> string -> unit
+  external text : t -> string -> unit = "caml_cairo_text_path"
     (** [text cr utf8] adds closed paths for text to the current path.
         The generated path if filled, achieves an effect similar to
-        that of {!Cairo.Text.show}.
+        that of {!Cairo.Text.show}.  [utf8] should be a valid UTF8
+        string containing no ['\000'] characters.
 
         Text conversion and positioning is done similar to {!Cairo.Text.show}.
 
@@ -797,7 +833,7 @@ sig
         adequate for serious text-using applications.  See
         {!Cairo.Glyph.path} for the "real" text path API in cairo. *)
 
-  val extents : t -> bounding_box
+  external extents : t -> bounding_box = "caml_cairo_path_extents"
     (** Computes a bounding box in user-space coordinates covering the
         points on the current path. If the current path is empty,
         returns an empty rectangle [{ x1=0.; y1=0.; x2=0.; y2=0. }].
@@ -821,12 +857,16 @@ sig
         {!Cairo.move_to} will not contribute to the results of
         [Cairo.Path.extents]. *)
 
+  external fold : path -> ('a -> path_data -> 'a) -> 'a = "caml_cairo_path_fold"
+
   val to_array : path -> path_data array
 
   val of_array : path_data array -> path
 end
 
-val arc : t -> x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
+external arc : t ->
+  x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
+  = "caml_cairo_arc_bc" "caml_cairo_arc"
   (** [arc xc yc radius angla1 angle2] adds a circular arc of the
       given radius to the current path.  The arc is centered at [(xc,
       yc)], begins at [angle1] and proceeds in the direction of
@@ -869,8 +909,9 @@ val arc : t -> x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
       ]}
   *)
 
-val arc_negative : t -> x:float -> y:float -> r:float ->
-  a1:float -> a2:float -> unit
+external arc_negative : t ->
+  x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
+  = "caml_cairo_arc_negative_bc" "caml_cairo_arc_negative"
   (** [arc_negative xc yc radius angla1 angle2] adds a circular arc of
       the given radius to the current path.  The arc is centered at
       [(xc, yc)], begins at [angle1] and proceeds in the direction of
@@ -881,8 +922,9 @@ val arc_negative : t -> x:float -> y:float -> r:float ->
       See {!Cairo.arc} for more details.  This function differs only
       in the direction of the arc between the two angles. *)
 
-val curve_to : t -> x1:float -> y1:float -> x2:float -> y2:float ->
-  x3:float -> y3:float -> unit
+external curve_to : t ->
+  x1:float -> y1:float -> x2:float -> y2:float -> x3:float -> y3:float -> unit
+  = "caml_cairo_curve_to_bc" "caml_cairo_curve_to"
   (** Adds a cubic Bézier spline to the path from the current point to
       position (x3, y3) in user-space coordinates, using (x1, y1) and
       (x2, y2) as the control points.  After this call the current
@@ -892,7 +934,7 @@ val curve_to : t -> x1:float -> y1:float -> x2:float -> y2:float ->
       function will behave as if preceded by a call to
       {!Cairo.move_to}[ cr x1 y1]. *)
 
-val line_to : t -> x:float -> y:float -> unit
+external line_to : t -> x:float -> y:float -> unit = "caml_cairo_line_to"
   (** Adds a line to the path from the current point to position (x,
       y) in user-space coordinates. After this call the current point
       will be (x, y).
@@ -900,11 +942,12 @@ val line_to : t -> x:float -> y:float -> unit
       If there is no current point before the call to cairo_line_to()
       this function will behave as {!Cairo.move_to}[ cr x y]. *)
 
-val move_to : t -> x:float -> y:float -> unit
+external move_to : t -> x:float -> y:float -> unit = "caml_cairo_move_to"
   (** Begin a new sub-path.  After this call the current point will be
       (x, y). *)
 
-val rectangle : t -> x:float -> y:float -> width:float -> height:float -> unit
+external rectangle : t -> x:float -> y:float -> width:float -> height:float
+  -> unit = "caml_cairo_rectangle"
   (** Adds a closed sub-path rectangle of the given size to the
       current path at position (x, y) in user-space coordinates.
 
@@ -918,8 +961,9 @@ val rectangle : t -> x:float -> y:float -> width:float -> height:float -> unit
       ]}
   *)
 
-val rel_curve_to : t -> x1:float -> y1:float -> x2:float -> y2:float ->
-  x3:float -> y3:float -> unit
+external rel_curve_to : t ->
+  x1:float -> y1:float -> x2:float -> y2:float -> x3:float -> y3:float -> unit
+  = "caml_cairo_rel_curve_to_bc" "caml_cairo_rel_curve_to"
   (** Relative-coordinate version of {!Cairo.curve_to}.  All offsets
       are relative to the current point.  Adds a cubic Bézier spline
       to the path from the current point to a point offset from the
@@ -934,7 +978,8 @@ val rel_curve_to : t -> x1:float -> y1:float -> x2:float -> y2:float ->
       It is an error to call this function with no current point.
       Doing so will cause [Error NO_CURRENT_POINT] to be raised.  *)
 
-val rel_line_to : t -> x:float -> y:float -> unit
+external rel_line_to : t -> x:float -> y:float -> unit
+  = "caml_cairo_rel_line_to"
   (** Relative-coordinate version of {!Cairo.line_to}.  Adds a line to
       the path from the current point to a point that is offset from the
       current point by (dx, dy) in user space. After this call the current
@@ -946,7 +991,8 @@ val rel_line_to : t -> x:float -> y:float -> unit
       It is an error to call this function with no current point.
       Doing so will cause [Error NO_CURRENT_POINT] to be raised.  *)
 
-val rel_move_to : t -> x:float -> y:float -> unit
+external rel_move_to : t -> x:float -> y:float -> unit
+  = "caml_cairo_rel_move_to"
   (** Begin a new sub-path. After this call the current point will
       offset by (x, y).
 

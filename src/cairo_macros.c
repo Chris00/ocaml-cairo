@@ -1,3 +1,5 @@
+#define FLOAT_ARRAY_LENGTH(a) Wosize_val(a) / Double_wosize
+
 #define DO_FUNCTION(name)                       \
   CAMLexport value caml_##name(value vcr)       \
   {                                             \
@@ -8,16 +10,76 @@
     CAMLreturn(Val_unit);                       \
   }
 
+#define DO1_FUNCTION(name, of_value)                 \
+  CAMLexport value caml_##name(value vcr, value v)   \
+  {                                                  \
+    CAMLparam2(vcr, v);                              \
+    cairo_t* cr = CAIRO_VAL(vcr);                    \
+    name(cr, of_value(v));                           \
+    caml_check_status(cr);                           \
+    CAMLreturn(Val_unit);                            \
+  }
 
-#define SET_FUNCTION(name, of_value)                                    \
-  CAMLexport value caml_##name(value vcr, value v)                      \
+#define DO2_FUNCTION(name, of_val1, of_val2)                            \
+  CAMLexport value caml_##name(value vcr, value v1, value v2)           \
   {                                                                     \
-    CAMLparam2(vcr, v);                                                 \
+    CAMLparam3(vcr, v1, v2);                                            \
     cairo_t* cr = CAIRO_VAL(vcr);                                       \
-    name(cr, of_value(v));                                              \
+    name(cr, of_val1(v1), of_val2(v2));                                 \
     caml_check_status(cr);                                              \
     CAMLreturn(Val_unit);                                               \
   }
+
+#define DO4_FUNCTION(name, of_val1, of_val2, of_val3, of_val4)          \
+  CAMLexport value caml_##name(value vcr, value v1, value v2, value v3, \
+                               value v4)                                \
+  {                                                                     \
+    CAMLparam5(vcr, v1, v2, v3, v4);                                    \
+    cairo_t* cr = CAIRO_VAL(vcr);                                       \
+    name(cr, of_val1(v1), of_val2(v2), of_val3(v3), of_val4(v4));       \
+    caml_check_status(cr);                                              \
+    CAMLreturn(Val_unit);                                               \
+  }
+
+#define DO5_FUNCTION(name, of_val1, of_val2, of_val3, of_val4, of_val5) \
+  CAMLexport value caml_##name(value vcr, value v1, value v2, value v3, \
+                               value v4, value v5)                      \
+  {                                                                     \
+    CAMLparam5(vcr, v1, v2, v3, v4);                                    \
+    CAMLxparam1(v5);                                                    \
+    cairo_t* cr = CAIRO_VAL(vcr);                                       \
+    name(cr, of_val1(v1), of_val2(v2), of_val3(v3), of_val4(v4),        \
+         of_val5(v5));                                                  \
+    caml_check_status(cr);                                              \
+    CAMLreturn(Val_unit);                                               \
+  }                                                                     \
+                                                                        \
+  CAMLexport value caml_##name##_bc(value * argv, int argn)             \
+  {                                                                     \
+    return caml_##name(argv[0], argv[1], argv[2], argv[3], argv[4],     \
+                       argv[5]);                                        \
+  }
+
+#define DO6_FUNCTION(name, of_val1, of_val2, of_val3, of_val4, of_val5, \
+                     of_val6)                                           \
+  CAMLexport value caml_##name(value vcr, value v1, value v2, value v3, \
+                               value v4, value v5, value v6)            \
+  {                                                                     \
+    CAMLparam5(vcr, v1, v2, v3, v4);                                    \
+    CAMLxparam2(v5, v6);                                                \
+    cairo_t* cr = CAIRO_VAL(vcr);                                       \
+    name(cr, of_val1(v1), of_val2(v2), of_val3(v3), of_val4(v4),        \
+         of_val5(v5), of_val6(v6));                                     \
+    caml_check_status(cr);                                              \
+    CAMLreturn(Val_unit);                                               \
+  }                                                                     \
+                                                                        \
+  CAMLexport value caml_##name##_bc(value * argv, int argn)             \
+  {                                                                     \
+    return caml_##name(argv[0], argv[1], argv[2], argv[3], argv[4],     \
+                       argv[5], argv[6]);                               \
+  }
+
 
 /* The return value should not require special alloc. */
 #define GET_FUNCTION(name, value_of, ty)                        \

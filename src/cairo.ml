@@ -56,6 +56,7 @@ external status_to_string  : status -> string = "caml_cairo_status_to_string"
 type t
 type surface
 type pattern
+type glyph = { index: int;  x: float;  y: float }
 
 external create : surface -> t = "caml_cairo_create"
 external save : t -> unit = "caml_cairo_save"
@@ -175,6 +176,60 @@ external in_stroke : t -> x:float -> y:float -> bool = "caml_cairo_in_stroke"
 external copy_page : t -> unit = "caml_cairo_copy_page"
 external show_page : t -> unit = "caml_cairo_show_page"
 
+(* ---------------------------------------------------------------------- *)
+
+type path
+type path_data =
+  | MOVE_TO of float * float
+  | LINE_TO of float * float
+  | CURVE_TO of float * float * float * float * float * float
+  | CLOSE_PATH
+
+module Path =
+struct
+  external copy : t -> path = "caml_cairo_copy_path"
+  external copy_flat : t -> path = "caml_cairo_copy_path_flat"
+  external append : t -> path -> unit = "caml_cairo_append_path"
+  external get_current_point : t -> float * float
+    = "caml_cairo_get_current_point"
+  external clear : t -> unit = "caml_cairo_new_path"
+  external sub : t -> unit = "caml_cairo_new_sub_path"
+  external close : t -> unit = "caml_cairo_close_path"
+
+  external glyph : t -> glyph array -> unit = "caml_cairo_glyph_path"
+  external text : t -> string -> unit = "caml_cairo_text_path"
+  external extents : t -> bounding_box = "caml_cairo_path_extents"
+
+  external fold : path -> ('a -> path_data -> 'a) -> 'a -> 'a
+    = "caml_cairo_path_fold"
+  external to_array : path -> path_data array = "caml_cairo_path_to_array"
+  external of_array : path_data array -> path = "caml_cairo_path_of_array"
+end
+
+
+external arc : t -> x:float -> y:float -> r:float -> a1:float -> a2:float
+  -> unit = "caml_cairo_arc_bc" "caml_cairo_arc"
+external arc_negative : t -> x:float -> y:float -> r:float -> a1:float ->
+  a2:float -> unit = "caml_cairo_arc_negative_bc" "caml_cairo_arc_negative"
+
+external curve_to : t -> x1:float -> y1:float -> x2:float -> y2:float ->
+  x3:float -> y3:float -> unit
+  = "caml_cairo_curve_to_bc" "caml_cairo_curve_to"
+
+external line_to : t -> x:float -> y:float -> unit = "caml_cairo_line_to"
+external move_to : t -> x:float -> y:float -> unit = "caml_cairo_move_to"
+external rectangle : t -> x:float -> y:float -> width:float -> height:float
+  -> unit = "caml_cairo_rectangle"
+
+external rel_curve_to : t -> x1:float -> y1:float -> x2:float -> y2:float ->
+  x3:float -> y3:float -> unit
+  = "caml_cairo_rel_curve_to_bc" "caml_cairo_rel_curve_to"
+
+external rel_line_to : t -> x:float -> y:float -> unit
+  = "caml_cairo_rel_line_to"
+external rel_move_to : t -> x:float -> y:float -> unit
+  = "caml_cairo_rel_move_to"
+
 
 (* ---------------------------------------------------------------------- *)
 
@@ -191,5 +246,12 @@ module Pattern =
 struct
   type t = pattern
 
+end
+
+(* ---------------------------------------------------------------------- *)
+
+module Glyph =
+struct
+  type t = glyph = { index: int;  x: float;  y: float }
 
 end
