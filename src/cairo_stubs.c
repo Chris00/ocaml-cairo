@@ -470,6 +470,10 @@ CAMLexport value caml_cairo_path_of_array(value varray)
 }
 
 
+/* Patterns -- Sources for drawing
+***********************************************************************/
+
+
 
 
 /* Local Variables: */

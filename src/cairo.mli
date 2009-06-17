@@ -45,7 +45,7 @@ type status =
   | WRITE_ERROR
   | SURFACE_FINISHED
   | SURFACE_TYPE_MISMATCH
-  | PATTERN_TYPE_MISMATCH
+  | PATTERN_TYPE_MISMATCH  (* should not be raised -- fobidden by types *)
   | INVALID_CONTENT
   | INVALID_FORMAT
   | INVALID_VISUAL
@@ -73,6 +73,25 @@ external status_to_string  : status -> string = "caml_cairo_status_to_string"
 
 (* ---------------------------------------------------------------------- *)
 
+(** Holds an affine transformation, such as a scale, rotation, shear,
+    or a combination of those. The transformation of a point (x, y) is
+    given by:
+    {[
+    x_new = xx *. x +. xy *. y +. x0;
+    y_new = yx *. x +. yy *. y +. y0;
+    ]} *)
+type matrix = { mutable xx: float; mutable yx: float;
+                mutable xy: float; mutable yy: float;
+                mutable x0: float: mutable y0: float }
+
+module Matrix :
+sig
+  type t = matrix
+
+end
+
+(* ---------------------------------------------------------------------- *)
+
 module Surface :
 sig
   type t
@@ -85,9 +104,205 @@ end
 (** {2:Patterns Sources for drawing} *)
 module Pattern :
 sig
-  type t
+  type 'a t
+    (** This is the paint with which cairo draws.  The primary use of
+        patterns is as the source for all cairo drawing operations,
+        although they can also be used as masks, that is, as the brush
+        too.
+
+        A cairo pattern is created by using one of the many functions,
+        of the form [Cairo.Pattern.create_type] or implicitly through
+        {!Cairo.set_source_*} functions.  *)
 
 
+  val add_color_stop_rgb : [`Gradient] t -> ?ofs:float ->
+    r:float -> g:float -> b:float -> unit
+    (** Adds an opaque color stop to a gradient pattern.  The offset
+        specifies the location along the gradient's control vector. For
+        example, a linear gradient's control vector is from (x0,y0) to
+        (x1,y1) while a radial gradient's control vector is from any point
+        on the start circle to the corresponding point on the end circle.
+
+        The color is specified in the same way as in {!Cairo.set_source_rgb}.
+
+        If two (or more) stops are specified with identical offset
+        values, they will be sorted according to the order in which
+        the stops are added, (stops added earlier will compare less
+        than stops added later).  This can be useful for reliably
+        making sharp color transitions instead of the typical blend. *)
+
+  val add_color_stop_rgba : [`Gradient] t -> ?ofs:float ->
+    r:float -> g:float -> b:float -> a:float -> unit
+    (** Adds a translucent color stop to a gradient pattern. The
+        offset specifies the location along the gradient's control
+        vector. For example, a linear gradient's control vector is from
+        (x0,y0) to (x1,y1) while a radial gradient's control vector is
+        from any point on the start circle to the corresponding point on
+        the end circle.
+
+        The color is specified in the same way as in {!Cairo.set_source_rgba}.
+
+        If two (or more) stops are specified with identical offset
+        values, they will be sorted according to the order in which
+        the stops are added, (stops added earlier will compare less
+        than stops added later). This can be useful for reliably
+        making sharp color transitions instead of the typical
+        blend.  *)
+
+  val get_color_stop_count : 'a t -> int
+    (** Return the number of color stops specified in the given
+        gradient pattern. *)
+
+  val get_color_stop_rgba : [`Gradient] t -> idx:int ->
+    float * float * float * float * float
+      (** Gets the color and offset information at the given index for
+          a gradient pattern. Values of index are 0 to 1 less than the
+          number returned by {!Cairo.Pattern.get_color_stop_count}.
+
+          @return (offset, red, green, blue, alpha) *)
+
+  val create_rgb : r:float -> g:float -> a:float -> [`Solid] t
+    (** Creates a new Cairo.Pattern.t corresponding to an opaque
+        color. The color components are floating point numbers in the
+        range 0 to 1. If the values passed in are outside that range,
+        they will be clamped. *)
+
+  val create_rgba : r:float -> g:float -> b:float -> a:float -> [`Solid] t
+    (** Creates a new {!Cairo.pattern.t} corresponding to a
+        translucent color.  The color components are floating point
+        numbers in the range 0 to 1.  If the values passed in are
+        outside that range, they will be clamped. *)
+
+  val get_rgba : [`Solid] t -> float * float * float * float
+    (** Return the solid color for a solid color pattern.
+
+    @return (red, green, blue, alpha) *)
+
+  val create_for_surface : Surface.t -> [`Surface] t
+    (** Create a new {!Cairo.Pattern.t} for the given surface. *)
+
+  val get_surface : [`Surface] pattern -> Surface.t
+    (** Gets the surface of a surface pattern.  *)
+
+  val create_linear : x0:float -> y0:float -> x1:float -> y1:float ->
+    [`Linear_gradient] t
+      (** Create a new linear gradient {!Cairo.Pattern.t} along the
+          line defined by (x0, y0) and (x1, y1).  Before using the
+          gradient pattern, a number of color stops should be defined
+          using {!Cairo.Pattern.add_color_stop_rgb} or
+          {!Cairo.Pattern.add_color_stop_rgba}.
+
+          Note: The coordinates here are in pattern space. For a new
+          pattern, pattern space is identical to user space, but the
+          relationship between the spaces can be changed with
+          {!Cairo.Pattern.set_matrix}.  *)
+
+  val get_linear_points : [`Linear_gradient] t -> float * float * float * float
+    (** Gets the gradient endpoints for a linear gradient.
+        @return (x0, y0, x1, y1). *)
+
+  val create_radial : x0:float -> y0:float -> r0:float ->
+    x1:float -> y1:float -> r1:float -> [`Radial_gradient] t
+    (** Creates a new radial gradient {!Cairo.Pattern.t} between the
+        two circles defined by (cx0, cy0, radius0) and (cx1, cy1,
+        radius1). Before using the gradient pattern, a number of color
+        stops should be defined using {!Cairo.Pattern.add_color_stop_rgb} or
+        {!Cairo.Pattern.add_color_stop_rgba}.
+
+        Note: The coordinates here are in pattern space. For a new
+        pattern, pattern space is identical to user space, but the
+        relationship between the spaces can be changed with
+        {!Cairo.Pattern.set_matrix}. *)
+
+  val get_radial_circles : [`Radial_gradient] t ->
+    float * float * float * float * float * float
+      (** Gets the gradient endpoint circles for a radial gradient,
+          each specified as a center coordinate and a radius.
+          @return (x0, y0, r0, x1, y1, r1).      *)
+
+  (** This is used to describe how pattern color/alpha will be
+      determined for areas "outside" the pattern's natural area, (for
+      example, outside the surface bounds or outside the gradient
+      geometry).  *)
+  type extend =
+    | NONE    (** pixels outside of the source pattern are fully transparent. *)
+    | REPEAT  (** the pattern is tiled by repeating. *)
+    | REFLECT (** the pattern is tiled by reflecting at the edges. *)
+    | PAD (** pixels outside of the pattern copy the closest pixel
+              from the source. *)
+
+  val set_extend : 'a t -> extend -> unit
+    (** Sets the mode to be used for drawing outside the area of a
+        pattern.  See {!Cairo.Pattern.extend} for details on the
+        semantics of each extend strategy.
+
+        The default extend mode is [NONE] for surface patterns and
+        [PAD] for gradient patterns. *)
+
+  val get_extend : 'a t -> extend
+    (** Gets the current extend mode for a pattern. See
+        {!Cairo.Pattern.extend} for details on the semantics of each
+        extend strategy. *)
+
+  (** This is used to indicate what filtering should be applied when
+      reading pixel values from patterns. See
+      {!Cairo.Pattern.set_source} for indicating the desired filter to
+      be used with a particular pattern. *)
+  type filter =
+    | FAST (** A high-performance filter, with quality similar to NEAREST *)
+    | GOOD (** A reasonable-performance filter, with quality similar
+               to BILINEAR *)
+    | BEST (** The highest-quality available, performance may not be
+               suitable for interactive use. *)
+    | NEAREST (** Nearest-neighbor filtering *)
+    | BILINEAR (** Linear interpolation in two dimensions *)
+    (* | GAUSSIAN *)
+
+  val set_filter : 'a t -> filter -> unit
+    (** Sets the filter to be used for resizing when using this
+        pattern. See {!Cairo.Pattern.filter} for details on each
+        filter.
+
+        Note that you might want to control filtering even when you do
+        not have an explicit {!Cairo.Pattern.t} value, (for example
+        when using {!Cairo.set_source_surface}).  In these cases, it
+        is convenient to use {!Cairo.get_source} to get access to the
+        pattern that cairo creates implicitly. For example:
+        {[
+        Cairo.set_source_surface cr image x y;
+        Cairo.Pattern.set_filter (Cairo.get_source cr) Cairo.Pattern.NEAREST;
+        ]} *)
+
+  val get_filter : 'a t -> filter
+    (** Gets the current filter for a pattern.  See
+        {!Cairo.Pattern.filter} for details on each filter. *)
+
+  val set_matrix : 'a t -> Matrix.t -> unit
+    (** Sets the pattern's transformation matrix to matrix. This
+        matrix is a transformation from user space to pattern space.
+
+        When a pattern is first created it always has the identity
+        matrix for its transformation matrix, which means that pattern
+        space is initially identical to user space.
+
+        Important: Please note that the direction of this
+        transformation matrix is from user space to pattern
+        space. This means that if you imagine the flow from a pattern
+        to user space (and on to device space), then coordinates in
+        that flow will be transformed by the inverse of the pattern
+        matrix.
+
+        For example, if you want to make a pattern appear twice as
+        large as it does by default the correct code to use is:
+        {[
+        let matrix = Cairo.Matrix.init_scale 0.5 0.5 in
+        Cairo.Pattern.set_matrix pattern matrix;
+        ]} *)
+
+  val get_matrix : 'a t -> Matrix.t
+    (** Returns the pattern's transformation matrix.  *)
+
+  (* FIXME: is get_type needed ? *)
 end
 
 
