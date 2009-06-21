@@ -473,6 +473,243 @@ CAMLexport value caml_cairo_path_of_array(value varray)
 /* Patterns -- Sources for drawing
 ***********************************************************************/
 
+CAMLexport value caml_cairo_pattern_add_color_stop_rgb
+(value vpat, value vofs, value vr, value vg, value vb)
+{
+  /* noalloc */
+  cairo_pattern_add_color_stop_rgb(PATTERN_VAL(vpat), Double_val(vofs),
+                                   Double_val(vr), Double_val(vg),
+                                   Double_val(vb));
+  return(Val_unit);
+}
+
+
+CAMLexport value caml_cairo_pattern_add_color_stop_rgba
+(value vpat, value vofs, value vr, value vg, value vb, value va)
+{
+  /* noalloc */
+  cairo_pattern_add_color_stop_rgba(PATTERN_VAL(vpat), Double_val(vofs),
+                                    Double_val(vr), Double_val(vg),
+                                    Double_val(vb), Double_val(va));
+  return(Val_unit);
+}
+
+CAMLexport value caml_cairo_pattern_add_color_stop_rgba_bc
+(value * argv, int argn)
+{
+  return caml_cairo_pattern_add_color_stop_rgba
+    (argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
+}
+
+
+CAMLexport value caml_cairo_pattern_get_color_stop_count(value vpat)
+{
+  CAMLparam1(vpat);
+  int count;
+  cairo_status_t st = cairo_pattern_get_color_stop_count(PATTERN_VAL(vpat),
+                                                         &count);
+  caml_raise_Error(st);
+  CAMLreturn(Val_int(count));
+}
+
+CAMLexport value caml_cairo_pattern_get_color_stop_rgba(value vpat,
+                                                        value vidx)
+{
+  CAMLparam2(vpat, vidx);
+  CAMLlocal1(vcolors);
+  double offset, red, green, blue, alpha;
+  cairo_status_t st = cairo_pattern_get_color_stop_rgba
+    (PATTERN_VAL(vpat), Int_val(vidx), &offset, &red, &green, &blue, &alpha);
+  caml_raise_Error(st);
+  /* tuple (offset, red, green, blue, alpha) */
+  vcolors = caml_alloc_tuple(5);
+  Store_field(vcolors, 0, caml_copy_double(offset));
+  Store_field(vcolors, 1, caml_copy_double(red));
+  Store_field(vcolors, 2, caml_copy_double(green));
+  Store_field(vcolors, 3, caml_copy_double(blue));
+  Store_field(vcolors, 4, caml_copy_double(alpha));
+  CAMLreturn(vcolors);
+}
+
+CAMLexport value caml_cairo_pattern_create_rgb(value vr, value vg, value vb)
+{
+  CAMLparam3(vr,vg,vb);
+  CAMLlocal1(vpat);
+  cairo_pattern_t* pat = cairo_pattern_create_rgb(Double_val(vr),
+                                                  Double_val(vg),
+                                                  Double_val(vb));
+  caml_raise_Error(cairo_pattern_status(pat));
+  PATTERN_ASSIGN(vpat, pat);
+  CAMLreturn(vpat);
+}
+
+CAMLexport value caml_cairo_pattern_create_rgba(value vr, value vg, value vb,
+                                                value va)
+{
+  CAMLparam4(vr,vg,vb,va);
+  CAMLlocal1(vpat);
+  cairo_pattern_t* pat = cairo_pattern_create_rgba(Double_val(vr),
+                                                   Double_val(vg),
+                                                   Double_val(vb),
+                                                   Double_val(va));
+  caml_raise_Error(cairo_pattern_status(pat));
+  PATTERN_ASSIGN(vpat, pat);
+  CAMLreturn(vpat);
+}
+
+CAMLexport value caml_cairo_pattern_get_rgba(value vpat)
+{
+  CAMLparam1(vpat);
+  CAMLlocal1(vrgba);
+  double red, green, blue, alpha;
+  cairo_status_t st = cairo_pattern_get_rgba(PATTERN_VAL(vpat),
+                                             &red, &green, &blue, &alpha);
+  caml_raise_Error(st);
+  vrgba = caml_alloc_tuple(4);
+  Store_field(vrgba, 0, caml_copy_double(red));
+  Store_field(vrgba, 1, caml_copy_double(green));
+  Store_field(vrgba, 2, caml_copy_double(blue));
+  Store_field(vrgba, 3, caml_copy_double(alpha));
+  CAMLreturn(vrgba);
+}
+
+CAMLexport value caml_cairo_pattern_create_for_surface(value vsurf)
+{
+  CAMLparam1(vsurf);
+  CAMLlocal1(vpat);
+  cairo_pattern_t* pat = cairo_pattern_create_for_surface(SURFACE_VAL(vsurf));
+  caml_raise_Error(cairo_pattern_status(pat));
+  PATTERN_ASSIGN(vpat, pat);
+  CAMLreturn(vpat);
+}
+
+CAMLexport value caml_cairo_pattern_get_surface(value vpat)
+{
+  CAMLparam1(vpat);
+  CAMLlocal1(vsurf);
+  cairo_surface_t *surface;
+  cairo_status_t st = cairo_pattern_get_surface(PATTERN_VAL(vpat),
+                                                &surface);
+  caml_raise_Error(st);
+  SURFACE_ASSIGN(vsurf, surface);
+  CAMLreturn(vsurf);
+}
+
+CAMLexport value caml_cairo_pattern_create_linear
+(value vx0, value vy0, value vx1, value vy1)
+{
+  CAMLparam4(vx0, vy0, vx1, vy1);
+  CAMLlocal1(vpat);
+  cairo_pattern_t* pat = cairo_pattern_create_linear
+    (Double_val(vx0), Double_val(vy0), Double_val(vx1), Double_val(vy1));
+  caml_raise_Error(cairo_pattern_status(pat));
+  PATTERN_ASSIGN(vpat, pat);
+  CAMLreturn(vpat);
+}
+
+CAMLexport value caml_cairo_pattern_get_linear_points(value vpat)
+{
+  CAMLparam1(vpat);
+  CAMLlocal1(vcoord);
+  double x0, y0, x1, y1;
+  cairo_status_t st = cairo_pattern_get_linear_points
+    (PATTERN_VAL(vpat), &x0, &y0, &x1, &y1);
+  caml_raise_Error(st);
+  vcoord = caml_alloc_tuple(4);
+  Store_field(vcoord, 0, caml_copy_double(x0));
+  Store_field(vcoord, 1, caml_copy_double(y0));
+  Store_field(vcoord, 2, caml_copy_double(x1));
+  Store_field(vcoord, 3, caml_copy_double(y1));
+  CAMLreturn(vcoord);
+}
+
+CAMLexport value caml_cairo_pattern_create_radial
+(value vx0, value vy0, value vr0, value vx1, value vy1, value vr1)
+{
+  CAMLparam5(vx0, vy0, vr0, vx1, vy1);
+  CAMLxparam1(vr1);
+  CAMLlocal1(vpat);
+  cairo_pattern_t* pat = cairo_pattern_create_radial
+    (Double_val(vx0), Double_val(vy0), Double_val(vr0),
+     Double_val(vx1), Double_val(vy1), Double_val(vr1));
+  caml_raise_Error(cairo_pattern_status(pat));
+  PATTERN_ASSIGN(vpat, pat);
+  CAMLreturn(vpat);
+}
+
+CAMLexport value caml_cairo_pattern_create_radial_bc(value * argv, int argn)
+{
+  return caml_cairo_pattern_create_radial(argv[0], argv[1], argv[2], argv[3],
+                                          argv[4], argv[5]);
+}
+
+CAMLexport value caml_cairo_pattern_get_radial_circles(value vpat)
+{
+  CAMLparam1(vpat);
+  CAMLlocal1(vcircles);
+  double x0, y0, r0, x1, y1, r1;
+  cairo_status_t st = cairo_pattern_get_radial_circles
+    (PATTERN_VAL(vpat), &x0, &y0, &r0, &x1, &y1, &r1);
+  caml_raise_Error(st);
+  vcircles = caml_alloc_tuple(6);
+  Store_field(vcircles, 0, caml_copy_double(x0));
+  Store_field(vcircles, 1, caml_copy_double(y0));
+  Store_field(vcircles, 2, caml_copy_double(r0));
+  Store_field(vcircles, 3, caml_copy_double(x1));
+  Store_field(vcircles, 4, caml_copy_double(y1));
+  Store_field(vcircles, 5, caml_copy_double(r1));
+  CAMLreturn(vcircles);
+}
+
+CAMLexport value caml_cairo_pattern_set_extend(value vpat, value vextend)
+{
+  /* noalloc */
+  cairo_pattern_set_extend(PATTERN_VAL(vpat), EXTEND_VAL(vextend));
+  return(Val_unit);
+}
+
+CAMLexport value caml_cairo_pattern_get_extend(value vpat)
+{
+  CAMLparam1(vpat);
+  cairo_extend_t extend = cairo_pattern_get_extend(PATTERN_VAL(vpat));
+  CAMLreturn(VAL_EXTEND(extend));
+}
+
+CAMLexport value caml_cairo_pattern_set_filter(value vpat, value vfilter)
+{
+  /* noalloc */
+  cairo_pattern_set_filter(PATTERN_VAL(vpat), FILTER_VAL(vfilter));
+  return(Val_unit);
+}
+
+CAMLexport value caml_cairo_pattern_get_filter(value vpat)
+{
+  CAMLparam1(vpat);
+  cairo_filter_t filter = cairo_pattern_get_filter(PATTERN_VAL(vpat));
+  CAMLreturn(VAL_FILTER(filter));
+}
+
+CAMLexport value caml_cairo_pattern_set_matrix(value vpat, value vmat)
+{
+  /* noalloc */
+  cairo_matrix_t *matrix;
+  SET_MATRIX_VAL(matrix, vmat);
+  cairo_pattern_set_matrix(PATTERN_VAL(vpat), matrix);
+  return(Val_unit);
+}
+
+CAMLexport value caml_cairo_pattern_get_matrix(value vpat)
+{
+  CAMLparam1(vpat);
+  CAMLlocal1(vmat);
+  cairo_matrix_t *matrix;
+  cairo_pattern_get_matrix(PATTERN_VAL(vpat), matrix);
+  MATRIX_ASSIGN(vmat, matrix);
+  CAMLreturn(vmat);
+}
+
+
+
 
 
 

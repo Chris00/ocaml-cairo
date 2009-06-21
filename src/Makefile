@@ -13,6 +13,8 @@ opt: native
 byte: cairo.cma
 native: cairo.cmxa
 
+cairo.cma: cairo.cmo dllcairo_stubs
+
 dllcairo_stubs: cairo.cmo cairo_stubs.o
 	ocamlmklib -o $@ $^ -lcairo
 

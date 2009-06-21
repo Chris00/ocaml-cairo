@@ -81,6 +81,12 @@ CAMLexport value caml_cairo_status_to_string(value vstatus)
 
 DEFINE_CUSTOM_OPERATIONS(pattern, cairo_pattern_destroy, PATTERN_VAL)
 
+#define EXTEND_VAL(v) Int_val(v)
+#define VAL_EXTEND(v) Val_int(v)
+
+#define FILTER_VAL(v) Int_val(v)
+#define VAL_FILTER(v) Val_int(v)
+
 /* Type cairo_surface_t
 ***********************************************************************/
 
@@ -165,3 +171,26 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
   p->index = Int_val(Field(v,0));                \
   p->x = Double_val(Field(v,1));                 \
   p->y = Double_val(Field(v,2))
+
+
+
+/* Type cairo_matrix_t
+***********************************************************************/
+
+/* FIXME: optimize when possible */
+#define SET_MATRIX_VAL(m, v)                    \
+  m->xx = Double_field(v, 0);                   \
+  m->yx = Double_field(v, 1);                   \
+  m->xy = Double_field(v, 2);                   \
+  m->yy = Double_field(v, 3);                   \
+  m->x0 = Double_field(v, 4);                   \
+  m->y0 = Double_field(v, 5)
+
+#define MATRIX_ASSIGN(v, m)                     \
+  v = caml_alloc(6, Double_array_tag);          \
+  Store_double_field(v, 0, m->xx);              \
+  Store_double_field(v, 1, m->yx);              \
+  Store_double_field(v, 2, m->xy);              \
+  Store_double_field(v, 3, m->yy);              \
+  Store_double_field(v, 4, m->x0);              \
+  Store_double_field(v, 5, m->y0)

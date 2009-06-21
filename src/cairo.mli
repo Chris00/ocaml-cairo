@@ -32,7 +32,6 @@
 *)
 
 type status =
-  | NO_MEMORY
   | INVALID_RESTORE
   | INVALID_POP_GROUP
   | NO_CURRENT_POINT
@@ -82,7 +81,7 @@ external status_to_string  : status -> string = "caml_cairo_status_to_string"
     ]} *)
 type matrix = { mutable xx: float; mutable yx: float;
                 mutable xy: float; mutable yy: float;
-                mutable x0: float: mutable y0: float }
+                mutable x0: float; mutable y0: float }
 
 (** This is used throughout cairo to convert between different
     coordinate spaces. *)
@@ -224,7 +223,8 @@ sig
         making sharp color transitions instead of the typical
         blend.  *)
 
-  val get_color_stop_count : [> `Gradient] t -> int
+  external get_color_stop_count : [> `Gradient] t -> int
+    = "caml_cairo_pattern_get_color_stop_count"
     (** Return the number of color stops specified in the given
         gradient pattern. *)
 
@@ -236,31 +236,36 @@ sig
 
           @return (offset, red, green, blue, alpha) *)
 
-  val create_rgb : r:float -> g:float -> a:float -> [`Solid] t
+  external create_rgb : r:float -> g:float -> b:float -> [`Solid] t
+    = "caml_cairo_pattern_create_rgb"
     (** Creates a new {!Cairo.Pattern.t} corresponding to an opaque
         color. The color components are floating point numbers in the
         range 0 to 1. If the values passed in are outside that range,
         they will be clamped. *)
 
-  val create_rgba : r:float -> g:float -> b:float -> a:float -> [`Solid] t
+  external create_rgba : r:float -> g:float -> b:float -> a:float -> [`Solid] t
+    = "caml_cairo_pattern_create_rgba"
     (** Creates a new {!Cairo.pattern.t} corresponding to a
         translucent color.  The color components are floating point
         numbers in the range 0 to 1.  If the values passed in are
         outside that range, they will be clamped. *)
 
-  val get_rgba : [> `Solid] t -> float * float * float * float
+  external get_rgba : [> `Solid] t -> float * float * float * float
+    = "caml_cairo_pattern_get_rgba"
     (** Return the solid color for a solid color pattern.
 
     @return (red, green, blue, alpha) *)
 
-  val create_for_surface : Surface.t -> [`Surface] t
+  external create_for_surface : Surface.t -> [`Surface] t
+    = "caml_cairo_pattern_create_for_surface"
     (** Create a new {!Cairo.Pattern.t} for the given surface. *)
 
-  val get_surface : [`Surface] pattern -> Surface.t
+  external get_surface : [`Surface] t -> Surface.t
+    = "caml_cairo_pattern_get_surface"
     (** Gets the surface of a surface pattern.  *)
 
-  val create_linear : x0:float -> y0:float -> x1:float -> y1:float ->
-    [`Linear | `Gradient] t
+  external create_linear : x0:float -> y0:float -> x1:float -> y1:float ->
+    [`Linear | `Gradient] t = "caml_cairo_pattern_create_linear"
       (** Create a new linear gradient {!Cairo.Pattern.t} along the
           line defined by (x0, y0) and (x1, y1).  Before using the
           gradient pattern, a number of color stops should be defined
@@ -272,13 +277,14 @@ sig
           relationship between the spaces can be changed with
           {!Cairo.Pattern.set_matrix}.  *)
 
-  val get_linear_points : [> `Linear|`Gradient] t
-    -> float * float * float * float
+  external get_linear_points : [> `Linear|`Gradient] t
+    -> float * float * float * float = "caml_cairo_pattern_get_linear_points"
     (** Gets the gradient endpoints for a linear gradient.
         @return (x0, y0, x1, y1). *)
 
-  val create_radial : x0:float -> y0:float -> r0:float ->
+  external create_radial : x0:float -> y0:float -> r0:float ->
     x1:float -> y1:float -> r1:float -> [`Radial | `Gradient] t
+    = "caml_cairo_pattern_create_radial_bc" "caml_cairo_pattern_create_radial"
     (** Creates a new radial gradient {!Cairo.Pattern.t} between the
         two circles defined by (cx0, cy0, radius0) and (cx1, cy1,
         radius1). Before using the gradient pattern, a number of color
@@ -290,8 +296,9 @@ sig
         relationship between the spaces can be changed with
         {!Cairo.Pattern.set_matrix}. *)
 
-  val get_radial_circles : [> `Radial|`Gradient] t ->
+  external get_radial_circles : [> `Radial|`Gradient] t ->
     float * float * float * float * float * float
+    = "caml_cairo_pattern_get_radial_circles"
       (** Gets the gradient endpoint circles for a radial gradient,
           each specified as a center coordinate and a radius.
           @return (x0, y0, r0, x1, y1, r1).      *)
@@ -307,7 +314,8 @@ sig
     | PAD (** pixels outside of the pattern copy the closest pixel
               from the source. *)
 
-  val set_extend : 'a t -> extend -> unit
+  external set_extend : 'a t -> extend -> unit
+    = "caml_cairo_pattern_set_extend" "noalloc"
     (** Sets the mode to be used for drawing outside the area of a
         pattern.  See {!Cairo.Pattern.extend} for details on the
         semantics of each extend strategy.
@@ -315,7 +323,7 @@ sig
         The default extend mode is [NONE] for surface patterns and
         [PAD] for gradient patterns. *)
 
-  val get_extend : 'a t -> extend
+  external get_extend : 'a t -> extend = "caml_cairo_pattern_get_extend"
     (** Gets the current extend mode for a pattern. See
         {!Cairo.Pattern.extend} for details on the semantics of each
         extend strategy. *)
@@ -334,7 +342,8 @@ sig
     | BILINEAR (** Linear interpolation in two dimensions *)
     (* | GAUSSIAN *)
 
-  val set_filter : 'a t -> filter -> unit
+  external set_filter : 'a t -> filter -> unit
+    = "caml_cairo_pattern_set_filter" "noalloc"
     (** Sets the filter to be used for resizing when using this
         pattern. See {!Cairo.Pattern.filter} for details on each
         filter.
@@ -349,11 +358,12 @@ sig
         Cairo.Pattern.set_filter (Cairo.get_source cr) Cairo.Pattern.NEAREST;
         ]} *)
 
-  val get_filter : 'a t -> filter
+  external get_filter : 'a t -> filter = "caml_cairo_pattern_get_filter"
     (** Gets the current filter for a pattern.  See
         {!Cairo.Pattern.filter} for details on each filter. *)
 
-  val set_matrix : 'a t -> Matrix.t -> unit
+  external set_matrix : 'a t -> Matrix.t -> unit
+    = "caml_cairo_pattern_set_matrix" "noalloc"
     (** Sets the pattern's transformation matrix to matrix. This
         matrix is a transformation from user space to pattern space.
 
@@ -375,7 +385,7 @@ sig
         Cairo.Pattern.set_matrix pattern matrix;
         ]} *)
 
-  val get_matrix : 'a t -> Matrix.t
+  external get_matrix : 'a t -> Matrix.t = "caml_cairo_pattern_get_matrix"
     (** Returns the pattern's transformation matrix.  *)
 
   (* FIXME: is get_type needed ? *)
@@ -400,7 +410,7 @@ sig
       Note that the offsets given by x and y are not cumulative.  When
       drawing or measuring text, each glyph is individually positioned
       with respect to the overall origin. *)
-  type t = glyph = {
+  type t = {
     index: int; (** glyph index in the font. The exact interpretation
                     of the glyph index depends on the font technology
                     being used. *)
@@ -447,7 +457,7 @@ external restore : t -> unit = "caml_cairo_restore"
       call to [save] and removes that state from the stack of saved
       states. *)
 
-external get_target : t -> surface = "caml_cairo_get_target"
+external get_target : t -> Surface.t = "caml_cairo_get_target"
   (** Gets the target surface for the cairo context as passed to [create]. *)
 
 module Group :
@@ -1098,7 +1108,7 @@ sig
         the "last move_to point" during processing as the [MOVE_TO]
         immediately after the [CLOSE_PATH] will provide that point. *)
 
-  external glyph : t -> glyph array -> unit = "caml_cairo_glyph_path"
+  external glyph : t -> Glyph.t array -> unit = "caml_cairo_glyph_path"
     (** Adds closed paths for the glyphs to the current path. The
         generated path if filled, achieves an effect similar to that
         of {!Cairo.Glyph.show}. *)

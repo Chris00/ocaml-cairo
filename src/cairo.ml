@@ -15,16 +15,19 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the file
    LICENSE for more details. *)
 
+(* Keep in sync with the C function caml_raise_Error *)
 type status =
-  | NO_MEMORY
+  (* Programmer error *)
   | INVALID_RESTORE
   | INVALID_POP_GROUP
   | NO_CURRENT_POINT
   | INVALID_MATRIX
   | INVALID_STATUS
+  (* Language binding implementation *)
   | NULL_POINTER
   | INVALID_STRING
   | INVALID_PATH_DATA
+  (* Other *)
   | READ_ERROR
   | WRITE_ERROR
   | SURFACE_FINISHED
@@ -55,6 +58,7 @@ external status_to_string  : status -> string = "caml_cairo_status_to_string"
 
 type t
 type surface
+type surface_content = COLOR | ALPHA | COLOR_ALPHA
 type 'a pattern
 type any_pattern = [`Solid | `Surface | `Gradient | `Linear | `Radial] pattern
 type glyph = { index: int;  x: float;  y: float }
@@ -68,12 +72,12 @@ external get_target : t -> surface = "caml_cairo_get_target"
 module Group =
 struct
   external push_group : t -> unit = "caml_cairo_push_group"
-  external push_group_with_content : t -> content -> unit
+  external push_group_with_content : t -> surface_content -> unit
     = "caml_cairo_push_group_with_content"
 
   let push ?content cr =
     match content with
-    | None -> push_group_stub cr
+    | None -> push_group cr
     | Some c -> push_group_with_content cr c
 
   external pop : t -> any_pattern = "caml_cairo_pop_group"
@@ -101,18 +105,32 @@ type antialias =
 external set_antialias : t -> antialias -> unit = "caml_cairo_set_antialias"
 external get_antialias : t -> antialias = "caml_cairo_get_antialias"
 
-external set_dash_stub : t -> float array -> osf:float -> unit
+external set_dash_stub : t -> float array -> ofs:float -> unit
   = "caml_cairo_set_dash"
 
-let set_dash cr ?(ofs=0.0) dashes = set_dash_stub cr ofs dashes
+let set_dash cr ?(ofs=0.0) dashes = set_dash_stub cr dashes ~ofs
 
 external get_dash : t -> float array * float = "caml_cairo_get_dash"
+
+type fill_rule =
+  | WINDING
+  | EVEN_ODD
 
 external set_fill_rule : t -> fill_rule -> unit = "caml_cairo_set_fill_rule"
 external get_fill_rule : t -> fill_rule = "caml_cairo_get_fill_rule"
 
+type line_cap =
+  | BUTT
+  | ROUND
+  | SQUARE
+
 external set_line_cap : t -> line_cap -> unit = "caml_cairo_set_line_cap"
 external get_line_cap : t -> line_cap = "caml_cairo_get_line_cap"
+
+type line_join =
+  | JOIN_MITER
+  | JOIN_ROUND
+  | JOIN_BEVEL
 
 external set_line_join : t -> line_join -> unit = "caml_cairo_set_line_join"
 external get_line_join : t -> line_join = "caml_cairo_get_line_join"
@@ -122,6 +140,22 @@ external get_line_width : t -> float = "caml_cairo_get_line_width"
 
 external set_miter_limit : t -> float -> unit = "caml_cairo_set_miter_limit"
 external get_miter_limit : t -> float = "caml_cairo_get_miter_limit"
+
+type operator =
+  | CLEAR
+  | SOURCE
+  | OVER
+  | IN
+  | OUT
+  | ATOP
+  | DEST
+  | DEST_OVER
+  | DEST_IN
+  | DEST_OUT
+  | DEST_ATOP
+  | XOR
+  | ADD
+  | SATURATE
 
 external set_operator : t -> operator -> unit = "caml_cairo_set_operator"
 external get_operator : t -> operator = "caml_cairo_get_operator"
@@ -238,7 +272,7 @@ module Surface =
 struct
   type t = surface
 
-  type content = COLOR | ALPHA | COLOR_ALPHA
+  type content = surface_content = COLOR | ALPHA | COLOR_ALPHA
 end
 
 (* ---------------------------------------------------------------------- *)
@@ -248,6 +282,86 @@ struct
   type 'a t = 'a pattern
   type any = any_pattern
 
+  external add_color_stop_rgb_stub : [> `Gradient] t -> ofs:float ->
+    r:float -> g:float -> b:float -> unit
+    = "caml_cairo_pattern_add_color_stop_rgb" "noalloc"
+
+  let add_color_stop_rgb cr ?(ofs=0.0) ~r ~g ~b =
+    add_color_stop_rgb_stub cr ~ofs ~r ~g ~b
+
+  external add_color_stop_rgba_stub : [> `Gradient] t -> ofs:float ->
+    r:float -> g:float -> b:float -> a:float -> unit
+    = "caml_cairo_pattern_add_color_stop_rgba_bc"
+    "caml_cairo_pattern_add_color_stop_rgba" "noalloc"
+
+  let add_color_stop_rgba cr ?(ofs=0.0) ~r ~g ~b =
+    add_color_stop_rgba_stub cr ~ofs ~r ~g ~b
+
+  external get_color_stop_count : [> `Gradient] t -> int
+    = "caml_cairo_pattern_get_color_stop_count"
+
+  external get_color_stop_rgba : [> `Gradient] t -> idx:int ->
+    float * float * float * float * float
+    = "caml_cairo_pattern_get_color_stop_rgba"
+    (* FIXME: do we want to iterate over the colors instead ?? *)
+
+  external create_rgb : r:float -> g:float -> b:float -> [`Solid] t
+    = "caml_cairo_pattern_create_rgb"
+
+  external create_rgba : r:float -> g:float -> b:float -> a:float -> [`Solid] t
+    = "caml_cairo_pattern_create_rgba"
+
+  external get_rgba : [> `Solid] t -> float * float * float * float
+    = "caml_cairo_pattern_get_rgba"
+
+  external create_for_surface : Surface.t -> [`Surface] t
+    = "caml_cairo_pattern_create_for_surface"
+
+  external get_surface : [`Surface] t -> Surface.t
+    = "caml_cairo_pattern_get_surface"
+
+  external create_linear : x0:float -> y0:float -> x1:float -> y1:float ->
+    [`Linear | `Gradient] t = "caml_cairo_pattern_create_linear"
+
+  external get_linear_points : [> `Linear|`Gradient] t
+    -> float * float * float * float = "caml_cairo_pattern_get_linear_points"
+
+  external create_radial : x0:float -> y0:float -> r0:float ->
+    x1:float -> y1:float -> r1:float -> [`Radial | `Gradient] t
+    = "caml_cairo_pattern_create_radial_bc" "caml_cairo_pattern_create_radial"
+
+  external get_radial_circles : [> `Radial|`Gradient] t ->
+    float * float * float * float * float * float
+    = "caml_cairo_pattern_get_radial_circles"
+
+  type extend =
+    | NONE
+    | REPEAT
+    | REFLECT
+    | PAD
+
+  external set_extend : 'a t -> extend -> unit
+    = "caml_cairo_pattern_set_extend" "noalloc"
+
+  external get_extend : 'a t -> extend = "caml_cairo_pattern_get_extend"
+
+  type filter =
+    | FAST
+    | GOOD
+    | BEST
+    | NEAREST
+    | BILINEAR
+    (* | GAUSSIAN *)
+
+  external set_filter : 'a t -> filter -> unit
+    = "caml_cairo_pattern_set_filter" "noalloc"
+
+  external get_filter : 'a t -> filter = "caml_cairo_pattern_get_filter"
+
+  external set_matrix : 'a t -> Matrix.t -> unit
+    = "caml_cairo_pattern_set_matrix" "noalloc"
+
+  external get_matrix : 'a t -> Matrix.t = "caml_cairo_pattern_get_matrix"
 end
 
 (* ---------------------------------------------------------------------- *)
