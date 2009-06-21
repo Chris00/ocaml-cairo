@@ -55,7 +55,8 @@ external status_to_string  : status -> string = "caml_cairo_status_to_string"
 
 type t
 type surface
-type pattern
+type 'a pattern
+type any_pattern = [`Solid | `Surface | `Gradient | `Linear | `Radial] pattern
 type glyph = { index: int;  x: float;  y: float }
 
 external create : surface -> t = "caml_cairo_create"
@@ -75,7 +76,7 @@ struct
     | None -> push_group_stub cr
     | Some c -> push_group_with_content cr c
 
-  external pop : t -> pattern = "caml_cairo_pop_group"
+  external pop : t -> any_pattern = "caml_cairo_pop_group"
   external pop_to_source : t -> unit = "caml_cairo_pop_group_to_source"
 
   external get_target : t -> surface = "caml_cairo_get_group_target"
@@ -87,9 +88,9 @@ external set_source_rgb : t -> r:float -> g:float -> b:float -> unit
 external set_source_rgba : t -> r:float -> g:float -> b:float -> a:float -> unit
   = "caml_cairo_set_source_rgba"
 
-external set_source : t -> Pattern.t -> unit = "caml_cairo_set_source"
+external set_source : t -> 'a pattern -> unit = "caml_cairo_set_source"
 
-external get_source : t -> Pattern.t = "caml_cairo_get_source"
+external get_source : t -> any_pattern = "caml_cairo_get_source"
 
 type antialias =
   | ANTIALIAS_DEFAULT
@@ -151,7 +152,7 @@ external fill_extents : t -> bounding_box = "caml_cairo_fill_extents"
 
 external in_fill : t -> x:float -> y:float -> bool = "caml_cairo_in_fill"
 
-external mask : t -> pattern -> unit = "caml_cairo_mask"
+external mask : t -> 'a pattern -> unit = "caml_cairo_mask"
 external mask_surface : t -> surface -> x:float -> y:float -> unit
   = "caml_cairo_mask_surface"
 
@@ -244,7 +245,8 @@ end
 
 module Pattern =
 struct
-  type t = pattern
+  type 'a t = 'a pattern
+  type any = any_pattern
 
 end
 

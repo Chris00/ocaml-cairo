@@ -84,10 +84,78 @@ type matrix = { mutable xx: float; mutable yx: float;
                 mutable xy: float; mutable yy: float;
                 mutable x0: float: mutable y0: float }
 
+(** This is used throughout cairo to convert between different
+    coordinate spaces. *)
 module Matrix :
 sig
   type t = matrix
 
+  val init_identity : unit -> t
+    (** [init_identity()] returns an identity transformation. *)
+
+  val init_translate : tx:float -> ty:float -> t
+    (** [init_translate tx ty] return a transformation that translates
+        by [tx] and [ty] in the X and Y dimensions, respectively. *)
+
+  val init_scale : sx:float -> sy:float -> t
+    (** [init_scale sx sy] return a transformation that scales by [sx]
+        and [sy] in the X and Y dimensions, respectively. *)
+
+  val init_rotate : r:float -> t
+    (** [init_rotate radians] returns a a transformation that rotates
+        by [radians]. *)
+
+  val translate : t -> tx:float -> ty:float -> unit
+    (** [translate matrix rx ty] applies a translation by [tx], [ty]
+        to the transformation in [matrix].  The effect of the new
+        transformation is to first translate the coordinates by [tx]
+        and [ty], then apply the original transformation to the
+        coordinates. *)
+
+  val scale : t -> sx:float -> sy:float -> unit
+    (** [scale matrix sx sy] applies scaling by [sx], [sy] to the
+        transformation in [matrix].  The effect of the new
+        transformation is to first scale the coordinates by [sx] and [sy],
+        then apply the original transformation to the coordinates. *)
+
+  val rotate : t -> r:float -> unit
+    (** [rotate matrix radians] applies rotation by [radians] to the
+        transformation in [matrix].  The effect of the new
+        transformation is to first rotate the coordinates by [radians],
+        then apply the original transformation to the coordinates. *)
+
+  val invert : t -> unit
+    (** [invert matrix] changes [matrix] to be the inverse of it's
+        original value.  Not all transformation matrices have
+        inverses; if the matrix collapses points together (it is
+        degenerate), then it has no inverse and this function will
+        fail. *)
+
+  val multiply : t -> t -> t
+    (** [multiply a b] multiplies the affine transformations in [a]
+        and [b] together and return the result.  The effect of the
+        resulting transformation is to first apply the transformation
+        in [a] to the coordinates and then apply the transformation in
+        [b] to the coordinates.  *)
+
+  val transform_distance : t -> dx:float -> dy:float -> float * float
+    (** [transform_distance matrix dx dy] transforms the distance
+        vector ([dx],[dy]) by [matrix].  This is similar to
+        {!Cairo.Matrix.transform_point} except that the translation
+        components of the transformation are ignored.  The calculation
+        of the returned vector is as follows:
+        {[
+        dx2 = dx1 * a + dy1 * c;
+        dy2 = dx1 * b + dy1 * d;
+        ]}
+        Affine transformations are position invariant, so the same
+        vector always transforms to the same vector.  If (x1,y1)
+        transforms to (x2,y2) then (x1+dx1,y1+dy1) will transform to
+        (x1+dx2,y1+dy2) for all values of x1 and x2.  *)
+
+  val transform_point : t -> x:float -> y:float -> float * float
+    (** [transform_point matrix x y] transforms the point ([x], [y])
+        by [matrix]. *)
 end
 
 (* ---------------------------------------------------------------------- *)
@@ -114,14 +182,21 @@ sig
         of the form [Cairo.Pattern.create_type] or implicitly through
         {!Cairo.set_source_*} functions.  *)
 
+  type any = [`Solid | `Surface | `Gradient | `Linear | `Radial] t
+      (** {!Cairo.Group.pop} and {!Cairo.get_source} retrieve patterns
+          whose properties we do not know.  In this case, we can only
+          assume the pattern has potentially all properties and the
+          functions below may raise an exception if it turns out that
+          the needed property is not present. *)
 
-  val add_color_stop_rgb : [`Gradient] t -> ?ofs:float ->
+  val add_color_stop_rgb : [> `Gradient] t -> ?ofs:float ->
     r:float -> g:float -> b:float -> unit
     (** Adds an opaque color stop to a gradient pattern.  The offset
-        specifies the location along the gradient's control vector. For
-        example, a linear gradient's control vector is from (x0,y0) to
-        (x1,y1) while a radial gradient's control vector is from any point
-        on the start circle to the corresponding point on the end circle.
+        [ofs] specifies the location along the gradient's control
+        vector (default: [0.0]).  For example, a linear gradient's
+        control vector is from (x0,y0) to (x1,y1) while a radial
+        gradient's control vector is from any point on the start
+        circle to the corresponding point on the end circle.
 
         The color is specified in the same way as in {!Cairo.set_source_rgb}.
 
@@ -131,7 +206,7 @@ sig
         than stops added later).  This can be useful for reliably
         making sharp color transitions instead of the typical blend. *)
 
-  val add_color_stop_rgba : [`Gradient] t -> ?ofs:float ->
+  val add_color_stop_rgba : [> `Gradient] t -> ?ofs:float ->
     r:float -> g:float -> b:float -> a:float -> unit
     (** Adds a translucent color stop to a gradient pattern. The
         offset specifies the location along the gradient's control
@@ -149,11 +224,11 @@ sig
         making sharp color transitions instead of the typical
         blend.  *)
 
-  val get_color_stop_count : 'a t -> int
+  val get_color_stop_count : [> `Gradient] t -> int
     (** Return the number of color stops specified in the given
         gradient pattern. *)
 
-  val get_color_stop_rgba : [`Gradient] t -> idx:int ->
+  val get_color_stop_rgba : [> `Gradient] t -> idx:int ->
     float * float * float * float * float
       (** Gets the color and offset information at the given index for
           a gradient pattern. Values of index are 0 to 1 less than the
@@ -162,7 +237,7 @@ sig
           @return (offset, red, green, blue, alpha) *)
 
   val create_rgb : r:float -> g:float -> a:float -> [`Solid] t
-    (** Creates a new Cairo.Pattern.t corresponding to an opaque
+    (** Creates a new {!Cairo.Pattern.t} corresponding to an opaque
         color. The color components are floating point numbers in the
         range 0 to 1. If the values passed in are outside that range,
         they will be clamped. *)
@@ -173,7 +248,7 @@ sig
         numbers in the range 0 to 1.  If the values passed in are
         outside that range, they will be clamped. *)
 
-  val get_rgba : [`Solid] t -> float * float * float * float
+  val get_rgba : [> `Solid] t -> float * float * float * float
     (** Return the solid color for a solid color pattern.
 
     @return (red, green, blue, alpha) *)
@@ -185,7 +260,7 @@ sig
     (** Gets the surface of a surface pattern.  *)
 
   val create_linear : x0:float -> y0:float -> x1:float -> y1:float ->
-    [`Linear_gradient] t
+    [`Linear | `Gradient] t
       (** Create a new linear gradient {!Cairo.Pattern.t} along the
           line defined by (x0, y0) and (x1, y1).  Before using the
           gradient pattern, a number of color stops should be defined
@@ -197,12 +272,13 @@ sig
           relationship between the spaces can be changed with
           {!Cairo.Pattern.set_matrix}.  *)
 
-  val get_linear_points : [`Linear_gradient] t -> float * float * float * float
+  val get_linear_points : [> `Linear|`Gradient] t
+    -> float * float * float * float
     (** Gets the gradient endpoints for a linear gradient.
         @return (x0, y0, x1, y1). *)
 
   val create_radial : x0:float -> y0:float -> r0:float ->
-    x1:float -> y1:float -> r1:float -> [`Radial_gradient] t
+    x1:float -> y1:float -> r1:float -> [`Radial | `Gradient] t
     (** Creates a new radial gradient {!Cairo.Pattern.t} between the
         two circles defined by (cx0, cy0, radius0) and (cx1, cy1,
         radius1). Before using the gradient pattern, a number of color
@@ -214,7 +290,7 @@ sig
         relationship between the spaces can be changed with
         {!Cairo.Pattern.set_matrix}. *)
 
-  val get_radial_circles : [`Radial_gradient] t ->
+  val get_radial_circles : [> `Radial|`Gradient] t ->
     float * float * float * float * float * float
       (** Gets the gradient endpoint circles for a radial gradient,
           each specified as a center coordinate and a radius.
@@ -402,7 +478,7 @@ sig
         intermediate group will have a content type of
         CAIRO_CONTENT_COLOR_ALPHA.  *)
 
-  external pop : t -> Pattern.t = "caml_cairo_pop_group"
+  external pop : t -> Pattern.any = "caml_cairo_pop_group"
     (** Terminates the redirection begun by a call to
         {!Cairo.Group.push} and returns a new pattern containing the
         results of all drawing operations performed to the group.
@@ -461,7 +537,7 @@ external set_source_rgba : t -> r:float -> g:float -> b:float -> a:float -> unit
       The default source pattern is opaque black, (that is, it is
       equivalent to [set_source_rgba cr 0. 0. 0. 1.0]). *)
 
-external set_source : t -> Pattern.t -> unit = "caml_cairo_set_source"
+external set_source : t -> 'a Pattern.t -> unit = "caml_cairo_set_source"
   (** [set_source cr source] sets the source pattern within [cr] to
       [source].  This pattern will then be used for any subsequent
       drawing operation until a new source pattern is set.
@@ -493,7 +569,7 @@ val set_source_surface : t -> Surface.t -> x:float -> y:float -> unit
       modified if desired (e.g. to create a repeating pattern with
       {!Cairo.Pattern.set_extend}). *)
 
-val get_source : t -> Pattern.t
+val get_source : t -> Pattern.any
   (** [get_source cr] gets the current source pattern for [cr]. *)
 
 (** Specifies the type of antialiasing to do when rendering text or shapes. *)
@@ -825,7 +901,7 @@ external in_fill : t -> x:float -> y:float -> bool = "caml_cairo_in_fill"
 
       See also {!Cairo.fill} and {!Cairo.set_fill_rule}.  *)
 
-external mask : t -> Pattern.t -> unit = "caml_cairo_mask"
+external mask : t -> 'a Pattern.t -> unit = "caml_cairo_mask"
   (** [mask cr pattern]: a drawing operator that paints the current
       source using the alpha channel of [pattern] as a mask.  (Opaque
       areas of [pattern] are painted with the source, transparent
