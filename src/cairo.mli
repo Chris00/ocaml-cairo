@@ -71,6 +71,7 @@ external status_to_string  : status -> string = "caml_cairo_status_to_string"
     (** Provides a human-readable description of a status. *)
 
 (* ---------------------------------------------------------------------- *)
+(** {2:Matrix Generic matrix operations} *)
 
 (** Holds an affine transformation, such as a scale, rotation, shear,
     or a combination of those. The transformation of a point (x, y) is
@@ -100,7 +101,7 @@ sig
     (** [init_scale sx sy] return a transformation that scales by [sx]
         and [sy] in the X and Y dimensions, respectively. *)
 
-  val init_rotate : r:float -> t
+  val init_rotate : angle:float -> t
     (** [init_rotate radians] returns a a transformation that rotates
         by [radians]. *)
 
@@ -117,7 +118,7 @@ sig
         transformation is to first scale the coordinates by [sx] and [sy],
         then apply the original transformation to the coordinates. *)
 
-  val rotate : t -> r:float -> unit
+  val rotate : t -> angle:float -> unit
     (** [rotate matrix radians] applies rotation by [radians] to the
         transformation in [matrix].  The effect of the new
         transformation is to first rotate the coordinates by [radians],
@@ -1311,9 +1312,76 @@ external rel_move_to : t -> x:float -> y:float -> unit
     The current transformation matrix, {i ctm}, is a two-dimensional
     affine transformation that maps all coordinates and other drawing
     instruments from the {i user space} into the surface's canonical
-    coordinate system, also known as the {i device space}.  *)
+    coordinate system, also known as the {i device space}.
+
+    See also {!Cairo.Matrix}. *)
 
 
+external translate : t -> tx:float -> ty:float -> unit = "caml_cairo_translate"
+  (** Modifies the current transformation matrix (CTM) by translating
+      the user-space origin by ([tx], [ty]).  This offset is
+      interpreted as a user-space coordinate according to the CTM in
+      place before the new call to [translate].  In other words, the
+      translation of the user-space origin takes place after any
+      existing transformation. *)
+
+external scale : t -> sx:float -> sy:float -> unit = "caml_cairo_scale"
+  (** Modifies the current transformation matrix (CTM) by scaling the
+      X and Y user-space axes by [sx] and [sy] respectively.  The
+      scaling of the axes takes place after any existing
+      transformation of user space. *)
+
+external rotate : t -> angle:float -> unit = "caml_cairo_rotate"
+  (** Modifies the current transformation matrix (CTM) by rotating the
+      user-space axes by [angle] radians.  The rotation of the axes
+      takes places after any existing transformation of user
+      space. The rotation direction for positive angles is from the
+      positive X axis toward the positive Y axis. *)
+
+external transform : t -> Matrix.t -> unit = "caml_cairo_transform"
+  (** [transform cr matrix] modifies the current transformation matrix
+      (CTM) by applying [matrix] as an additional transformation.  The
+      new transformation of user space takes place after any existing
+      transformation. *)
+
+external set_matrix : t -> Matrix.t -> unit = "caml_cairo_set_matrix"
+  (** [set_matrix cr matrix] Modifies the current transformation
+      matrix (CTM) by setting it equal to [matrix]. *)
+
+external get_matrix : t -> Matrix.t = "caml_cairo_get_matrix"
+  (** Return the current transformation matrix (CTM). *)
+
+external identity_matrix : t -> unit = "caml_cairo_identity_matrix"
+  (** Resets the current transformation matrix (CTM) by setting it
+      equal to the identity matrix.  That is, the user-space and
+      device-space axes will be aligned and one user-space unit will
+      transform to one device-space unit. *)
+
+external user_to_device : t -> x:float -> y:float -> float * float
+  = "cairo_user_to_device"
+  (** [user_to_device cr x y] transform a coordinate from user space
+      to device space by multiplying the given point by the current
+      transformation matrix (CTM). *)
+
+external user_to_device_distance : t -> x:float -> y:float -> float * float
+  = "caml_cairo_user_to_device_distance"
+  (** [user_to_device_distance cr dx dy] transform a distance vector
+      from user space to device space.  This function is similar to
+      {!Cairo.user_to_device} except that the translation components
+      of the CTM will be ignored when transforming ([dx],[dy]). *)
+
+external device_to_user : t -> x:float -> y:float -> float * float
+  = "caml_cairo_device_to_user"
+  (** Transform a coordinate from device space to user space by
+      multiplying the given point by the inverse of the current
+      transformation matrix (CTM). *)
+
+external device_to_user_distance : t -> x:float -> y:float -> float * float
+  = "caml_cairo_device_to_user_distance"
+  (** [device_to_user_distance cr dx dy] transform a distance vector
+      from device space to user space.  This function is similar to
+      {!Cairo.device_to_user} except that the translation components
+      of the inverse CTM will be ignored when transforming ([dx],[dy]). *)
 
 
 (* ---------------------------------------------------------------------- *)
