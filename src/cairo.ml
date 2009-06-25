@@ -365,6 +365,30 @@ struct
 end
 
 (* ---------------------------------------------------------------------- *)
+(* Transformations - Manipulating the current transformation matrix  *)
+
+external translate : t -> tx:float -> ty:float -> unit = "caml_cairo_translate"
+external scale : t -> sx:float -> sy:float -> unit = "caml_cairo_scale"
+external rotate : t -> angle:float -> unit = "caml_cairo_rotate"
+
+external transform : t -> Matrix.t -> unit = "caml_cairo_transform" "noalloc"
+external set_matrix : t -> Matrix.t -> unit = "caml_cairo_set_matrix" "noalloc"
+
+external get_matrix : t -> Matrix.t = "caml_cairo_get_matrix"
+
+external identity_matrix : t -> unit = "caml_cairo_identity_matrix"
+
+external user_to_device : t -> x:float -> y:float -> float * float
+  = "caml_cairo_user_to_device"
+external user_to_device_distance : t -> x:float -> y:float -> float * float
+  = "caml_cairo_user_to_device_distance"
+external device_to_user : t -> x:float -> y:float -> float * float
+  = "caml_cairo_device_to_user"
+external device_to_user_distance : t -> x:float -> y:float -> float * float
+  = "caml_cairo_device_to_user_distance"
+
+
+(* ---------------------------------------------------------------------- *)
 
 module Glyph =
 struct

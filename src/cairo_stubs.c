@@ -709,8 +709,66 @@ CAMLexport value caml_cairo_pattern_get_matrix(value vpat)
 }
 
 
+/* Transformations - Manipulating the current transformation matrix
+***********************************************************************/
+
+DO2_FUNCTION(cairo_translate, Double_val, Double_val)
+DO2_FUNCTION(cairo_scale, Double_val, Double_val)
+DO1_FUNCTION(cairo_rotate, Double_val)
+
+CAMLexport value caml_cairo_transform(value vcr, value vmat)
+{
+  /* noalloc */
+  cairo_matrix_t matrix;
+  SET_MATRIX_VAL(matrix, vmat);
+  cairo_transform(CAIRO_VAL(vcr), matrix);
+  return(Val_unit);
+}
+
+CAMLexport value caml_cairo_set_matrix(value vcr, value vmat)
+{
+  /* noalloc */
+  cairo_matrix_t matrix;
+  SET_MATRIX_VAL(matrix, vmat);
+  cairo_set_matrix(CAIRO_VAL(vcr), matrix);
+  return(Val_unit);
+}
+
+CAMLexport value caml_cairo_get_matrix(value vcr)
+{
+  CAMLparam1(vcr);
+  CAMLlocal1(vmat);
+  cairo_matrix_t *matrix;
+  cairo_get_matrix(CAIRO_VAL(vcr), matrix);
+  MATRIX_ASSIGN(vmat, matrix);
+  CAMLreturn(vmat);
+}
+
+DO_FUNCTION(cairo_identity_matrix)
+
+#define COORD_TRANSFORM(name)                                 \
+  CAMLexport value caml_##name(value vcr, value vx, value vy) \
+  {                                                           \
+    CAMLparam3(vcr, vx, vy);                                  \
+    CAMLlocal1(vcouple);                                      \
+    cairo_t* cr = CAIRO_VAL(vcr);                             \
+    double x = Double_val(vx);                                \
+    double y = Double_val(vy);                                \
+    name(cr, &x, &y);                                         \
+    vcouple = caml_alloc_tuple(2);                            \
+    Store_field(vcouple, 0, caml_copy_double(x));             \
+    Store_field(vcouple, 1, caml_copy_double(y));             \
+    CAMLreturn(vcouple);                                      \
+  }
+
+COORD_TRANSFORM(cairo_user_to_device)
+COORD_TRANSFORM(cairo_user_to_device_distance)
+COORD_TRANSFORM(cairo_device_to_user)
+COORD_TRANSFORM(cairo_device_to_user_distance)
 
 
+/* Text - Rendering text and glyphs
+***********************************************************************/
 
 
 /* Local Variables: */

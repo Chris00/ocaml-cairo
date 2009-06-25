@@ -1338,13 +1338,13 @@ external rotate : t -> angle:float -> unit = "caml_cairo_rotate"
       space. The rotation direction for positive angles is from the
       positive X axis toward the positive Y axis. *)
 
-external transform : t -> Matrix.t -> unit = "caml_cairo_transform"
+external transform : t -> Matrix.t -> unit = "caml_cairo_transform" "noalloc"
   (** [transform cr matrix] modifies the current transformation matrix
       (CTM) by applying [matrix] as an additional transformation.  The
       new transformation of user space takes place after any existing
       transformation. *)
 
-external set_matrix : t -> Matrix.t -> unit = "caml_cairo_set_matrix"
+external set_matrix : t -> Matrix.t -> unit = "caml_cairo_set_matrix" "noalloc"
   (** [set_matrix cr matrix] Modifies the current transformation
       matrix (CTM) by setting it equal to [matrix]. *)
 
@@ -1358,7 +1358,7 @@ external identity_matrix : t -> unit = "caml_cairo_identity_matrix"
       transform to one device-space unit. *)
 
 external user_to_device : t -> x:float -> y:float -> float * float
-  = "cairo_user_to_device"
+  = "caml_cairo_user_to_device"
   (** [user_to_device cr x y] transform a coordinate from user space
       to device space by multiplying the given point by the current
       transformation matrix (CTM). *)
