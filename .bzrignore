@@ -1,4 +1,13 @@
+# 							-*-conf-unix-*-
 *.cm[ioax]
 *.cmxa
 *.annot
 .depend.ocaml
+# Automake & configure
+autom4te.cache
+configure
+aclocal.m4
+config.log
+config.status
+Makefile.ocaml
+src/Makefile

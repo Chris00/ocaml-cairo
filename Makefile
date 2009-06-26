@@ -1,7 +1,8 @@
 ROOT=.
 include Makefile.conf
 
-.PHONY: all opt byte native install uninstall htdoc doc
+.PHONY: default all opt byte native install uninstall htdoc doc
+default: byte opt
 all: byte
 opt: native
 htdoc: doc

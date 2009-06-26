@@ -1,13 +1,17 @@
 ROOT=..
 include $(ROOT)/Makefile.conf
 
+CPPFLAGS = "@CPPFLAGS@"
+LIBS = "@LIBS@"
+
 DOC_DIR = $(ROOT)/doc/html/
 # Native code versions must be installed if and only if make opt was
 # called previously (i.e. the files exist):
 INSTALL_FILES = cairo.mli \
   $(wildcard )
 
-.PHONY: all opt byte native
+.PHONY: default all opt byte native
+default: @OCAMLBEST@
 all: byte
 opt: native
 byte: cairo.cma

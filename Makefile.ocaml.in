@@ -1,11 +1,9 @@
-OCAMLFIND  ?= ocamlfind
-PP	   ?=
-OCAMLC     ?= $(OCAMLFIND) ocamlc
-OCAMLOPT   ?= $(OCAMLFIND) ocamlopt
-OCAMLDEP   ?= $(OCAMLFIND) ocamldep
-OCAMLDOC   ?= $(OCAMLFIND) ocamldoc
-CAMLP4     ?= camlp4
-OCAMLTAGS  ?= ocamltags
+OCAMLFIND  = @OCAMLFIND@
+PP	   =
+OCAMLC     = @OCAMLC@
+OCAMLOPT   = @OCAMLOPT@
+OCAMLDEP   = @OCAMLDEP@
+OCAMLDOC   = @OCAMLDOC@
 
 OCAMLC_FLAGS = -dtypes
 OCAMLOPT_FLAGS = -dtypes -inline 3
