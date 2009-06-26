@@ -828,15 +828,14 @@ external set_tolerance : t -> float -> unit = "caml_cairo_set_tolerance"
 external get_tolerance : t -> float = "caml_cairo_get_tolerance"
     (** Gets the current tolerance value, as set by {!Cairo.set_tolerance}. *)
 
-(** Bounding box (aka extents). *)
-type bounding_box = {
-  x1: float;      (** left of the resulting extents *)
-  y1: float;      (** top of the resulting extents *)
-  x2: float;      (** right of the resulting extents  *)
-  y2: float;      (** bottom of the resulting extents  *)
-}
 
-type rectangle = { x:float; y:float; width:float; height:float }
+(** A data structure for holding a rectangle. *)
+type rectangle = {
+  x:float;       (** X coordinate of the left side of the rectangle *)
+  y:float;       (** Y coordinate of the the top side of the rectangle  *)
+  width:float;   (** width of the rectangle *)
+  height:float   (** height of the rectangle  *)
+}
 
 val clip : ?preserve:bool -> t -> unit
   (** Establishes a new clip region by intersecting the current clip
@@ -851,7 +850,7 @@ val clip : ?preserve:bool -> t -> unit
       means of temporarily restricting the clip region.
   *)
 
-external clip_extents : t -> bounding_box = "caml_cairo_clip_extents"
+external clip_extents : t -> rectangle = "caml_cairo_clip_extents"
   (** Computes a bounding box in user coordinates covering the area
       inside the current clip.  *)
 
@@ -885,7 +884,7 @@ val fill : ?preserve:bool -> t -> unit
 
       See also {!Cairo.set_fill_rule}. *)
 
-external fill_extents : t -> bounding_box = "caml_cairo_fill_extents"
+external fill_extents : t -> rectangle = "caml_cairo_fill_extents"
   (** Computes a bounding box in user coordinates covering the area
       that would be affected, (the "inked" area), by a [fill]
       operation given the current path and fill parameters.  If the
@@ -963,7 +962,7 @@ val stroke : ?perserve:bool -> t -> unit
       In no case will a cap style of [BUTT] cause anything to be drawn
       in the case of either degenerate segments or sub-paths. *)
 
-val stroke_extents : t -> bounding_box
+val stroke_extents : t -> rectangle
   (** Computes a bounding box in user coordinates covering the area
       that would be affected, (the "inked" area), by a {!Cairo.stroke}
       operation operation given the current path and stroke
@@ -1135,7 +1134,7 @@ sig
         adequate for serious text-using applications.  See
         {!Cairo.Glyph.path} for the "real" text path API in cairo. *)
 
-  external extents : t -> bounding_box = "caml_cairo_path_extents"
+  external extents : t -> rectangle = "caml_cairo_path_extents"
     (** Computes a bounding box in user-space coordinates covering the
         points on the current path. If the current path is empty,
         returns an empty rectangle [{ x1=0.; y1=0.; x2=0.; y2=0. }].

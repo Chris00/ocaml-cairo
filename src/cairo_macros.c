@@ -92,6 +92,8 @@
     CAMLreturn(value_of(r));                                    \
   }
 
+/* As recommended in the section "Multiple return values" of the cairo
+ * documentation, map the "extents" to the "rectangle" representation. */
 #define GET_EXTENTS(name)                                       \
   CAMLexport value caml_##name(value vcr)                       \
   {                                                             \
@@ -105,7 +107,7 @@
     bb = caml_alloc(4 * Double_wosize, Double_array_tag);       \
     Store_double_field(bb, 0, x1);                              \
     Store_double_field(bb, 1, y1);                              \
-    Store_double_field(bb, 2, x2);                              \
-    Store_double_field(bb, 3, y2);                              \
+    Store_double_field(bb, 2, x2 - x1);                         \
+    Store_double_field(bb, 3, y2 - y1);                         \
     CAMLreturn(bb);                                             \
   }

@@ -57,6 +57,7 @@ let () = Callback.register_exception "Cairo.Error" (Error INVALID_RESTORE)
 external status_to_string  : status -> string = "caml_cairo_status_to_string"
 
 type t
+type context = t
 type surface
 type surface_content = COLOR | ALPHA | COLOR_ALPHA
 type 'a pattern
@@ -169,7 +170,14 @@ external clip_preserve : t -> unit = "caml_cairo_clip_preserve"
 let clip ?(preserve=false) cr =
   if preserve then clip_preserve cr else clip_stub cr
 
-external clip_extents : t -> bounding_box = "caml_cairo_clip_extents"
+type rectangle = {
+  x:float;
+  y:float;
+  width:float;
+  height:float
+}
+
+external clip_extents : t -> rectangle = "caml_cairo_clip_extents"
 
 external clip_reset : t -> unit = "caml_cairo_reset_clip"
 
@@ -182,7 +190,7 @@ external fill_preserve : t -> unit = "caml_cairo_fill_preserve"
 let fill ?(preserve=false) cr =
   if preserve then fill_preserve cr else fill_stub cr
 
-external fill_extents : t -> bounding_box = "caml_cairo_fill_extents"
+external fill_extents : t -> rectangle = "caml_cairo_fill_extents"
 
 external in_fill : t -> x:float -> y:float -> bool = "caml_cairo_in_fill"
 
@@ -204,7 +212,7 @@ external stroke_preserve : t -> unit = "caml_cairo_stroke_preserve"
 let stroke ?(preserve=false) cr =
   if preserve then stroke_preserve cr else stroke_stub cr
 
-external stroke_extents : t -> bounding_box = "caml_cairo_stroke_extents"
+external stroke_extents : t -> rectangle = "caml_cairo_stroke_extents"
 
 external in_stroke : t -> x:float -> y:float -> bool = "caml_cairo_in_stroke"
 
@@ -233,7 +241,7 @@ struct
 
   external glyph : t -> glyph array -> unit = "caml_cairo_glyph_path"
   external text : t -> string -> unit = "caml_cairo_text_path"
-  external extents : t -> bounding_box = "caml_cairo_path_extents"
+  external extents : t -> rectangle = "caml_cairo_path_extents"
 
   external fold : path -> ('a -> path_data -> 'a) -> 'a -> 'a
     = "caml_cairo_path_fold"
