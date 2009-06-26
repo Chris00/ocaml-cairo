@@ -95,6 +95,9 @@ external set_source_rgba : t -> r:float -> g:float -> b:float -> a:float -> unit
 
 external set_source : t -> 'a pattern -> unit = "caml_cairo_set_source"
 
+external set_source_surface : t -> Surface.t -> x:float -> y:float -> unit
+  = "caml_cairo_set_source_surface"
+
 external get_source : t -> any_pattern = "caml_cairo_get_source"
 
 type antialias =
@@ -273,6 +276,19 @@ external rel_line_to : t -> x:float -> y:float -> unit
 external rel_move_to : t -> x:float -> y:float -> unit
   = "caml_cairo_rel_move_to"
 
+
+(* ---------------------------------------------------------------------- *)
+
+type matrix = { mutable xx: float; mutable yx: float;
+                mutable xy: float; mutable yy: float;
+                mutable x0: float; mutable y0: float }
+
+module Matrix =
+struct
+  type t = matrix
+
+
+end
 
 (* ---------------------------------------------------------------------- *)
 

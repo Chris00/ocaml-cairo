@@ -96,28 +96,16 @@ CAMLexport value caml_cairo_get_group_target(value vcr)
   CAMLreturn(vsurf);
 }
 
-CAMLexport value caml_cairo_set_source_rgb(
-  value vcr, value vr, value vg, value vb)
-{
-  CAMLparam4(vcr, vr, vg, vb);
-  cairo_t* cr = CAIRO_VAL(vcr);
-  cairo_set_source_rgb(cr, Double_val(vr), Double_val(vg), Double_val(vb));
-  caml_check_status(cr);
-  CAMLreturn(Val_unit);
-}
+DO3_FUNCTION(cairo_set_source_rgb, Double_val, Double_val, Double_val)
 
-CAMLexport value caml_cairo_set_source_rgba(
-  value vcr, value vr, value vg, value vb, value va)
-{
-  CAMLparam4(vcr, vr, vg, vb);
-  cairo_t* cr = CAIRO_VAL(vcr);
-  cairo_set_source_rgba(cr, Double_val(vr), Double_val(vg), Double_val(vb),
-                        Double_val(va));
-  caml_check_status(cr);
-  CAMLreturn(Val_unit);
-}
+DO4_FUNCTION(cairo_set_source_rgba, Double_val, Double_val,
+             Double_val, Double_val)
+
+DO3_FUNCTION(cairo_set_source_surface, SURFACE_VAL, Double_val, Double_val)
 
 DO1_FUNCTION(cairo_set_source, PATTERN_VAL)
+
+
 
 CAMLexport value caml_cairo_get_source(value vcr)
 {

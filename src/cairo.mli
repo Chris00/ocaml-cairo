@@ -561,7 +561,8 @@ external set_source : t -> 'a Pattern.t -> unit = "caml_cairo_set_source"
       The default source pattern is a solid pattern that is opaque
       black (that is, it is equivalent to [set_source_rgb cr 0. 0. 0.]). *)
 
-val set_source_surface : t -> Surface.t -> x:float -> y:float -> unit
+external set_source_surface : t -> Surface.t -> x:float -> y:float -> unit
+  = ""
   (** [set_source_surface cr surface x y] is a convenience for
       creating a pattern from surface and setting it as the source in [cr]
       with [set_source].
@@ -580,7 +581,7 @@ val set_source_surface : t -> Surface.t -> x:float -> y:float -> unit
       modified if desired (e.g. to create a repeating pattern with
       {!Cairo.Pattern.set_extend}). *)
 
-val get_source : t -> Pattern.any
+external get_source : t -> Pattern.any = "caml_cairo_get_source"
   (** [get_source cr] gets the current source pattern for [cr]. *)
 
 (** Specifies the type of antialiasing to do when rendering text or shapes. *)

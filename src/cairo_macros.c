@@ -30,6 +30,16 @@
     CAMLreturn(Val_unit);                                               \
   }
 
+#define DO3_FUNCTION(name, of_val1, of_val2, of_val3)                   \
+  CAMLexport value caml_##name(value vcr, value v1, value v2, value v3) \
+  {                                                                     \
+    CAMLparam4(vcr, v1, v2, v3);                                        \
+    cairo_t* cr = CAIRO_VAL(vcr);                                       \
+    name(cr, of_val1(v1), of_val2(v2), of_val3(v3));                    \
+    caml_check_status(cr);                                              \
+    CAMLreturn(Val_unit);                                               \
+  }
+
 #define DO4_FUNCTION(name, of_val1, of_val2, of_val3, of_val4)          \
   CAMLexport value caml_##name(value vcr, value v1, value v2, value v3, \
                                value v4)                                \
