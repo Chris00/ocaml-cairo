@@ -707,7 +707,7 @@ DO1_FUNCTION(cairo_rotate, Double_val)
 CAMLexport value caml_cairo_transform(value vcr, value vmat)
 {
   /* noalloc */
-  cairo_matrix_t matrix;
+  cairo_matrix_t *matrix;
   SET_MATRIX_VAL(matrix, vmat);
   cairo_transform(CAIRO_VAL(vcr), matrix);
   return(Val_unit);
@@ -716,7 +716,7 @@ CAMLexport value caml_cairo_transform(value vcr, value vmat)
 CAMLexport value caml_cairo_set_matrix(value vcr, value vmat)
 {
   /* noalloc */
-  cairo_matrix_t matrix;
+  cairo_matrix_t *matrix;
   SET_MATRIX_VAL(matrix, vmat);
   cairo_set_matrix(CAIRO_VAL(vcr), matrix);
   return(Val_unit);
@@ -757,6 +757,9 @@ COORD_TRANSFORM(cairo_device_to_user_distance)
 
 /* Text - Rendering text and glyphs
 ***********************************************************************/
+
+
+
 
 
 /* Local Variables: */

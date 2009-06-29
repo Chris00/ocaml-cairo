@@ -51,4 +51,4 @@ include .depend.ocaml
 
 .PHONY: clean
 clean::
-	$(RM) -f $(wildcard *~ *.annot *.cmi *.cmo *.cma *.cmx *.cmxa *.o *.a)
+	$(RM) $(wildcard *~ *.annot *.cmi *.cmo *.cma *.cmx *.cmxa *.o *.a)

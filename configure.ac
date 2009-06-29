@@ -13,7 +13,7 @@ CAIRO_INCS="/usr/include/cairo"
 AC_ARG_WITH(cairo,
     [  --with-cairo=INCLUDES (-I options to find cairo headers, default=/usr/include/cairo)],
     [CAIRO_INCS="$withval"], [])
-CPPFLAGS="$CPPFLAGS -I$CAIRO_INCS"
+CPPFLAGS="$CPPFLAGS -I $CAIRO_INCS"
 
 AC_CHECK_HEADERS([cairo.h], , [AC_MSG_ERROR(cairo.h missing)])
 

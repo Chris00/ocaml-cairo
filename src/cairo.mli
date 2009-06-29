@@ -82,7 +82,7 @@ external status_to_string  : status -> string = "caml_cairo_status_to_string"
     ]} *)
 type matrix = { mutable xx: float; mutable yx: float;
                 mutable xy: float; mutable yy: float;
-                mutable x0: float; mutable y0: float }
+                mutable x0: float; mutable y0: float; }
 
 (** This is used throughout cairo to convert between different
     coordinate spaces. *)
@@ -91,7 +91,7 @@ sig
   type t = matrix
 
   val init_identity : unit -> t
-    (** [init_identity()] returns an identity transformation. *)
+    (** [init_identity()] returns the identity transformation. *)
 
   val init_translate : tx:float -> ty:float -> t
     (** [init_translate tx ty] return a transformation that translates
@@ -562,7 +562,7 @@ external set_source : t -> 'a Pattern.t -> unit = "caml_cairo_set_source"
       black (that is, it is equivalent to [set_source_rgb cr 0. 0. 0.]). *)
 
 external set_source_surface : t -> Surface.t -> x:float -> y:float -> unit
-  = ""
+  = "caml_cairo_set_source_surface"
   (** [set_source_surface cr surface x y] is a convenience for
       creating a pattern from surface and setting it as the source in [cr]
       with [set_source].
@@ -934,7 +934,7 @@ val paint : ?alpha:float -> t -> unit
 
       @param alpha  alpha value, between 0 (transparent) and 1 (opaque).  *)
 
-val stroke : ?perserve:bool -> t -> unit
+val stroke : ?preserve:bool -> t -> unit
   (** A drawing operator that strokes the current path according to
       the current line width, line join, line cap, and dash settings.
       After [stroke], the current path will be cleared from the cairo
@@ -1159,7 +1159,8 @@ sig
         {!Cairo.move_to} will not contribute to the results of
         [Cairo.Path.extents]. *)
 
-  external fold : path -> ('a -> path_data -> 'a) -> 'a = "caml_cairo_path_fold"
+  external fold : path -> ('a -> path_data -> 'a) -> 'a -> 'a
+    = "caml_cairo_path_fold"
 
   val to_array : path -> path_data array
 

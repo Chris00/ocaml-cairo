@@ -33,6 +33,5 @@ sync-scm:
 
 .PHONY: clean
 clean:
-	$(RM) -f $(wildcard *~)
+	$(RM) $(wildcard *~) cairo.godiva
 	$(MAKE) -C src $@
-	$(RM) -f cairo.godiva

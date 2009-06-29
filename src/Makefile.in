@@ -1,8 +1,8 @@
 ROOT=..
 include $(ROOT)/Makefile.conf
 
-CPPFLAGS = "@CPPFLAGS@"
-LIBS = "@LIBS@"
+CPPFLAGS = @CPPFLAGS@
+LIBS = @LIBS@
 
 DOC_DIR = $(ROOT)/doc/html/
 # Native code versions must be installed if and only if make opt was
@@ -17,13 +17,11 @@ opt: native
 byte: cairo.cma
 native: cairo.cmxa
 
-cairo.cma: cairo.cmo dllcairo_stubs
-
-dllcairo_stubs: cairo.cmo cairo_stubs.o
-	ocamlmklib -o $@ $^ -lcairo
+cairo.cma cairo.cmxa: cairo.cmo cairo.cmx cairo_stubs.o
+	ocamlmklib -o cairo -oc cairo_stubs $(LIBS) $(CPPFLAGS) $^
 
 cairo_stubs.o: cairo_stubs.c
-	$(OCAMLC) -c $^ -I /usr/include/cairo/
+	$(OCAMLC) $(CPPFLAGS) -c $^
 
 
 .PHONY: doc
@@ -44,3 +42,7 @@ uninstall:
 	ocamlfind remove $(PACKAGE)
 
 include $(ROOT)/Makefile.ocaml
+
+.PHONY: clean
+clean::
+	$(RM) $(wildcard *.so)
