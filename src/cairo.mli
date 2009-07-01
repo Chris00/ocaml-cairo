@@ -394,39 +394,6 @@ end
 
 
 (* ---------------------------------------------------------------------- *)
-(** {2:Text Rendering text and glyphs} *)
-
-module Glyph :
-sig
-  (** The [Glyph.t} structure holds information about a single glyph
-      when drawing or measuring text.  A font is (in simple terms) a
-      collection of shapes used to draw text.  A glyph is one of these
-      shapes. There can be multiple glyphs for a single character
-      (alternates to be used in different contexts, for example), or a
-      glyph can be a ligature of multiple characters.  Cairo doesn't
-      expose any way of converting input text into glyphs, so in order
-      to use the Cairo interfaces that take arrays of glyphs, you must
-      directly access the appropriate underlying font system.
-
-      Note that the offsets given by x and y are not cumulative.  When
-      drawing or measuring text, each glyph is individually positioned
-      with respect to the overall origin. *)
-  type t = {
-    index: int; (** glyph index in the font. The exact interpretation
-                    of the glyph index depends on the font technology
-                    being used. *)
-    x: float; (** the offset in the X direction between the origin
-                  used for drawing or measuring the string and the
-                  origin of this glyph.  *)
-    y: float; (** the offset in the Y direction between the origin
-                  used for drawing or measuring the string and the
-                  origin of this glyph. *)
-  }
-
-end
-
-
-(* ---------------------------------------------------------------------- *)
 (** {2:cairo_t The cairo drawing context} *)
 
 type t
@@ -1009,6 +976,490 @@ external show_page : t -> unit = "caml_cairo_show_page"
 
 
 (* ---------------------------------------------------------------------- *)
+(** {2:Text Rendering text and glyphs} *)
+
+(** The subpixel order specifies the order of color elements within
+    each pixel on the display device when rendering with an
+    antialiasing mode of {!Cairo.ANTIALIAS_SUBPIXEL}. *)
+type subpixel_order =
+  | SUBPIXEL_ORDER_DEFAULT (** Use the default subpixel order for for
+                               the target device *)
+  | SUBPIXEL_ORDER_RGB (** Subpixel elements are arranged horizontally
+                           with red at the left *)
+  | SUBPIXEL_ORDER_BGR (** Subpixel elements are arranged horizontally
+                           with blue at the left *)
+  | SUBPIXEL_ORDER_VRGB (** Subpixel elements are arranged vertically
+                            with red at the top *)
+  | SUBPIXEL_ORDER_VBGR (** Subpixel elements are arranged vertically
+                            with blue at the top *)
+
+(** Specifies the type of hinting to do on font outlines.  Hinting is
+    the process of fitting outlines to the pixel grid in order to improve
+    the appearance of the result.  Since hinting outlines involves
+    distorting them, it also reduces the faithfulness to the original
+    outline shapes.  Not all of the outline hinting styles are supported by
+    all font backends. *)
+type hint_style =
+  | HINT_STYLE_DEFAULT (** Use the default hint style for font backend
+                           and target device *)
+  | HINT_STYLE_NONE (** Do not hint outlines *)
+  | HINT_STYLE_SLIGHT (** Hint outlines slightly to improve contrast
+                          while retaining good fidelity to the
+                          original shapes. *)
+  | HINT_STYLE_MEDIUM (** Hint outlines with medium strength giving a
+                          compromise between fidelity to the original
+                          shapes and contrast. *)
+  | HINT_STYLE_FULL (** Hint outlines to maximize contrast. *)
+
+(** Specifies whether to hint font metrics; hinting font metrics means
+    quantizing them so that they are integer values in device space.
+    Doing this improves the consistency of letter and line spacing,
+    however it also means that text will be laid out differently at
+    different zoom factors. *)
+type hint_metrics =
+  | HINT_METRICS_DEFAULT (** Hint metrics in the default manner for
+                             the font backend and target device. *)
+  | HINT_METRICS_OFF (** Do not hint font metrics. *)
+  | HINT_METRICS_ON (** Hint font metrics. *)
+
+
+(** The font options specify how fonts should be rendered.  Most of the
+    time the font options implied by a surface are just right and do not
+    need any changes, but for pixel-based targets tweaking font options
+    may result in superior output on a particular display.  *)
+module Font_options :
+sig
+  type t
+    (** An opaque type holding all options that are used when rendering
+        fonts.
+
+        Individual features of a [Cairo.Font_options.t] can be set or
+        accessed using functions below, like
+        {!Cairo.Font_options.set_antialias} and
+        {!Cairo.Font_options.get_antialias}.
+
+        New features may be added to a [font_options] in the future. For
+        this reason, {!Cairo.font_options_copy} and
+        {!Cairo.font_options_merge} should be used to copy or merge of
+        [Cairo.font_options] values. *)
+
+  val set : context -> t -> unit
+    (** [set_font_options cr opt] sets a set of custom font rendering
+        options for [cr].  Rendering options are derived by merging
+        these options with the options derived from underlying
+        surface; if the value in options has a default value (like
+        {!Cairo.ANTIALIAS_DEFAULT}), then the value from the surface is
+        used.  *)
+
+  val get : context -> t
+    (** Retrieves font rendering options set via
+        {!Cairo.Text.set_font_options}.  Note that the returned
+        options do not include any options derived from the underlying
+        surface; they are literally the options passed to
+        {!Cairo.Text.set_font_options}. *)
+
+  val create : unit -> t
+    (** Allocates a new font options object with all options initialized
+        to default values.  *)
+
+  val make : antialias -> subpixel_order -> hint_style -> hint_metrics -> t
+    (** Convenience function to create a, options object with properties set. *)
+
+  val copy : t -> t
+    (** [copy original] allocates a new font options object copying
+        the option values from [original]. *)
+
+  val merge : t -> t -> unit
+    (** [merge options other] merges non-default options from other
+        into options, replacing existing values.  This operation can
+        be thought of as somewhat similar to compositing other onto
+        options with the operation of {!Cairo.Operator.OVER}. *)
+
+  val set_antialias : t -> antialias -> unit
+    (** Sets the antialiasing mode for the font options object. This
+        specifies the type of antialiasing to do when rendering text. *)
+
+  val get_antialias : t -> antialias
+    (** Gets the antialiasing mode for the font options object. *)
+
+  val set_subpixel_order : t -> subpixel_order -> unit
+    (** Sets the subpixel order for the font options object.  The
+        subpixel order specifies the order of color elements within each
+        pixel on the display device when rendering with an antialiasing
+        mode of {!Cairo.ANTIALIAS_SUBPIXEL}.  See the documentation for
+        {!Cairo.subpixel_order} for full details. *)
+
+  val get_subpixel_order : t -> subpixel_order
+    (** Gets the subpixel order for the font options object. See the
+        documentation for {!Cairo.subpixel_order} for full details. *)
+
+  val set_hint_style : t -> hint_style -> unit
+    (** Sets the hint style for font outlines for the font options
+        object. This controls whether to fit font outlines to the
+        pixel grid, and if so, whether to optimize for fidelity or
+        contrast.  See the documentation for {!Cairo.hint_style} for
+        full details. *)
+
+  val get_hint_style : t -> hint_style
+    (** Gets the hint style for font outlines for the font options
+        object. See the documentation for {!Cairo.hint_style} for full
+        details. *)
+
+  val set_hint_metrics : t -> hint_metrics -> unit
+    (** Sets the metrics hinting mode for the font options
+        object. This controls whether metrics are quantized to integer
+        values in device units. See the documentation for
+        {!Cairo.hint_metrics} for full details. *)
+
+  val get_hint_metrics : t -> hint_metrics
+    (** Gets the metrics hinting mode for the font options object. See
+        the documentation for {!Cairo.hint_metrics} for full details. *)
+end
+
+(** Specifies variants of a font face based on their slant. *)
+type slant = Upright | Italic | Oblique
+
+(** Specifies variants of a font face based on their weight. *)
+type weight = Normal | Bold
+
+(** {!Cairo.font_type} is used to describe the type of a given font
+    face or scaled font.  The font types are also known as "font
+    backends" within cairo.
+
+    The type of a font face is determined by the function used to
+    create it, which will generally be of the form
+    {!Cairo.*.font_face_create}.  The font face type can be queried
+    with {!Cairo.Font_face.get_type}
+
+    The various {!Cairo.font_face} functions can be used with a font
+    face of any type.
+
+    The type of a scaled font is determined by the type of the font
+    face passed to {!Cairo.scaled_font_create}.  The scaled font type
+    can be queried with {!Cairo.scaled_font_get_type}.
+
+    The various cairo_scaled_font_t functions can be used with scaled
+    fonts of any type, but some font backends also provide
+    type-specific functions that must only be called with a scaled
+    font of the appropriate type. These functions have names that
+    begin with cairo_type_scaled_font() such as
+    cairo_ft_scaled_font_lock_face().
+
+    FIXME: The behavior of calling a type-specific function with a scaled
+    font of the wrong type is undefined. *)
+type font_type =
+  | FONT_TYPE_TOY (** The font was created using cairo's toy font api *)
+  | FONT_TYPE_FT (** The font is of type FreeType *)
+  | FONT_TYPE_WIN32 (** The font is of type Win32 *)
+  | FONT_TYPE_QUARTZ (** The font is of type Quartz *)
+  | FONT_TYPE_USER (** The font was create using cairo's user font api *)
+
+module Font_face :
+sig
+  type 'a t
+    (** A {!Cairo.Font_face.t} specifies all aspects of a font other
+        than the size or font matrix (a font matrix is used to distort
+        a font by sheering it or scaling it unequally in the two
+        directions).  A font face can be set on a {!Cairo.context} by using
+        {!Cairo.set_font_face}; the size and font matrix are set with
+        {!Cairo.set_font_size} and {!Cairo.set_font_matrix}.
+
+        Font faces are created using font-backend-specific constructors,
+        or implicitly using the toy text API by way of {!Cairo.select_font_face}.
+
+        There are various types of font faces, depending on the font
+        backend they use.  The type of a font face can be queried using
+        {!Cairo.font_face_get_type}.  *)
+
+  val get_type : 'a t -> font_type
+  (** This function returns the type of the backend used to create a
+      font face. See {!Cairo.font_type} for available types. *)
+
+  val create : ?family:string -> slant -> weight -> [`Toy] t
+    (** [create family slant weight] creates a font face from a
+        triplet of family, slant, and weight.  These font faces are
+        used in implementation of the the cairo "toy" font API.
+
+        If family is not given or is the zero-length string "", the
+        platform-specific default family is assumed.  The default
+        family then can be queried using {!Cairo.Font_face.get_family}.
+
+        The {!Cairo.select_font_face} function uses this to create font
+        faces. See that function for limitations of toy font faces. *)
+
+  val get_family : [`Toy] t -> string
+    (** Gets the familly name of a toy font. *)
+
+  val get_slant : [`Toy] t -> slant
+    (** Gets the slant a toy font. *)
+
+  val get_weight : [`Toy] t -> weight
+    (** Gets the weight a toy font. *)
+end
+
+(** {!Cairo.Scaled_font.t} represents a realization of a font face at
+    a particular size and transformation and a certain set of font
+    options.  *)
+module Scaled_font :
+sig
+  type t
+    (** A [Cairo.Scaled_font.t] is a font scaled to a particular size
+        and device resolution.  It is most useful for low-level font
+        usage where a library or application wants to cache a
+        reference to a scaled font to speed up the computation of metrics.
+
+        There are various types of scaled fonts, depending on the font
+        backend they use.  The type of a scaled font can be queried
+        using {!Cairo.Scaled_font.get_type}.  *)
+
+  val create : font_face -> Matrix.t -> Matrix.t -> Font_options.t -> t
+    (** [create font_face font_matrix ctm options] creates a
+        {!Cairo.Scaled_font.t} object from a font face and matrices that
+        describe the size of the font and the environment in which it
+        will be used. *)
+
+(* FIXME: TBD *)
+end
+
+
+(** {3 Low-level text API} *)
+
+(** This is Cairo low-level text API.  The low-level API relies on the
+    user to convert text to a set of glyph indexes and positions. This is
+    a very hard problem and is best handled by external libraries, like
+    the pangocairo that is part of the Pango text layout and rendering
+    library.  Pango is available from http://www.pango.org/  *)
+module Glyph :
+sig
+  (** The [Glyph.t] structure holds information about a single glyph
+      when drawing or measuring text.  A font is (in simple terms) a
+      collection of shapes used to draw text.  A glyph is one of these
+      shapes. There can be multiple glyphs for a single character
+      (alternates to be used in different contexts, for example), or a
+      glyph can be a ligature of multiple characters.  Cairo doesn't
+      expose any way of converting input text into glyphs, so in order
+      to use the Cairo interfaces that take arrays of glyphs, you must
+      directly access the appropriate underlying font system.
+
+      Note that the offsets given by x and y are not cumulative.  When
+      drawing or measuring text, each glyph is individually positioned
+      with respect to the overall origin. *)
+  type t = {
+    index: int; (** glyph index in the font. The exact interpretation
+                    of the glyph index depends on the font technology
+                    being used. *)
+    x: float; (** the offset in the X direction between the origin
+                  used for drawing or measuring the string and the
+                  origin of this glyph.  *)
+    y: float; (** the offset in the Y direction between the origin
+                  used for drawing or measuring the string and the
+                  origin of this glyph. *)
+  }
+
+  (** The [cluster] record holds information about a single {i text
+      cluster}.  A text cluster is a minimal mapping of some glyphs
+      corresponding to some UTF-8 text.
+
+      For a cluster to be valid, both [num_bytes] and [num_glyphs]
+      should be non-negative, and at least one should be non-zero.
+      Note that clusters with zero glyphs are not as well supported as
+      normal clusters.  For example, PDF rendering applications
+      typically ignore those clusters when PDF text is being selected.
+
+      See {!Cairo.Glyphs.show_text} for how clusters are used in
+      advanced text operations. *)
+  type cluster = {
+    num_bytes : int; (** the number of bytes of UTF-8 text covered by cluster *)
+    num_glyphs : int; (** the number of glyphs covered by cluster *)
+  }
+
+
+  val extents : context -> t array -> text_extents
+    (** Gets the extents for an array of glyphs. The extents describe a
+        user-space rectangle that encloses the "inked" portion of the
+        glyphs, (as they would be drawn by {!Cairo.show_glyphs}).
+        Additionally, the [x_advance] and [y_advance] values indicate
+        the amount by which the current point would be advanced by
+        {!Cairo.show_glyphs}.
+
+        Note that whitespace glyphs do not contribute to the size of the
+        rectangle (extents.width and extents.height). *)
+
+
+  val show : context -> t array -> unit
+    (** A drawing operator that generates the shape from an array of
+        glyphs, rendered according to the current font face, font size (font
+        matrix), and font options. *)
+
+  val show_text : context -> string -> t array ->
+    text_cluster -> text_cluster_flags -> unit
+    (** [show_text cr utf8 glyphs clusters cluster_flags]: This
+        operation has rendering effects similar to
+        {!Cairo.Glyphs.show} but, if the target surface supports it,
+        uses the provided text and cluster mapping to embed the text
+        for the glyphs shown in the output.  If the target does not
+        support the extended attributes, this function acts like the
+        basic {!Cairo.Glyphs.show} as if it had been passed [glyphs].
+
+        The mapping between [utf8] and [glyphs] is provided by an
+        array of [clusters].  Each cluster covers a number of text bytes
+        and glyphs, and neighboring clusters cover neighboring areas
+        of [utf8] and [glyphs].  The clusters should collectively cover
+        [utf8] and [glyphs] in entirety.
+
+        The first cluster always covers bytes from the beginning of
+        [utf8].  If [cluster_flags] do not have the
+        CAIRO_TEXT_CLUSTER_FLAG_BACKWARD set, the first cluster also
+        covers the beginning of glyphs, otherwise it covers the end of
+        the glyphs array and following clusters move backward.
+
+        See {!Cairo.text_cluster} for constraints on valid clusters. *)
+
+
+(** As it is, this module is pretty much unusable.  This will be
+    corrected in the future. *)
+
+(* FIXME:
+   cairo_text_cluster_flags_t
+
+*)
+
+end
+
+
+(** {3 "Toy" text API}
+
+    This is cairo's toy text API.  The toy API takes UTF-8 encoded text
+    and is limited in its functionality to rendering simple
+    left-to-right text with no advanced features.  That means for
+    example that most complex scripts like Hebrew, Arabic, and Indic
+    scripts are out of question.  No kerning or correct positioning of
+    diacritical marks either.  The font selection is pretty limited
+    too and doesn't handle the case that the selected font does not
+    cover the characters in the text.  This set of functions are
+    really that, a toy text API, for testing and demonstration
+    purposes. Any serious application should avoid them.
+
+    See the {!Glyph} module for the low-level text API.   *)
+
+val select_font_face : t -> ?slant:slant -> ?weight:weight -> string -> unit
+  (** [select_font_face cr family ?slant ?weight] selects a family
+      and style of font from a simplified description as a family
+      name, slant and weight. Cairo provides no operation to list
+      available family names on the system (this is a "toy",
+      remember), but the standard CSS2 generic family names,
+      ("serif", "sans-serif", "cursive", "fantasy", "monospace"),
+      are likely to work as expected.
+
+      @param slant default [Upright].
+      @param weight default [Normal].
+
+      For "real" font selection, see the font-backend-specific
+      [font_face_create] functions for the font backend you are
+      using.  (For example, if you are using the freetype-based
+      cairo-ft font backend, see
+      {!Cairo.Ft.font_face_create_for_ft_face} or
+      {!Cairo.Ft.font_face_create_for_pattern}.)  The resulting font
+      face could then be used with {!Cairo.scaled_font_create} and
+      {!Cairo.set_scaled_font}.
+
+      Similarly, when using the "real" font support, you can call
+      directly into the underlying font system, (such as fontconfig
+      or freetype), for operations such as listing available fonts,
+      etc.
+
+      It is expected that most applications will need to use a more
+      comprehensive font handling and text layout library, (for
+      example, pango), in conjunction with cairo.
+
+      If text is drawn without a call to {!Cairo.Text.select_font_face},
+      (nor {!Cairo.set_font_face} nor {!Cairo.set_scaled_font}), the
+      default family is platform-specific, but is essentially
+      "sans-serif".  Default slant is CAIRO_FONT_SLANT_NORMAL, and
+      default weight is CAIRO_FONT_WEIGHT_NORMAL.  *)
+
+val set_font_size : t -> float -> unit
+  (** [set_font_size cr size] sets the current font matrix to a
+      scale by a factor of size, replacing any font matrix previously
+      set with [set_font_size] or {!Cairo.Text.set_font_matrix}.  This
+      results in a font size of size user space units.  (More precisely,
+      this matrix will result in the font's em-square being a size by
+      size square in user space.)
+
+      If text is drawn without a call to [set_font_size], (nor
+      {!Cairo.Text.set_font_matrix} nor {!Cairo.Text.set_scaled_font}),
+      the default font size is 10.0. *)
+
+val set_font_matrix : t -> Matrix.t -> unit
+  (** [set_font_matrix cr matrix] sets the current font matrix to
+      [matrix].  The font matrix gives a transformation from the
+      design space of the font (in this space, the em-square is 1
+      unit by 1 unit) to user space.  Normally, a simple scale is
+      used (see {!Cairo.Text.set_font_size}), but a more complex font
+      matrix can be used to shear the font or stretch it unequally
+      along the two axes.  *)
+
+val get_font_matrix : t -> Matrix.t
+  (** Returns the current font matrix.  See {!Cairo.Text.set_font_matrix}. *)
+
+
+val set_font_face : t -> font_face -> unit
+  (** Replaces the current {!Cairo.font_face} object in the {!Cairo.t}
+      with font_face. *)
+
+val get_font_face : t -> 'a font_face
+  (** Gets the current font face for a {!Cairo.t}. *)
+
+val set_scaled_font : t -> Scaled_font.t -> unit
+  (** Replaces the current font face, font matrix, and font options in
+      the {Cairo.t} with those of the {!Cairo.Scaled_font.t}.  Except
+      for some translation, the current CTM of the {!Cairo.t} should be
+      the same as that of the {!Cairo.Scaled_font.t}, which can be
+      accessed using {!Cairo.Scaled_font.get_ctm}. *)
+
+val get_scaled_font : t -> Scaled_font.t
+  (** Gets the current scaled font for a cairo_t. *)
+
+val show_text : t -> string -> unit
+  (** A drawing operator that generates the shape from a string of
+      UTF-8 characters, rendered according to the current [font_face],
+      [font_size] (font_matrix), and [font_options].
+
+      This function first computes a set of glyphs for the string of
+      text. The first glyph is placed so that its origin is at the
+      current point. The origin of each subsequent glyph is offset
+      from that of the previous glyph by the advance values of the
+      previous glyph.
+
+      After this call the current point is moved to the origin of
+      where the next glyph would be placed in this same progression.
+      That is, the current point will be at the origin of the final
+      glyph offset by its advance values. This allows for easy display
+      of a single logical string with multiple calls to [show_text].  *)
+
+val font_extents : t -> font_extents
+  (** Gets the font extents for the currently selected font. *)
+
+val text_extents : t -> string -> text_extents
+  (** Gets the extents for a string of text. The extents describe a
+      user-space rectangle that encloses the "inked" portion of the text,
+      (as it would be drawn by {!Cairo.show_text}).  Additionally, the
+      [x_advance] and [y_advance] values indicate the amount by which the
+      current point would be advanced by {!Cairo.show_text}.
+
+      Note that whitespace characters do not directly contribute to
+      the size of the rectangle ([extents.width] and
+      [extents.height]).  They do contribute indirectly by changing
+      the position of non-whitespace characters.  In particular,
+      trailing whitespace characters are likely to not affect the size
+      of the rectangle, though they will affect the [x_advance] and
+      [y_advance] values. *)
+
+
+
+
+
+(* ---------------------------------------------------------------------- *)
 (** {2:Paths Creating paths and manipulating path data}
 
     Paths are the most basic drawing tools and are primarily used to
@@ -1386,7 +1837,8 @@ external device_to_user_distance : t -> x:float -> y:float -> float * float
 
 
 (* ---------------------------------------------------------------------- *)
-(** {2:Text Rendering text and glyphs} *)
+
+
 
 (* set_user_data *)
 (* get_user_data *)

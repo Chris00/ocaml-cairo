@@ -759,6 +759,17 @@ COORD_TRANSFORM(cairo_device_to_user_distance)
 ***********************************************************************/
 
 
+CAMLexport value caml_cairo_font_options_create(value unit)
+{
+  CAMLparam1(unit);
+  CAMLlocal1(vfo);
+  cairo_font_options_t* fo = cairo_font_options_create();
+  caml_raise_Error(cairo_font_options_status(fo));
+  vfo = ALLOC(font_options);
+  FONT_OPTIONS_VAL(vfo) = fo;
+  CAMLreturn(vfo);
+}
+
 
 
 

@@ -15,15 +15,15 @@ static long caml_cairo_hash_pointer(value v)
 }
 
 #define DEFINE_CUSTOM_OPERATIONS(name, destroy, val)                    \
-  static void caml_##name##_finalize(value v)                           \
+  static void caml_cairo_##name##_finalize(value v)                     \
   {                                                                     \
     /* [cairo_*_reference] not used, the first [destroy] frees it. */   \
     destroy(val(v));                                                    \
   }                                                                     \
                                                                         \
   static struct custom_operations caml_##name##_ops = {                 \
-    #name "_t", /* identifier for serialization and deserialization */ \
-    &caml_##name##_finalize,                                            \
+    #name "_t", /* identifier for serialization and deserialization */  \
+    &caml_cairo_##name##_finalize,                                      \
     &caml_cairo_compare_pointers,                                       \
     &caml_cairo_hash_pointer,                                           \
     custom_serialize_default,                                           \
@@ -160,8 +160,8 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
     default:                                            \
       caml_failwith("C bindings: SWITCH_PATH_DATA");    \
     }
-                                                      
-  
+
+
 
 
 /* Type cairo_glyph_t
@@ -194,3 +194,43 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
   Store_double_field(v, 3, m->yy);              \
   Store_double_field(v, 4, m->x0);              \
   Store_double_field(v, 5, m->y0)
+
+
+/* Text
+***********************************************************************/
+
+#define FONT_OPTIONS_VAL(v) (* (cairo_font_options_t**) Data_custom_val(v))
+
+static void caml_cairo_font_options_finalize(value v)
+{
+  cairo_font_options_destroy(FONT_OPTIONS_VAL(v));
+}
+
+static void caml_cairo_font_options_compare(value v1, value v2)
+{
+  cairo_font_options_t *fo1 = FONT_OPTIONS_VAL(v1);
+  cairo_font_options_t *fo2 = FONT_OPTIONS_VAL(v2);
+  /* fo1 == fo2 => cairo_font_options_equal(fo1, fo2) ; thus this
+     remains a total order. */
+  if (cairo_font_options_equal(fo1, fo2)) return(0);
+  else if (fo1 < fo2) return(-1);
+  else return(1)
+}
+
+static long caml_cairo_font_options_hash(value v)
+{
+  return(cairo_font_options_hash(FONT_OPTIONS_VAL(v)));
+}
+
+static struct custom_operations caml_font_options_ops = {
+  "font_options_t", /* identifier for serialization and deserialization */
+  &caml_cairo_font_options_finalize,
+  &caml_cairo_font_options_compare,
+  &caml_cairo_font_options_hash,
+  custom_serialize_default,
+  custom_deserialize_default };
+
+
+#define FONT_FACE_VAL(v) (* (cairo_font_face_t**) Data_custom_val(v))
+
+DEFINE_CUSTOM_OPERATIONS(font_face, cairo_font_face_destroy, FONT_FACE_VAL)
