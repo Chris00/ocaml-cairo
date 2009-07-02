@@ -11,3 +11,4 @@ config.log
 config.status
 Makefile.ocaml
 src/Makefile
+doc/html

@@ -21,10 +21,10 @@
 
     - Drawing:
     {!cairo_t}: The cairo drawing context
-    {!Paths}: Creating paths and manipulating path data
-    {!Patterns}: Sources for drawing.
-    {!Transformations} Manipulating the current transformation matrix.
-    {!Text}: Rendering text and glyphs.
+    {!paths}: Creating paths and manipulating path data
+    {!patterns}: Sources for drawing.
+    {!transformations} Manipulating the current transformation matrix.
+    {!text}: Rendering text and glyphs.
 
     - Fonts:
 
@@ -71,7 +71,7 @@ external status_to_string  : status -> string = "caml_cairo_status_to_string"
     (** Provides a human-readable description of a status. *)
 
 (* ---------------------------------------------------------------------- *)
-(** {2:Matrix Generic matrix operations} *)
+(** {2:matrix  Generic matrix operations} *)
 
 (** Holds an affine transformation, such as a scale, rotation, shear,
     or a combination of those. The transformation of a point (x, y) is
@@ -169,7 +169,7 @@ end
 
 (* ---------------------------------------------------------------------- *)
 
-(** {2:Patterns Sources for drawing} *)
+(** {2:patterns  Sources for drawing} *)
 module Pattern :
 sig
   type 'a t
@@ -180,7 +180,7 @@ sig
 
         A cairo pattern is created by using one of the many functions,
         of the form [Cairo.Pattern.create_type] or implicitly through
-        {!Cairo.set_source_*} functions.  *)
+        [Cairo.set_source_*] functions.  *)
 
   type any = [`Solid | `Surface | `Gradient | `Linear | `Radial] t
       (** {!Cairo.Group.pop} and {!Cairo.get_source} retrieve patterns
@@ -246,7 +246,7 @@ sig
 
   external create_rgba : r:float -> g:float -> b:float -> a:float -> [`Solid] t
     = "caml_cairo_pattern_create_rgba"
-    (** Creates a new {!Cairo.pattern.t} corresponding to a
+    (** Creates a new {!Cairo.Pattern.t} corresponding to a
         translucent color.  The color components are floating point
         numbers in the range 0 to 1.  If the values passed in are
         outside that range, they will be clamped. *)
@@ -433,7 +433,7 @@ sig
   val push : ?content:Surface.content -> t -> unit
     (** Temporarily redirects drawing to an intermediate surface known
         as a group.  The redirection lasts until the group is completed
-        by a call to {!Cairo.pop_group} or {!Cairo.pop_group_to_source}.
+        by a call to {!Cairo.Group.pop} or {!Cairo.Group.pop_to_source}.
         These calls provide the result of any drawing to the group as a
         pattern, (either as an explicit object, or set as the source
         pattern).
@@ -570,7 +570,7 @@ external set_antialias : t -> antialias -> unit = "caml_cairo_set_antialias"
         backend supports [ANTIALIAS_SUBPIXEL] when drawing shapes.
 
         Note that this option does not affect text rendering, instead
-        see {!Cairo.Font.set_antialias}. *)
+        see {!Cairo.Font_options.set_antialias}. *)
 
 external get_antialias : t -> antialias = "caml_cairo_get_antialias"
   (** Gets the current shape antialiasing mode, as set by
@@ -860,13 +860,13 @@ external fill_extents : t -> rectangle = "caml_cairo_fill_extents"
       y1=0.; x2=0.; y2=0. }].  Surface dimensions and clipping are not
       taken into account.
 
-      Contrast with {!Cairo.path_extents}, which is similar, but
+      Contrast with {!Cairo.Path.extents}, which is similar, but
       returns non-zero extents for some paths with no inked area,
       (such as a simple line segment).
 
       Note that [fill_extents] must necessarily do more work to
       compute the precise inked areas in light of the fill rule, so
-      {!Cairo.path_extents} may be more desirable for sake of
+      {!Cairo.Path.extents} may be more desirable for sake of
       performance if the non-inked path extents are desired.
 
       See {!Cairo.fill} and {!Cairo.set_fill_rule}. *)
@@ -920,7 +920,7 @@ val stroke : ?preserve:bool -> t -> unit
       direction of the underlying path.
 
       2. A sub-path created by {!Cairo.move_to} followed by either a
-      {!Cairo.close_path} or one or more calls to {!Cairo.line_to} to
+      {!Cairo.Path.close} or one or more calls to {!Cairo.line_to} to
       the same coordinate as the {!Cairo.move_to}.  If the cap style
       is [ROUND] then these sub-paths will be drawn as circular dots.
       Note that in the case of [SQUARE] line cap, a degenerate
@@ -940,12 +940,12 @@ val stroke_extents : t -> rectangle
 
       Note that if the line width is set to exactly zero, then
       [stroke_extents] will return an empty rectangle.  Contrast with
-      {!Cairo.path_extents} which can be used to compute the non-empty
+      {!Cairo.Path.extents} which can be used to compute the non-empty
       bounds as the line width approaches zero.
 
       Note that [stroke_extents] must necessarily do more work to
       compute the precise inked areas in light of the stroke
-      parameters, so {!Cairo.path_extents} may be more desirable for
+      parameters, so {!Cairo.Path.extents} may be more desirable for
       sake of performance if non-inked path extents are desired.
 
       See {!Cairo.stroke}, {!Cairo.set_line_width}, {!Cairo.set_line_join},
@@ -976,11 +976,11 @@ external show_page : t -> unit = "caml_cairo_show_page"
 
 
 (* ---------------------------------------------------------------------- *)
-(** {2:Text Rendering text and glyphs} *)
+(** {2:text  Rendering text and glyphs} *)
 
 (** The subpixel order specifies the order of color elements within
     each pixel on the display device when rendering with an
-    antialiasing mode of {!Cairo.ANTIALIAS_SUBPIXEL}. *)
+    antialiasing mode of [ANTIALIAS_SUBPIXEL] (see {!Cairo.antialias}). *)
 type subpixel_order =
   | SUBPIXEL_ORDER_DEFAULT (** Use the default subpixel order for for
                                the target device *)
@@ -1039,24 +1039,23 @@ sig
         {!Cairo.Font_options.get_antialias}.
 
         New features may be added to a [font_options] in the future. For
-        this reason, {!Cairo.font_options_copy} and
-        {!Cairo.font_options_merge} should be used to copy or merge of
-        [Cairo.font_options] values. *)
+        this reason, {!Cairo.Font_options.copy} and
+        {!Cairo.Font_options.merge} should be used to copy or merge of
+        [Cairo.Font_options.t] values. *)
 
   val set : context -> t -> unit
     (** [set_font_options cr opt] sets a set of custom font rendering
         options for [cr].  Rendering options are derived by merging
         these options with the options derived from underlying
         surface; if the value in options has a default value (like
-        {!Cairo.ANTIALIAS_DEFAULT}), then the value from the surface is
-        used.  *)
+        [ANTIALIAS_DEFAULT]), then the value from the surface is used.  *)
 
   val get : context -> t
     (** Retrieves font rendering options set via
-        {!Cairo.Text.set_font_options}.  Note that the returned
-        options do not include any options derived from the underlying
-        surface; they are literally the options passed to
-        {!Cairo.Text.set_font_options}. *)
+        {!Cairo.Font_options.set}.  Note that the returned options do
+        not include any options derived from the underlying surface;
+        they are literally the options passed to
+        {!Cairo.Font_options.set}. *)
 
   val create : unit -> t
     (** Allocates a new font options object with all options initialized
@@ -1076,7 +1075,7 @@ sig
         options with the operation of {!Cairo.Operator.OVER}. *)
 
   val set_antialias : t -> antialias -> unit
-    (** Sets the antialiasing mode for the font options object. This
+    (** Sets the antialiasing mode for the font options object.  This
         specifies the type of antialiasing to do when rendering text. *)
 
   val get_antialias : t -> antialias
@@ -1084,9 +1083,10 @@ sig
 
   val set_subpixel_order : t -> subpixel_order -> unit
     (** Sets the subpixel order for the font options object.  The
-        subpixel order specifies the order of color elements within each
-        pixel on the display device when rendering with an antialiasing
-        mode of {!Cairo.ANTIALIAS_SUBPIXEL}.  See the documentation for
+        subpixel order specifies the order of color elements within
+        each pixel on the display device when rendering with an
+        antialiasing mode of [ANTIALIAS_SUBPIXEL] (see
+        {!Cairo.antialias}).  See the documentation for
         {!Cairo.subpixel_order} for full details. *)
 
   val get_subpixel_order : t -> subpixel_order
@@ -1122,13 +1122,42 @@ type slant = Upright | Italic | Oblique
 (** Specifies variants of a font face based on their weight. *)
 type weight = Normal | Bold
 
+(** The [Cairo.text_extents] structure stores the extents of a single
+    glyph or a string of glyphs in user-space coordinates.  Because text
+    extents are in user-space coordinates, they are mostly, but not
+    entirely, independent of the current transformation matrix.  If you
+    call {!Cairo.scale}[cr 2.0 2.0], text will be drawn twice as big, but
+    the reported text extents will not be doubled.  They will change
+    slightly due to hinting (so you can't assume that metrics are
+    independent of the transformation matrix), but otherwise will remain
+    unchanged. *)
+type text_extents = {
+  x_bearing : float;
+  (** The horizontal distance from the origin to the leftmost part of
+      the glyphs as drawn. Positive if the glyphs
+      lie entirely to the right of the origin. *)
+  y_bearing : float;
+  (** The vertical distance from the origin to the topmost part of the
+      glyphs as drawn. Positive only if the glyphs lie completely below
+      the origin; will usually be negative.  *)
+  width : float; (** width of the glyphs as drawn *)
+  height : float; (** height of the glyphs as drawn *)
+  x_advance : float;
+  (** Distance to advance in the X direction after drawing these glyphs. *)
+  y_advance : float;
+  (** Distance to advance in the Y direction after drawing these
+      glyphs. Will typically be zero except for vertical text layout
+      as found in East-Asian languages. *)
+}
+
+
 (** {!Cairo.font_type} is used to describe the type of a given font
     face or scaled font.  The font types are also known as "font
     backends" within cairo.
 
     The type of a font face is determined by the function used to
     create it, which will generally be of the form
-    {!Cairo.*.font_face_create}.  The font face type can be queried
+    [Cairo.*.font_face_create].  The font face type can be queried
     with {!Cairo.Font_face.get_type}
 
     The various {!Cairo.font_face} functions can be used with a font
@@ -1169,7 +1198,7 @@ sig
 
         There are various types of font faces, depending on the font
         backend they use.  The type of a font face can be queried using
-        {!Cairo.font_face_get_type}.  *)
+        {!Cairo.Font_face.get_type}.  *)
 
   val get_type : 'a t -> font_type
   (** This function returns the type of the backend used to create a
@@ -1195,6 +1224,15 @@ sig
 
   val get_weight : [`Toy] t -> weight
     (** Gets the weight a toy font. *)
+
+
+  val set : context -> _ t -> unit
+    (** Replaces the current {!Cairo.font_face} object in the {!Cairo.t}
+        with font_face. *)
+
+  val get : context -> 'a t
+    (** Gets the current font face for a {!Cairo.t}. *)
+
 end
 
 (** {!Cairo.Scaled_font.t} represents a realization of a font face at
@@ -1212,11 +1250,63 @@ sig
         backend they use.  The type of a scaled font can be queried
         using {!Cairo.Scaled_font.get_type}.  *)
 
-  val create : font_face -> Matrix.t -> Matrix.t -> Font_options.t -> t
+  (** The [Cairo.Scaled_font.font_extents] structure stores metric
+      information for a font. Values are given in the current user-space
+      coordinate system.
+
+      Because font metrics are in user-space coordinates, they are
+      mostly, but not entirely, independent of the current
+      transformation matrix.  If you call {!Cairo.scale}[cr 2.0 2.0],
+      text will be drawn twice as big, but the reported text extents
+      will not be doubled. They will change slightly due to hinting
+      (so you can't assume that metrics are independent of the
+      transformation matrix), but otherwise will remain unchanged. *)
+  type font_extents = {
+    ascent : float;
+    (** the distance that the font extends above the baseline. Note
+        that this is not always exactly equal to the maximum of the
+        extents of all the glyphs in the font, but rather is picked to
+        express the font designer's intent as to how the font should align
+        with elements above it.  *)
+    descent : float;
+    (** the distance that the font extends below the baseline. This
+        value is positive for typical fonts that include portions below
+        the baseline. Note that this is not always exactly equal to the
+        maximum of the extents of all the glyphs in the font, but rather
+        is picked to express the font designer's intent as to how the the
+        font should align with elements below it.  *)
+    height : float;
+    (** the recommended vertical distance between baselines when
+        setting consecutive lines of text with the font. This is greater
+        than ascent+descent by a quantity known as the line spacing or
+        external leading. When space is at a premium, most fonts can be
+        set with only a distance of ascent+descent between lines.  *)
+    max_x_advance : float;
+    (** the maximum distance in the X direction that the the origin is
+        advanced for any glyph in the font.  *)
+    max_y_advance : float;
+    (** the maximum distance in the Y direction that the the origin is
+        advanced for any glyph in the font. this will be zero for normal
+        fonts used for horizontal writing. (The scripts of East Asia are
+        sometimes written vertically.)  *)
+  }
+
+  val create : _ Font_face.t -> Matrix.t -> Matrix.t -> Font_options.t -> t
     (** [create font_face font_matrix ctm options] creates a
         {!Cairo.Scaled_font.t} object from a font face and matrices that
         describe the size of the font and the environment in which it
         will be used. *)
+
+  val set : context -> t -> unit
+    (** Replaces the current font face, font matrix, and font options in
+        the {Cairo.t} with those of the {!Cairo.Scaled_font.t}.  Except
+        for some translation, the current CTM of the {!Cairo.t} should be
+        the same as that of the {!Cairo.Scaled_font.t}, which can be
+        accessed using {!Cairo.Scaled_font.get_ctm}. *)
+
+  val get : context -> t
+    (** Gets the current scaled font for a cairo_t. *)
+
 
 (* FIXME: TBD *)
 end
@@ -1266,21 +1356,25 @@ sig
       normal clusters.  For example, PDF rendering applications
       typically ignore those clusters when PDF text is being selected.
 
-      See {!Cairo.Glyphs.show_text} for how clusters are used in
+      See {!Cairo.Glyph.show_text} for how clusters are used in
       advanced text operations. *)
   type cluster = {
     num_bytes : int; (** the number of bytes of UTF-8 text covered by cluster *)
     num_glyphs : int; (** the number of glyphs covered by cluster *)
   }
 
+  (** Specifies properties of a text cluster mapping. *)
+  type cluster_flags =
+    | BACKWARD (** The clusters in the cluster array map to glyphs in
+                   the glyph array from end to start. *)
 
   val extents : context -> t array -> text_extents
     (** Gets the extents for an array of glyphs. The extents describe a
         user-space rectangle that encloses the "inked" portion of the
-        glyphs, (as they would be drawn by {!Cairo.show_glyphs}).
+        glyphs, (as they would be drawn by {!Cairo.Glyph.show}).
         Additionally, the [x_advance] and [y_advance] values indicate
         the amount by which the current point would be advanced by
-        {!Cairo.show_glyphs}.
+        {!Cairo.Glyph.show}.
 
         Note that whitespace glyphs do not contribute to the size of the
         rectangle (extents.width and extents.height). *)
@@ -1292,14 +1386,14 @@ sig
         matrix), and font options. *)
 
   val show_text : context -> string -> t array ->
-    text_cluster -> text_cluster_flags -> unit
+    cluster -> cluster_flags -> unit
     (** [show_text cr utf8 glyphs clusters cluster_flags]: This
         operation has rendering effects similar to
-        {!Cairo.Glyphs.show} but, if the target surface supports it,
+        {!Cairo.Glyph.show} but, if the target surface supports it,
         uses the provided text and cluster mapping to embed the text
         for the glyphs shown in the output.  If the target does not
         support the extended attributes, this function acts like the
-        basic {!Cairo.Glyphs.show} as if it had been passed [glyphs].
+        basic {!Cairo.Glyph.show} as if it had been passed [glyphs].
 
         The mapping between [utf8] and [glyphs] is provided by an
         array of [clusters].  Each cluster covers a number of text bytes
@@ -1308,21 +1402,12 @@ sig
         [utf8] and [glyphs] in entirety.
 
         The first cluster always covers bytes from the beginning of
-        [utf8].  If [cluster_flags] do not have the
-        CAIRO_TEXT_CLUSTER_FLAG_BACKWARD set, the first cluster also
-        covers the beginning of glyphs, otherwise it covers the end of
-        the glyphs array and following clusters move backward.
+        [utf8].  If [cluster_flags] do not have the [BACKWARD] set,
+        the first cluster also covers the beginning of glyphs,
+        otherwise it covers the end of the glyphs array and following
+        clusters move backward.
 
         See {!Cairo.text_cluster} for constraints on valid clusters. *)
-
-
-(** As it is, this module is pretty much unusable.  This will be
-    corrected in the future. *)
-
-(* FIXME:
-   cairo_text_cluster_flags_t
-
-*)
 
 end
 
@@ -1360,7 +1445,7 @@ val select_font_face : t -> ?slant:slant -> ?weight:weight -> string -> unit
       cairo-ft font backend, see
       {!Cairo.Ft.font_face_create_for_ft_face} or
       {!Cairo.Ft.font_face_create_for_pattern}.)  The resulting font
-      face could then be used with {!Cairo.scaled_font_create} and
+      face could then be used with {!Cairo.Scaled_font.create} and
       {!Cairo.set_scaled_font}.
 
       Similarly, when using the "real" font support, you can call
@@ -1372,8 +1457,8 @@ val select_font_face : t -> ?slant:slant -> ?weight:weight -> string -> unit
       comprehensive font handling and text layout library, (for
       example, pango), in conjunction with cairo.
 
-      If text is drawn without a call to {!Cairo.Text.select_font_face},
-      (nor {!Cairo.set_font_face} nor {!Cairo.set_scaled_font}), the
+      If text is drawn without a call to {!Cairo.select_font_face},
+      (nor {!Cairo.Font_face.set} nor {!Cairo.set_scaled_font}), the
       default family is platform-specific, but is essentially
       "sans-serif".  Default slant is CAIRO_FONT_SLANT_NORMAL, and
       default weight is CAIRO_FONT_WEIGHT_NORMAL.  *)
@@ -1381,13 +1466,13 @@ val select_font_face : t -> ?slant:slant -> ?weight:weight -> string -> unit
 val set_font_size : t -> float -> unit
   (** [set_font_size cr size] sets the current font matrix to a
       scale by a factor of size, replacing any font matrix previously
-      set with [set_font_size] or {!Cairo.Text.set_font_matrix}.  This
+      set with [set_font_size] or {!Cairo.set_font_matrix}.  This
       results in a font size of size user space units.  (More precisely,
       this matrix will result in the font's em-square being a size by
       size square in user space.)
 
       If text is drawn without a call to [set_font_size], (nor
-      {!Cairo.Text.set_font_matrix} nor {!Cairo.Text.set_scaled_font}),
+      {!Cairo.set_font_matrix} nor {!Cairo.Text.set_scaled_font}),
       the default font size is 10.0. *)
 
 val set_font_matrix : t -> Matrix.t -> unit
@@ -1400,25 +1485,7 @@ val set_font_matrix : t -> Matrix.t -> unit
       along the two axes.  *)
 
 val get_font_matrix : t -> Matrix.t
-  (** Returns the current font matrix.  See {!Cairo.Text.set_font_matrix}. *)
-
-
-val set_font_face : t -> font_face -> unit
-  (** Replaces the current {!Cairo.font_face} object in the {!Cairo.t}
-      with font_face. *)
-
-val get_font_face : t -> 'a font_face
-  (** Gets the current font face for a {!Cairo.t}. *)
-
-val set_scaled_font : t -> Scaled_font.t -> unit
-  (** Replaces the current font face, font matrix, and font options in
-      the {Cairo.t} with those of the {!Cairo.Scaled_font.t}.  Except
-      for some translation, the current CTM of the {!Cairo.t} should be
-      the same as that of the {!Cairo.Scaled_font.t}, which can be
-      accessed using {!Cairo.Scaled_font.get_ctm}. *)
-
-val get_scaled_font : t -> Scaled_font.t
-  (** Gets the current scaled font for a cairo_t. *)
+  (** Returns the current font matrix.  See {!Cairo.set_font_matrix}. *)
 
 val show_text : t -> string -> unit
   (** A drawing operator that generates the shape from a string of
@@ -1437,7 +1504,7 @@ val show_text : t -> string -> unit
       glyph offset by its advance values. This allows for easy display
       of a single logical string with multiple calls to [show_text].  *)
 
-val font_extents : t -> font_extents
+val font_extents : t -> Scaled_font.font_extents
   (** Gets the font extents for the currently selected font. *)
 
 val text_extents : t -> string -> text_extents
@@ -1460,13 +1527,12 @@ val text_extents : t -> string -> text_extents
 
 
 (* ---------------------------------------------------------------------- *)
-(** {2:Paths Creating paths and manipulating path data}
+(** {2:paths  Creating paths and manipulating path data}
 
     Paths are the most basic drawing tools and are primarily used to
     implicitly generate simple masks.
 *)
 
-type path
 type path_data =
   | MOVE_TO of float * float
   | LINE_TO of float * float
@@ -1475,11 +1541,13 @@ type path_data =
 
 module Path :
 sig
-  external copy : t -> path = "caml_cairo_copy_path"
+  type t
+
+  external copy : context -> t = "caml_cairo_copy_path"
     (** Creates a copy of the current path. See cairo_path_data_t for
         hints on how to iterate over the returned data structure.  *)
 
-  external copy_flat : t -> path = "caml_cairo_copy_path_flat"
+  external copy_flat : context -> t = "caml_cairo_copy_path_flat"
     (** Gets a flattened copy of the current path.
 
         This function is like {!Cairo.Path.copy} except that any
@@ -1489,12 +1557,12 @@ sig
         elements of type [CURVE_TO] which will instead be replaced by
         a series of [LINE_TO] elements.  *)
 
-  external append : t -> path -> unit = "caml_cairo_append_path"
+  external append : context -> t -> unit = "caml_cairo_append_path"
     (** Append the path onto the current path.  The path may be either
         the return value from one of {!Cairo.Path.copy} or
         {!Cairo.Path.copy_flat} or it may be constructed manually.  *)
 
-  external get_current_point : t -> float * float
+  external get_current_point : context -> float * float
     = "caml_cairo_get_current_point"
     (** [get_current_point cr] gets the (x,y) coordinates of the
         current point of the current path, which is conceptually the
@@ -1507,22 +1575,22 @@ sig
         Most path construction functions alter the current point.  See the
         following for details on how they affect the current point:
         {!Cairo.Path.make}, {!Cairo.Path.sub}, {!Cairo.Path.append},
-        {!Cairo.Path.close}, {!Cairo.move_to}, {!Cairo_line_to},
+        {!Cairo.Path.close}, {!Cairo.move_to}, {!Cairo.line_to},
         {!Cairo.curve_to}, {!Cairo.rel_move_to}, {!Cairo.rel_line_to},
         {!Cairo.rel_curve_to}, {!Cairo.arc}, {!Cairo.arc_negative},
         {!Cairo.rectangle}, {!Cairo.text_path}, {!Cairo.glyph_path}.
 
         Some functions use and alter the current point but do not
-        otherwise change current path: {!Cairo.Text.show}.
+        otherwise change current path: {!Cairo.show_text}.
 
         Some functions unset the current path and as a result, current
         point: {!Cairo.fill}, {!Cairo.stroke}. *)
 
-  external clear : t -> unit = "caml_cairo_new_path"
+  external clear : context -> unit = "caml_cairo_new_path"
     (** Clears the current path. After this call there will be no path
         and no current point. *)
 
-  external sub : t -> unit = "caml_cairo_new_sub_path"
+  external sub : context -> unit = "caml_cairo_new_sub_path"
     (** Begin a new sub-path. Note that the existing path is not
         affected. After this call there will be no current point.
 
@@ -1535,7 +1603,7 @@ sig
         manually compute the arc's initial coordinates for a call to
         {!Cairo.move_to}. *)
 
-  external close : t -> unit = "caml_cairo_close_path"
+  external close : context -> unit = "caml_cairo_close_path"
     (** Adds a line segment to the path from the current point to the
         beginning of the current sub-path, (the most recent point
         passed to {!Cairo.move_to}), and closes this sub-path.  After
@@ -1560,20 +1628,20 @@ sig
         the "last move_to point" during processing as the [MOVE_TO]
         immediately after the [CLOSE_PATH] will provide that point. *)
 
-  external glyph : t -> Glyph.t array -> unit = "caml_cairo_glyph_path"
+  external glyph : context -> Glyph.t array -> unit = "caml_cairo_glyph_path"
     (** Adds closed paths for the glyphs to the current path. The
         generated path if filled, achieves an effect similar to that
         of {!Cairo.Glyph.show}. *)
 
-  external text : t -> string -> unit = "caml_cairo_text_path"
+  external text : context -> string -> unit = "caml_cairo_text_path"
     (** [text cr utf8] adds closed paths for text to the current path.
         The generated path if filled, achieves an effect similar to
-        that of {!Cairo.Text.show}.  [utf8] should be a valid UTF8
+        that of {!Cairo.show_text}.  [utf8] should be a valid UTF8
         string containing no ['\000'] characters.
 
-        Text conversion and positioning is done similar to {!Cairo.Text.show}.
+        Text conversion and positioning is done similar to {!Cairo.show_text}.
 
-        Like {!Cairo.Text.show}, after this call the current point is
+        Like {!Cairo.show_text}, after this call the current point is
         moved to the origin of where the next glyph would be placed in
         this same progression.  That is, the current point will be at
         the origin of the final glyph offset by its advance values.
@@ -1586,7 +1654,7 @@ sig
         adequate for serious text-using applications.  See
         {!Cairo.Glyph.path} for the "real" text path API in cairo. *)
 
-  external extents : t -> rectangle = "caml_cairo_path_extents"
+  external extents : context -> rectangle = "caml_cairo_path_extents"
     (** Computes a bounding box in user-space coordinates covering the
         points on the current path. If the current path is empty,
         returns an empty rectangle [{ x1=0.; y1=0.; x2=0.; y2=0. }].
@@ -1610,12 +1678,12 @@ sig
         {!Cairo.move_to} will not contribute to the results of
         [Cairo.Path.extents]. *)
 
-  external fold : path -> ('a -> path_data -> 'a) -> 'a -> 'a
+  external fold : t -> ('a -> path_data -> 'a) -> 'a -> 'a
     = "caml_cairo_path_fold"
 
-  val to_array : path -> path_data array
+  val to_array : t -> path_data array
 
-  val of_array : path_data array -> path
+  val of_array : path_data array -> t
 end
 
 external arc : t ->
@@ -1759,7 +1827,7 @@ external rel_move_to : t -> x:float -> y:float -> unit
 
 
 (* ---------------------------------------------------------------------- *)
-(** {2:Transformations Manipulating the current transformation matrix}
+(** {2:transformations  Manipulating the current transformation matrix}
 
     The current transformation matrix, {i ctm}, is a two-dimensional
     affine transformation that maps all coordinates and other drawing
