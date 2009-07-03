@@ -490,6 +490,15 @@ external device_to_user_distance : t -> x:float -> y:float -> float * float
 (* ---------------------------------------------------------------------- *)
 (* Rendering text and glyphs *)
 
+type text_extents = {
+  x_bearing : float;
+  y_bearing : float;
+  width : float;
+  height : float;
+  x_advance : float;
+  y_advance : float;
+}
+
 type subpixel_order =
   | SUBPIXEL_ORDER_DEFAULT
   | SUBPIXEL_ORDER_RGB
@@ -545,9 +554,83 @@ struct
     set_hint_metrics fo hint_metrics
 end
 
+type slant = Upright | Italic | Oblique
+type weight = Normal | Bold
+type font_type =
+  | FONT_TYPE_TOY
+  | FONT_TYPE_FT
+  | FONT_TYPE_WIN32
+  | FONT_TYPE_QUARTZ
+  | FONT_TYPE_USER
+
+module Font_face =
+struct
+  type 'a t
+
+  external get_type : 'a t -> font_type = "caml_cairo_font_face_get_type"
+
+  external create_stub : family:string -> slant -> weight -> [`Toy] t
+    = "caml_"
+
+  let create ?(family="") slant weight =
+    create_stub family slant weight
+
+  external set : context -> _ t -> unit = "caml_cairo_set_font_face"
+  external get : context -> 'a t = "caml_cairo_get_font_face"
+end
 
 module Glyph =
 struct
   type t = glyph = { index: int;  x: float;  y: float }
 
+  type cluster = {
+    num_bytes : int;
+    num_glyphs : int;
+  }
+
+  type cluster_flags =
+    | BACKWARD
+
 end
+
+module Scaled_font =
+struct
+  type 'a t
+
+  type font_extents = {
+    ascent : float;
+    descent : float;
+    height : float;
+    max_x_advance : float;
+    max_y_advance : float;
+  }
+
+  external set : context -> _ t -> unit = "caml_cairo_set_scaled_font"
+  external get : context -> _ t = "caml_cairo_get_scaled_font"
+
+  external create : 'a Font_face.t -> Matrix.t -> Matrix.t -> Font_options.t
+    -> 'a t = "caml_cairo_scaled_font_create"
+
+
+  external extents : _ t -> font_extents = "caml_cairo_scaled_font_extents"
+
+  external text_extents : _ t -> string -> text_extents
+    = "caml_cairo_scaled_font_text_extents"
+  external glyph_extents : _ t -> Glyph.t array -> text_extents
+    = "caml_cairo_scaled_font_glyph_extents"
+
+  external text_to_glyphs : _ t -> x:float -> y:float -> string
+    -> Glyph.t array * Glyph.cluster array * Glyph.cluster_flags
+    = "caml_cairo_scaled_font_text_to_glyphs"
+
+  external get_font_options : _ t -> Font_options.t
+    = "caml_cairo_scaled_font_get_font_options"
+
+  external get_font_matrix : _ t -> Matrix.t
+    = "caml_cairo_scaled_font_get_font_matrix"
+  external get_ctm : _ t -> Matrix.t = "caml_cairo_scaled_font_get_ctm"
+  external get_scale_matrix : _ t -> Matrix.t
+    = "caml_cairo_scaled_font_get_scale_matrix"
+end
+
+

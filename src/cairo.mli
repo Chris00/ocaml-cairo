@@ -978,6 +978,150 @@ external show_page : t -> unit = "caml_cairo_show_page"
 (* ---------------------------------------------------------------------- *)
 (** {2:text  Rendering text and glyphs} *)
 
+(** The [Cairo.text_extents] structure stores the extents of a single
+    glyph or a string of glyphs in user-space coordinates.  Because text
+    extents are in user-space coordinates, they are mostly, but not
+    entirely, independent of the current transformation matrix.  If you
+    call {!Cairo.scale}[cr 2.0 2.0], text will be drawn twice as big, but
+    the reported text extents will not be doubled.  They will change
+    slightly due to hinting (so you can't assume that metrics are
+    independent of the transformation matrix), but otherwise will remain
+    unchanged. *)
+type text_extents = {
+  x_bearing : float;
+  (** The horizontal distance from the origin to the leftmost part of
+      the glyphs as drawn. Positive if the glyphs
+      lie entirely to the right of the origin. *)
+  y_bearing : float;
+  (** The vertical distance from the origin to the topmost part of the
+      glyphs as drawn. Positive only if the glyphs lie completely below
+      the origin; will usually be negative.  *)
+  width : float; (** width of the glyphs as drawn *)
+  height : float; (** height of the glyphs as drawn *)
+  x_advance : float;
+  (** Distance to advance in the X direction after drawing these glyphs. *)
+  y_advance : float;
+  (** Distance to advance in the Y direction after drawing these
+      glyphs. Will typically be zero except for vertical text layout
+      as found in East-Asian languages. *)
+}
+
+(** {3 Low-level text API} *)
+
+(** This is Cairo low-level text API.  The low-level API relies on the
+    user to convert text to a set of glyph indexes and positions. This is
+    a very hard problem and is best handled by external libraries, like
+    the pangocairo that is part of the Pango text layout and rendering
+    library.  Pango is available from http://www.pango.org/
+
+    See the {!text_toy} module for the "toy" text API.  *)
+module Glyph :
+sig
+  (** The [Glyph.t] structure holds information about a single glyph
+      when drawing or measuring text.  A font is (in simple terms) a
+      collection of shapes used to draw text.  A glyph is one of these
+      shapes. There can be multiple glyphs for a single character
+      (alternates to be used in different contexts, for example), or a
+      glyph can be a ligature of multiple characters.  Cairo doesn't
+      expose any way of converting input text into glyphs, so in order
+      to use the Cairo interfaces that take arrays of glyphs, you must
+      directly access the appropriate underlying font system.
+
+      Note that the offsets given by x and y are not cumulative.  When
+      drawing or measuring text, each glyph is individually positioned
+      with respect to the overall origin. *)
+  type t = {
+    index: int; (** glyph index in the font. The exact interpretation
+                    of the glyph index depends on the font technology
+                    being used. *)
+    x: float; (** the offset in the X direction between the origin
+                  used for drawing or measuring the string and the
+                  origin of this glyph.  *)
+    y: float; (** the offset in the Y direction between the origin
+                  used for drawing or measuring the string and the
+                  origin of this glyph. *)
+  }
+
+  (** The [cluster] record holds information about a single {i text
+      cluster}.  A text cluster is a minimal mapping of some glyphs
+      corresponding to some UTF-8 text.
+
+      For a cluster to be valid, both [num_bytes] and [num_glyphs]
+      should be non-negative, and at least one should be non-zero.
+      Note that clusters with zero glyphs are not as well supported as
+      normal clusters.  For example, PDF rendering applications
+      typically ignore those clusters when PDF text is being selected.
+
+      See {!Cairo.Glyph.show_text} for how clusters are used in
+      advanced text operations. *)
+  type cluster = {
+    num_bytes : int; (** the number of bytes of UTF-8 text covered by cluster *)
+    num_glyphs : int; (** the number of glyphs covered by cluster *)
+  }
+
+  (** Specifies properties of a text cluster mapping. *)
+  type cluster_flags =
+    | BACKWARD (** The clusters in the cluster array map to glyphs in
+                   the glyph array from end to start. *)
+
+  val extents : context -> t array -> text_extents
+    (** Gets the extents for an array of glyphs. The extents describe a
+        user-space rectangle that encloses the "inked" portion of the
+        glyphs, (as they would be drawn by {!Cairo.Glyph.show}).
+        Additionally, the [x_advance] and [y_advance] values indicate
+        the amount by which the current point would be advanced by
+        {!Cairo.Glyph.show}.
+
+        Note that whitespace glyphs do not contribute to the size of the
+        rectangle (extents.width and extents.height). *)
+
+  val show : context -> t array -> unit
+    (** A drawing operator that generates the shape from an array of
+        glyphs, rendered according to the current font face, font size (font
+        matrix), and font options. *)
+
+  val show_text : context -> string -> t array ->
+    cluster -> cluster_flags -> unit
+    (** [show_text cr utf8 glyphs clusters cluster_flags]: This
+        operation has rendering effects similar to
+        {!Cairo.Glyph.show} but, if the target surface supports it,
+        uses the provided text and cluster mapping to embed the text
+        for the glyphs shown in the output.  If the target does not
+        support the extended attributes, this function acts like the
+        basic {!Cairo.Glyph.show} as if it had been passed [glyphs].
+
+        The mapping between [utf8] and [glyphs] is provided by an
+        array of [clusters].  Each cluster covers a number of text bytes
+        and glyphs, and neighboring clusters cover neighboring areas
+        of [utf8] and [glyphs].  The clusters should collectively cover
+        [utf8] and [glyphs] in entirety.
+
+        The first cluster always covers bytes from the beginning of
+        [utf8].  If [cluster_flags] do not have the [BACKWARD] set,
+        the first cluster also covers the beginning of glyphs,
+        otherwise it covers the end of the glyphs array and following
+        clusters move backward.
+
+        See {!Cairo.text_cluster} for constraints on valid clusters. *)
+
+end
+
+
+(** {3:text_toy "Toy" text API}
+
+    This is cairo's toy text API.  The toy API takes UTF-8 encoded text
+    and is limited in its functionality to rendering simple
+    left-to-right text with no advanced features.  That means for
+    example that most complex scripts like Hebrew, Arabic, and Indic
+    scripts are out of question.  No kerning or correct positioning of
+    diacritical marks either.  The font selection is pretty limited
+    too and doesn't handle the case that the selected font does not
+    cover the characters in the text.  This set of functions are
+    really that, a toy text API, for testing and demonstration
+    purposes. Any serious application should avoid them.
+
+    See the {!Glyph} module for the low-level text API.   *)
+
 (** The subpixel order specifies the order of color elements within
     each pixel on the display device when rendering with an
     antialiasing mode of [ANTIALIAS_SUBPIXEL] (see {!Cairo.antialias}). *)
@@ -1136,35 +1280,6 @@ type slant = Upright | Italic | Oblique
 (** Specifies variants of a font face based on their weight. *)
 type weight = Normal | Bold
 
-(** The [Cairo.text_extents] structure stores the extents of a single
-    glyph or a string of glyphs in user-space coordinates.  Because text
-    extents are in user-space coordinates, they are mostly, but not
-    entirely, independent of the current transformation matrix.  If you
-    call {!Cairo.scale}[cr 2.0 2.0], text will be drawn twice as big, but
-    the reported text extents will not be doubled.  They will change
-    slightly due to hinting (so you can't assume that metrics are
-    independent of the transformation matrix), but otherwise will remain
-    unchanged. *)
-type text_extents = {
-  x_bearing : float;
-  (** The horizontal distance from the origin to the leftmost part of
-      the glyphs as drawn. Positive if the glyphs
-      lie entirely to the right of the origin. *)
-  y_bearing : float;
-  (** The vertical distance from the origin to the topmost part of the
-      glyphs as drawn. Positive only if the glyphs lie completely below
-      the origin; will usually be negative.  *)
-  width : float; (** width of the glyphs as drawn *)
-  height : float; (** height of the glyphs as drawn *)
-  x_advance : float;
-  (** Distance to advance in the X direction after drawing these glyphs. *)
-  y_advance : float;
-  (** Distance to advance in the Y direction after drawing these
-      glyphs. Will typically be zero except for vertical text layout
-      as found in East-Asian languages. *)
-}
-
-
 (** {!Cairo.font_type} is used to describe the type of a given font
     face or scaled font.  The font types are also known as "font
     backends" within cairo.
@@ -1214,7 +1329,14 @@ sig
         backend they use.  The type of a font face can be queried using
         {!Cairo.Font_face.get_type}.  *)
 
-  val get_type : 'a t -> font_type
+  external set : context -> _ t -> unit = "caml_cairo_set_font_face"
+    (** Replaces the current {!Cairo.font_face} object in the {!Cairo.t}
+        with font_face. *)
+
+  external get : context -> 'a t = "caml_cairo_get_font_face"
+    (** Gets the current font face for a {!Cairo.t}. *)
+
+  external get_type : 'a t -> font_type = "caml_cairo_font_face_get_type"
   (** This function returns the type of the backend used to create a
       font face. See {!Cairo.font_type} for available types. *)
 
@@ -1238,15 +1360,6 @@ sig
 
   val get_weight : [`Toy] t -> weight
     (** Gets the weight a toy font. *)
-
-
-  val set : context -> _ t -> unit
-    (** Replaces the current {!Cairo.font_face} object in the {!Cairo.t}
-        with font_face. *)
-
-  val get : context -> 'a t
-    (** Gets the current font face for a {!Cairo.t}. *)
-
 end
 
 (** {!Cairo.Scaled_font.t} represents a realization of a font face at
@@ -1254,7 +1367,7 @@ end
     options.  *)
 module Scaled_font :
 sig
-  type t
+  type 'a t
     (** A [Cairo.Scaled_font.t] is a font scaled to a particular size
         and device resolution.  It is most useful for low-level font
         usage where a library or application wants to cache a
@@ -1263,6 +1376,16 @@ sig
         There are various types of scaled fonts, depending on the font
         backend they use.  The type of a scaled font can be queried
         using {!Cairo.Scaled_font.get_type}.  *)
+
+  external set : context -> _ t -> unit = "caml_cairo_set_scaled_font"
+    (** Replaces the current font face, font matrix, and font options in
+        the {Cairo.t} with those of the {!Cairo.Scaled_font.t}.  Except
+        for some translation, the current CTM of the {!Cairo.t} should be
+        the same as that of the {!Cairo.Scaled_font.t}, which can be
+        accessed using {!Cairo.Scaled_font.get_ctm}. *)
+
+  external get : context -> 'a t = "caml_cairo_get_scaled_font"
+    (** Gets the current scaled font for a cairo_t. *)
 
   (** The [Cairo.Scaled_font.font_extents] structure stores metric
       information for a font. Values are given in the current user-space
@@ -1305,141 +1428,79 @@ sig
         sometimes written vertically.)  *)
   }
 
-  val create : _ Font_face.t -> Matrix.t -> Matrix.t -> Font_options.t -> t
+  val create : 'a Font_face.t -> Matrix.t -> Matrix.t -> Font_options.t -> 'a t
     (** [create font_face font_matrix ctm options] creates a
         {!Cairo.Scaled_font.t} object from a font face and matrices that
         describe the size of the font and the environment in which it
         will be used. *)
 
-  val set : context -> t -> unit
-    (** Replaces the current font face, font matrix, and font options in
-        the {Cairo.t} with those of the {!Cairo.Scaled_font.t}.  Except
-        for some translation, the current CTM of the {!Cairo.t} should be
-        the same as that of the {!Cairo.Scaled_font.t}, which can be
-        accessed using {!Cairo.Scaled_font.get_ctm}. *)
+  external extents : _ t -> font_extents = "caml_cairo_scaled_font_extents"
+    (** [extents sf] gets the metrics for [sf]. *)
 
-  val get : context -> t
-    (** Gets the current scaled font for a cairo_t. *)
+  external text_extents : _ t -> string -> text_extents
+    = "caml_cairo_scaled_font_text_extents"
+      (** [text_extents scaled_font utf8] gets the [extents] for a string of
+          text. The extents describe a user-space rectangle that encloses
+          the "inked" portion of the text drawn at the origin (0,0) (as it
+          would be drawn by {!Cairo.show_text} if the cairo graphics state
+          were set to the same font_face, font_matrix, ctm, and
+          font_options as [scaled_font]). Additionally, the x_advance and
+          y_advance values indicate the amount by which the current point
+          would be advanced by {!Cairo.show_text}.  The string [utf8]
+          should not contain ['\000'] characters.
 
+          Note that whitespace characters do not directly contribute
+          to the size of the rectangle ([extents.width] and
+          [extents.height]).  They do contribute indirectly by changing
+          the position of non-whitespace characters.  In particular,
+          trailing whitespace characters are likely to not affect the
+          size of the rectangle, though they will affect the [x_advance]
+          and [y_advance] values. *)
 
-(* FIXME: TBD *)
-end
-
-
-(** {3 Low-level text API} *)
-
-(** This is Cairo low-level text API.  The low-level API relies on the
-    user to convert text to a set of glyph indexes and positions. This is
-    a very hard problem and is best handled by external libraries, like
-    the pangocairo that is part of the Pango text layout and rendering
-    library.  Pango is available from http://www.pango.org/  *)
-module Glyph :
-sig
-  (** The [Glyph.t] structure holds information about a single glyph
-      when drawing or measuring text.  A font is (in simple terms) a
-      collection of shapes used to draw text.  A glyph is one of these
-      shapes. There can be multiple glyphs for a single character
-      (alternates to be used in different contexts, for example), or a
-      glyph can be a ligature of multiple characters.  Cairo doesn't
-      expose any way of converting input text into glyphs, so in order
-      to use the Cairo interfaces that take arrays of glyphs, you must
-      directly access the appropriate underlying font system.
-
-      Note that the offsets given by x and y are not cumulative.  When
-      drawing or measuring text, each glyph is individually positioned
-      with respect to the overall origin. *)
-  type t = {
-    index: int; (** glyph index in the font. The exact interpretation
-                    of the glyph index depends on the font technology
-                    being used. *)
-    x: float; (** the offset in the X direction between the origin
-                  used for drawing or measuring the string and the
-                  origin of this glyph.  *)
-    y: float; (** the offset in the Y direction between the origin
-                  used for drawing or measuring the string and the
-                  origin of this glyph. *)
-  }
-
-  (** The [cluster] record holds information about a single {i text
-      cluster}.  A text cluster is a minimal mapping of some glyphs
-      corresponding to some UTF-8 text.
-
-      For a cluster to be valid, both [num_bytes] and [num_glyphs]
-      should be non-negative, and at least one should be non-zero.
-      Note that clusters with zero glyphs are not as well supported as
-      normal clusters.  For example, PDF rendering applications
-      typically ignore those clusters when PDF text is being selected.
-
-      See {!Cairo.Glyph.show_text} for how clusters are used in
-      advanced text operations. *)
-  type cluster = {
-    num_bytes : int; (** the number of bytes of UTF-8 text covered by cluster *)
-    num_glyphs : int; (** the number of glyphs covered by cluster *)
-  }
-
-  (** Specifies properties of a text cluster mapping. *)
-  type cluster_flags =
-    | BACKWARD (** The clusters in the cluster array map to glyphs in
-                   the glyph array from end to start. *)
-
-  val extents : context -> t array -> text_extents
-    (** Gets the extents for an array of glyphs. The extents describe a
-        user-space rectangle that encloses the "inked" portion of the
-        glyphs, (as they would be drawn by {!Cairo.Glyph.show}).
-        Additionally, the [x_advance] and [y_advance] values indicate
-        the amount by which the current point would be advanced by
-        {!Cairo.Glyph.show}.
+  external glyph_extents : _ t -> Glyph.t array -> text_extents
+    = "caml_cairo_scaled_font_glyph_extents"
+    (** [glyph_extents scaled_font glyphs] gets the [extents] for an
+        array of glyphs. The extents describe a user-space rectangle
+        that encloses the "inked" portion of the glyphs, (as they
+        would be drawn by {!Cairo.show_glyphs} if the cairo graphics
+        state were set to the same font_face, font_matrix, ctm, and
+        font_options as [scaled_font]).  Additionally, the [x_advance] and
+        [y_advance] values indicate the amount by which the current
+        point would be advanced by {!Cairo.show_glyphs}.
 
         Note that whitespace glyphs do not contribute to the size of the
-        rectangle (extents.width and extents.height). *)
+        rectangle ([extents.width] and [extents.height]). *)
 
+  external text_to_glyphs : _ t -> x:float -> y:float -> string
+    -> Glyph.t array * Glyph.cluster array * Glyph.cluster_flags
+    = "caml_cairo_scaled_font_text_to_glyphs"
+    (** [text_to_glyphs scaled_font x y utf8] converts UTF-8 text to
+        an array of glyphs, optionally with cluster mapping, that can
+        be used to render later using [scaled_font].
+        See {!Cairo.Glyph.show_text}. *)
 
-  val show : context -> t array -> unit
-    (** A drawing operator that generates the shape from an array of
-        glyphs, rendered according to the current font face, font size (font
-        matrix), and font options. *)
+  external get_font_options : _ t -> Font_options.t
+    = "caml_cairo_scaled_font_get_font_options"
+    (** [get_font_options scaled_font] returns the font options with
+        which [scaled_font] was created.  *)
 
-  val show_text : context -> string -> t array ->
-    cluster -> cluster_flags -> unit
-    (** [show_text cr utf8 glyphs clusters cluster_flags]: This
-        operation has rendering effects similar to
-        {!Cairo.Glyph.show} but, if the target surface supports it,
-        uses the provided text and cluster mapping to embed the text
-        for the glyphs shown in the output.  If the target does not
-        support the extended attributes, this function acts like the
-        basic {!Cairo.Glyph.show} as if it had been passed [glyphs].
+  external get_font_matrix : _ t -> Matrix.t
+    = "caml_cairo_scaled_font_get_font_matrix"
+    (** [get_font_matrix scaled_font] return the font matrix with
+        which [scaled_font] was created. *)
 
-        The mapping between [utf8] and [glyphs] is provided by an
-        array of [clusters].  Each cluster covers a number of text bytes
-        and glyphs, and neighboring clusters cover neighboring areas
-        of [utf8] and [glyphs].  The clusters should collectively cover
-        [utf8] and [glyphs] in entirety.
+  external get_ctm : _ t -> Matrix.t = "caml_cairo_scaled_font_get_ctm"
+    (** [get_ctm scaled_font] returns the CTM with which [scaled_font]
+        was created. *)
 
-        The first cluster always covers bytes from the beginning of
-        [utf8].  If [cluster_flags] do not have the [BACKWARD] set,
-        the first cluster also covers the beginning of glyphs,
-        otherwise it covers the end of the glyphs array and following
-        clusters move backward.
-
-        See {!Cairo.text_cluster} for constraints on valid clusters. *)
-
+  external get_scale_matrix : _ t -> Matrix.t
+    = "caml_cairo_scaled_font_get_scale_matrix"
+    (** [get_scale_matrix scaled_font] returns the scale matrix of
+        [scaled_font].  The scale matrix is product of the font matrix
+        and the ctm associated with the scaled font, and hence is the
+        matrix mapping from font space to device space. *)
 end
 
-
-(** {3 "Toy" text API}
-
-    This is cairo's toy text API.  The toy API takes UTF-8 encoded text
-    and is limited in its functionality to rendering simple
-    left-to-right text with no advanced features.  That means for
-    example that most complex scripts like Hebrew, Arabic, and Indic
-    scripts are out of question.  No kerning or correct positioning of
-    diacritical marks either.  The font selection is pretty limited
-    too and doesn't handle the case that the selected font does not
-    cover the characters in the text.  This set of functions are
-    really that, a toy text API, for testing and demonstration
-    purposes. Any serious application should avoid them.
-
-    See the {!Glyph} module for the low-level text API.   *)
 
 val select_font_face : t -> ?slant:slant -> ?weight:weight -> string -> unit
   (** [select_font_face cr family ?slant ?weight] selects a family

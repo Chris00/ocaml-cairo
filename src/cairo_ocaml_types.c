@@ -172,7 +172,18 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
   p->x = Double_val(Field(v,1));                 \
   p->y = Double_val(Field(v,2))
 
+#define GLYPH_ASSIGN(v, glyph)                          \
+  v = caml_alloc_tuple(3);                              \
+  Store_field(v, 0, Val_int(glyph.index));              \
+  Store_field(v, 1, caml_copy_double(glyph.x));         \
+  Store_field(v, 2, caml_copy_double(glyph.y))
 
+#define CLUSTER_ASSIGN(v, cluster)                      \
+  v = caml_alloc_tuple(2);                              \
+  Store_field(v, 0, Val_int(cluster.num_bytes));        \
+  Store_field(v, 1, Val_int(cluster.num_glyphs))
+
+#define VAL_CLUSTER_FLAGS(v) Val_int(v)
 
 /* Type cairo_matrix_t
 ***********************************************************************/
@@ -200,6 +211,9 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
 ***********************************************************************/
 
 #define FONT_OPTIONS_VAL(v) (* (cairo_font_options_t**) Data_custom_val(v))
+#define FONT_OPTIONS_ASSIGN(vfo, fo) \
+  vfo = ALLOC(font_options);         \
+  FONT_OPTIONS_VAL(vfo) = fo
 
 static void caml_cairo_font_options_finalize(value v)
 {
@@ -234,3 +248,9 @@ static struct custom_operations caml_font_options_ops = {
 #define FONT_FACE_VAL(v) (* (cairo_font_face_t**) Data_custom_val(v))
 
 DEFINE_CUSTOM_OPERATIONS(font_face, cairo_font_face_destroy, FONT_FACE_VAL)
+
+
+#define SCALED_FONT_VAL(v) (* (cairo_scaled_font_t**) Data_custom_val(v))
+
+DEFINE_CUSTOM_OPERATIONS(scaled_font,
+                         cairo_scaled_font_destroy, SCALED_FONT_VAL)

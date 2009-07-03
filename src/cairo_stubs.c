@@ -339,7 +339,7 @@ CAMLexport value caml_cairo_glyph_path(value vcr, value vglyphs)
 
   glyphs = malloc(num_glyphs * sizeof(cairo_glyph_t));
   for(i=0, p = glyphs; i < num_glyphs; i++, p++) {
-    SET_GLYPH_VAL(p, vglyphs);
+    SET_GLYPH_VAL(p, Field(vglyphs, i));
   }
   cairo_glyph_path(cr, glyphs, num_glyphs);
   free(glyphs);
@@ -767,8 +767,7 @@ CAMLexport value caml_cairo_get_font_options(value vcr)
   cairo_font_options_t *options = cairo_font_options_create();
   caml_raise_Error(cairo_font_options_status(options));
   cairo_get_font_options(CAIRO_VAL(vcr), options);
-  vfont_option = ALLOC(font_options);
-  FONT_OPTIONS_VAL(vfont_option) = options;
+  FONT_OPTIONS_ASSIGN(vfont_option, options);
   CAMLreturn(vfont_option);
 }
 
@@ -778,8 +777,7 @@ CAMLexport value caml_cairo_font_options_create(value vunit)
   CAMLlocal1(vfo);
   cairo_font_options_t* fo = cairo_font_options_create();
   caml_raise_Error(cairo_font_options_status(fo));
-  vfo = ALLOC(font_options);
-  FONT_OPTIONS_VAL(vfo) = fo;
+  FONT_OPTIONS_ASSIGN(vfo, fo);
   CAMLreturn(vfo);
 }
 
@@ -789,8 +787,7 @@ CAMLexport value caml_cairo_font_options_copy(value vorig)
   CAMLlocal1(vcopy);
   cairo_font_options_t* copy = cairo_font_options_copy(FONT_OPTIONS_VAL(vorig));
   caml_raise_Error(cairo_font_options_status(copy));
-  vcopy = ALLOC(font_options);
-  FONT_OPTIONS_VAL(vcopy) = copy;
+  FONT_OPTIONS_ASSIGN(vcopy, copy);
   CAMLreturn(vcopy);
 }
 
@@ -835,6 +832,190 @@ GET_FONT_OPTIONS(cairo_font_options_get_hint_style,
 SET_FONT_OPTIONS(cairo_font_options_set_hint_metrics, HINT_METRICS_VAL)
 GET_FONT_OPTIONS(cairo_font_options_get_hint_metrics,
                  VAL_HINT_METRICS, cairo_hint_metrics_t)
+
+/* Font face
+***********************************************************************/
+
+#define VAL_FONT_TYPE(v) Val_int(v)
+
+CAMLexport value caml_cairo_font_face_get_type(value vff)
+{
+  CAMLparam1(vff);
+  cairo_font_type_t ft = cairo_font_face_get_type(FONT_FACE_VAL(vff));
+  CAMLreturn(VAL_FONT_TYPE(ft));
+}
+
+
+DO1_FUNCTION(cairo_set_font_face, FONT_FACE_VAL)
+
+CAMLexport value caml_cairo_get_font_face(value vcr)
+{
+  CAMLparam1(vcr);
+  CAMLlocal1(vff);
+  cairo_font_face_t* ff = cairo_get_font_face(CAIRO_VAL(vcr));
+  caml_raise_Error(cairo_font_face_status(ff));
+  /* Since we are going to create a value with the [ff] and this value
+     is shared with the one hold inside the cairo context, one must
+     increase the reference count (to avoid that destroying one of
+     these object leaves a dangling pointer for the other).  */
+  cairo_font_face_reference(ff);
+  vff = ALLOC(font_face);
+  FONT_FACE_VAL(vff) = ff;
+  CAMLreturn(vff);
+}
+
+/* Scaled font
+***********************************************************************/
+
+DO1_FUNCTION(cairo_set_scaled_font, SCALED_FONT_VAL)
+
+CAMLexport value caml_cairo_get_scaled_font(value vcr)
+{
+  CAMLparam1(vcr);
+  CAMLlocal1(vsf);
+  cairo_scaled_font_t* sf = cairo_get_scaled_font(CAIRO_VAL(vcr));
+  /* create a value with shared [sf] => must increase ref. count */
+  cairo_scaled_font_reference(sf);
+  vsf = ALLOC(scaled_font);
+  SCALED_FONT_VAL(vsf) = sf;
+  CAMLreturn(vsf);
+}
+
+CAMLexport value caml_cairo_scaled_font_create
+(value vff, value vfont_matrix, value vctm, value voptions)
+{
+  CAMLparam4(vff, vfont_matrix, vctm, voptions);
+  CAMLlocal1(vsf);
+  cairo_matrix_t *font_matrix, *ctm;
+  SET_MATRIX_VAL(font_matrix, vfont_matrix);
+  SET_MATRIX_VAL(ctm, vctm);
+  cairo_scaled_font_t* sf = cairo_scaled_font_create
+    (FONT_FACE_VAL(vff), font_matrix, ctm, FONT_OPTIONS_VAL(voptions));
+  vsf = ALLOC(scaled_font);
+  SCALED_FONT_VAL(vsf) = sf;  
+  CAMLreturn(vsf);
+}
+
+CAMLexport value caml_cairo_scaled_font_extents(value vsf)
+{
+  CAMLparam1(vsf);
+  CAMLlocal1(vfe);
+  cairo_font_extents_t fe;
+  cairo_scaled_font_extents(SCALED_FONT_VAL(vsf), &fe);
+  vfe = caml_alloc(5 * Double_wosize, Double_array_tag);
+  Store_double_field(vfe, 0, fe.ascent);
+  Store_double_field(vfe, 1, fe.descent);
+  Store_double_field(vfe, 2, fe.height);
+  Store_double_field(vfe, 3, fe.max_x_advance);
+  Store_double_field(vfe, 4, fe.max_y_advance);
+  CAMLreturn(vfe);
+}
+
+CAMLexport value caml_cairo_scaled_font_text_extents(value vsf, value vutf8)
+{
+  CAMLparam2(vsf, vutf8);
+  CAMLlocal1(vte);
+  cairo_text_extents_t te;
+  cairo_scaled_font_text_extents(SCALED_FONT_VAL(vsf), String_val(vutf8), &te);
+  vte = caml_alloc(6 * Double_wosize, Double_array_tag);
+  Store_double_field(vte, 0, te.x_bearing);
+  Store_double_field(vte, 1, te.y_bearing);
+  Store_double_field(vte, 2, te.width);
+  Store_double_field(vte, 3, te.height);
+  Store_double_field(vte, 4, te.x_advance);
+  Store_double_field(vte, 5, te.y_advance);
+  CAMLreturn(vte);
+}
+
+CAMLexport value caml_cairo_scaled_font_glyph_extents(value vsf, value vglyphs)
+{
+  CAMLparam2(vsf, vglyphs);
+  CAMLlocal1(vte);
+  cairo_text_extents_t te;
+  int i, num_glyphs = Wosize_val(vglyphs);
+  cairo_glyph_t *glyphs, *p;
+  
+  glyphs = malloc(num_glyphs * sizeof(cairo_glyph_t));
+  for(i=0, p = glyphs; i < num_glyphs; i++, p++) {
+    SET_GLYPH_VAL(p, Field(vglyphs, i));
+  }
+  cairo_scaled_font_glyph_extents(SCALED_FONT_VAL(vsf),
+                                  glyphs, num_glyphs, &te);
+  free(glyphs);
+  vte = caml_alloc(6 * Double_wosize, Double_array_tag);
+  Store_double_field(vte, 0, te.x_bearing);
+  Store_double_field(vte, 1, te.y_bearing);
+  Store_double_field(vte, 2, te.width);
+  Store_double_field(vte, 3, te.height);
+  Store_double_field(vte, 4, te.x_advance);
+  Store_double_field(vte, 5, te.y_advance);
+  CAMLreturn(vte);
+}
+
+CAMLexport value caml_cairo_scaled_font_text_to_glyphs
+(value vsf, value vx, value vy, value vutf8)
+{
+  CAMLparam4(vsf, vx, vy, vutf8);
+  CAMLlocal4(vglyphs, vclusters, vtriplet, v);
+  cairo_glyph_t *glyphs = NULL;
+  int i, num_glyphs;
+  cairo_text_cluster_t *clusters = NULL;
+  int num_clusters;
+  cairo_text_cluster_flags_t cluster_flags;
+  cairo_status_t status;
+  
+  status = cairo_scaled_font_text_to_glyphs
+    (SCALED_FONT_VAL(vsf), Double_val(vx), Double_val(vy),
+     String_val(vutf8), string_length(vutf8),
+     &glyphs, &num_glyphs,  &clusters, &num_clusters,  &cluster_flags);
+  caml_raise_Error(status);
+
+  vglyphs = caml_alloc_tuple(num_glyphs);
+  for(i = 0; i < num_glyphs; i++) {
+    GLYPH_ASSIGN(v, glyphs[i]);
+    Store_field(vglyphs, i, v);
+  }
+  cairo_glyph_free(glyphs);
+  vclusters = caml_alloc_tuple(num_clusters);
+  for(i = 0; i < num_clusters; i++) {
+    CLUSTER_ASSIGN(v, clusters[i]);
+    Store_field(vclusters, i, v);
+  }
+  cairo_text_cluster_free(clusters);
+  /* FIXME: cluster_flags */
+  /* (glyphs, clusters, cluster_flags) */
+  vtriplet = caml_alloc_tuple(3);
+  Store_field(vtriplet, 0, vglyphs);
+  Store_field(vtriplet, 1, vclusters);
+  Store_field(vtriplet, 2, VAL_CLUSTER_FLAGS(cluster_flags));
+  CAMLreturn(vtriplet);
+}
+
+CAMLexport value caml_cairo_scaled_font_get_font_options(value vsf)
+{
+  CAMLparam1(vsf);
+  CAMLlocal1(vfo);
+  cairo_font_options_t *fo = cairo_font_options_create();
+  caml_raise_Error(cairo_font_options_status(fo));
+  cairo_scaled_font_get_font_options(SCALED_FONT_VAL(vsf), fo);
+  FONT_OPTIONS_ASSIGN(vfo, fo);
+  CAMLreturn(vfo);
+}
+
+#define SCALED_FONT_GET_MATRIX(name)                                    \
+  CAMLexport value caml_##name(value vsf)                               \
+  {                                                                     \
+    CAMLparam1(vsf);                                                    \
+    CAMLlocal1(vmatrix);                                                \
+    cairo_matrix_t *matrix;                                             \
+    name(SCALED_FONT_VAL(vsf), matrix);                                 \
+    MATRIX_ASSIGN(vmatrix, matrix);                                     \
+    CAMLreturn(vmatrix);                                                \
+  }
+
+SCALED_FONT_GET_MATRIX(cairo_scaled_font_get_font_matrix)
+SCALED_FONT_GET_MATRIX(cairo_scaled_font_get_ctm)
+SCALED_FONT_GET_MATRIX(cairo_scaled_font_get_scale_matrix)
 
 
 /* Local Variables: */
