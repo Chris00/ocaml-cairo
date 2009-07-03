@@ -330,8 +330,8 @@ sig
         extend strategy. *)
 
   (** This is used to indicate what filtering should be applied when
-      reading pixel values from patterns. See
-      {!Cairo.Pattern.set_source} for indicating the desired filter to
+      reading pixel values from patterns.  See
+      {!Cairo.Pattern.set_filter} for indicating the desired filter to
       be used with a particular pattern. *)
   type filter =
     | FAST (** A high-performance filter, with quality similar to NEAREST *)
@@ -1109,7 +1109,7 @@ sig
         otherwise it covers the end of the glyphs array and following
         clusters move backward.
 
-        See {!Cairo.text_cluster} for constraints on valid clusters. *)
+        See {!Cairo.Glyph.cluster} for constraints on valid clusters. *)
 
 end
 
@@ -1229,7 +1229,7 @@ sig
     (** [merge options other] merges non-default options from other
         into options, replacing existing values.  This operation can
         be thought of as somewhat similar to compositing other onto
-        options with the operation of {!Cairo.Operator.OVER}. *)
+        options with the operation of [OVER] (see {!Cairo.operator}). *)
 
   external set_antialias : t -> antialias -> unit
     = "caml_cairo_font_options_set_antialias"
@@ -1296,19 +1296,17 @@ type weight = Normal | Bold
     [Cairo.*.font_face_create].  The font face type can be queried
     with {!Cairo.Font_face.get_type}
 
-    The various {!Cairo.font_face} functions can be used with a font
+    The various {!Cairo.Font_face} functions can be used with a font
     face of any type.
 
     The type of a scaled font is determined by the type of the font
-    face passed to {!Cairo.scaled_font_create}.  The scaled font type
-    can be queried with {!Cairo.scaled_font_get_type}.
+    face passed to {!Cairo.Scaled_font.create}.  The scaled font type
+    can be queried with {!Cairo.Scaled_font.get_type}.
 
-    The various cairo_scaled_font_t functions can be used with scaled
+    The various {!Cairo.Scaled_font} functions can be used with scaled
     fonts of any type, but some font backends also provide
-    type-specific functions that must only be called with a scaled
-    font of the appropriate type. These functions have names that
-    begin with cairo_type_scaled_font() such as
-    cairo_ft_scaled_font_lock_face().
+    type-specific functions (such as {!Cairo.Ft.scaled_font_lock_face})
+    that must only be called with a scaled font of the appropriate type.
 
     FIXME: The behavior of calling a type-specific function with a scaled
     font of the wrong type is undefined. *)
@@ -1327,7 +1325,7 @@ sig
         than the size or font matrix (a font matrix is used to distort
         a font by sheering it or scaling it unequally in the two
         directions).  A font face can be set on a {!Cairo.context} by using
-        {!Cairo.set_font_face}; the size and font matrix are set with
+        {!Cairo.Font_face.set}; the size and font matrix are set with
         {!Cairo.set_font_size} and {!Cairo.set_font_matrix}.
 
         Font faces are created using font-backend-specific constructors,
@@ -1339,11 +1337,11 @@ sig
         {!Cairo.Font_face.get_type}.  *)
 
   external set : context -> _ t -> unit = "caml_cairo_set_font_face"
-    (** Replaces the current {!Cairo.font_face} object in the {!Cairo.t}
-        with font_face. *)
+      (** Replaces the current {!Cairo.Font_face.t} object in the
+          {!Cairo.context} with font_face. *)
 
   external get : context -> font_type t = "caml_cairo_get_font_face"
-    (** Gets the current font face for a {!Cairo.t}. *)
+      (** Gets the current font face for a {!Cairo.context}. *)
 
   external get_type : 'a t -> font_type = "caml_cairo_font_face_get_type"
       (** This function returns the type of the backend used to create a
@@ -1392,8 +1390,8 @@ sig
 
   external set : context -> _ t -> unit = "caml_cairo_set_scaled_font"
     (** Replaces the current font face, font matrix, and font options in
-        the {Cairo.t} with those of the {!Cairo.Scaled_font.t}.  Except
-        for some translation, the current CTM of the {!Cairo.t} should be
+        the {Cairo.context} with those of the {!Cairo.Scaled_font.t}.  Except
+        for some translation, the current CTM of the {!Cairo.context} should be
         the same as that of the {!Cairo.Scaled_font.t}, which can be
         accessed using {!Cairo.Scaled_font.get_ctm}. *)
 
@@ -1475,11 +1473,11 @@ sig
     (** [glyph_extents scaled_font glyphs] gets the [extents] for an
         array of glyphs. The extents describe a user-space rectangle
         that encloses the "inked" portion of the glyphs, (as they
-        would be drawn by {!Cairo.show_glyphs} if the cairo graphics
+        would be drawn by {!Cairo.Glyph.show} if the cairo graphics
         state were set to the same font_face, font_matrix, ctm, and
         font_options as [scaled_font]).  Additionally, the [x_advance] and
         [y_advance] values indicate the amount by which the current
-        point would be advanced by {!Cairo.show_glyphs}.
+        point would be advanced by {!Cairo.Glyph.show}.
 
         Note that whitespace glyphs do not contribute to the size of the
         rectangle ([extents.width] and [extents.height]). *)
@@ -1543,7 +1541,7 @@ val select_font_face : context -> ?slant:slant -> ?weight:weight -> string ->
       {!Cairo.Ft.font_face_create_for_ft_face} or
       {!Cairo.Ft.font_face_create_for_pattern}.)  The resulting font
       face could then be used with {!Cairo.Scaled_font.create} and
-      {!Cairo.set_scaled_font}.
+      {!Cairo.Scaled_font.set}.
 
       Similarly, when using the "real" font support, you can call
       directly into the underlying font system, (such as fontconfig
@@ -1554,7 +1552,7 @@ val select_font_face : context -> ?slant:slant -> ?weight:weight -> string ->
       example, pango), in conjunction with cairo.
 
       If text is drawn without a call to {!Cairo.select_font_face},
-      (nor {!Cairo.Font_face.set} nor {!Cairo.set_scaled_font}), the
+      (nor {!Cairo.Font_face.set} nor {!Cairo.Scaled_font.set}), the
       default family is platform-specific, but is essentially
       "sans-serif".  Default slant is [Upright], and default weight is
       [Normal].  *)
@@ -1569,7 +1567,7 @@ external set_font_size : context -> float -> unit
       size square in user space.)
 
       If text is drawn without a call to [set_font_size], (nor
-      {!Cairo.set_font_matrix} nor {!Cairo.Text.set_scaled_font}),
+      {!Cairo.set_font_matrix} nor {!Cairo.Scaled_font.set}),
       the default font size is 10.0. *)
 
 external set_font_matrix : context -> Matrix.t -> unit
@@ -1578,7 +1576,7 @@ external set_font_matrix : context -> Matrix.t -> unit
       [matrix].  The font matrix gives a transformation from the
       design space of the font (in this space, the em-square is 1
       unit by 1 unit) to user space.  Normally, a simple scale is
-      used (see {!Cairo.Text.set_font_size}), but a more complex font
+      used (see {!Cairo.set_font_size}), but a more complex font
       matrix can be used to shear the font or stretch it unequally
       along the two axes.  *)
 
@@ -1679,7 +1677,7 @@ sig
         {!Cairo.Path.close}, {!Cairo.move_to}, {!Cairo.line_to},
         {!Cairo.curve_to}, {!Cairo.rel_move_to}, {!Cairo.rel_line_to},
         {!Cairo.rel_curve_to}, {!Cairo.arc}, {!Cairo.arc_negative},
-        {!Cairo.rectangle}, {!Cairo.text_path}, {!Cairo.glyph_path}.
+        {!Cairo.rectangle}, {!Cairo.contextext_path}, {!Cairo.Path.glyph}.
 
         Some functions use and alter the current point but do not
         otherwise change current path: {!Cairo.show_text}.
@@ -1753,7 +1751,7 @@ sig
         designers call the "toy" text API.  It is convenient for short
         demos and simple programs, but it is not expected to be
         adequate for serious text-using applications.  See
-        {!Cairo.Glyph.path} for the "real" text path API in cairo. *)
+        {!Cairo.Path.glyph} for the "real" text path API in cairo. *)
 
   external extents : context -> rectangle = "caml_cairo_path_extents"
     (** Computes a bounding box in user-space coordinates covering the
