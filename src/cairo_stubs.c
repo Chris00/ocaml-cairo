@@ -333,14 +333,10 @@ CAMLexport value caml_cairo_glyph_path(value vcr, value vglyphs)
 {
   CAMLparam2(vcr, vglyphs);
   cairo_t* cr = CAIRO_VAL(vcr);
-  int num_glyphs = Wosize_val(vglyphs);
   cairo_glyph_t *glyphs, *p;
-  int i;
+  int i, num_glyphs;
 
-  glyphs = malloc(num_glyphs * sizeof(cairo_glyph_t));
-  for(i=0, p = glyphs; i < num_glyphs; i++, p++) {
-    SET_GLYPH_VAL(p, Field(vglyphs, i));
-  }
+  ARRAY_GLYPH_VAL(glyphs, p, vglyphs, num_glyphs);
   cairo_glyph_path(cr, glyphs, num_glyphs);
   free(glyphs);
   caml_check_status(cr);
@@ -956,13 +952,10 @@ CAMLexport value caml_cairo_scaled_font_glyph_extents(value vsf, value vglyphs)
   CAMLparam2(vsf, vglyphs);
   CAMLlocal1(vte);
   cairo_text_extents_t te;
-  int i, num_glyphs = Wosize_val(vglyphs);
   cairo_glyph_t *glyphs, *p;
-  
-  glyphs = malloc(num_glyphs * sizeof(cairo_glyph_t));
-  for(i=0, p = glyphs; i < num_glyphs; i++, p++) {
-    SET_GLYPH_VAL(p, Field(vglyphs, i));
-  }
+  int i, num_glyphs;
+
+  ARRAY_GLYPH_VAL(glyphs, p, vglyphs, num_glyphs);
   cairo_scaled_font_glyph_extents(SCALED_FONT_VAL(vsf),
                                   glyphs, num_glyphs, &te);
   free(glyphs);
@@ -1072,11 +1065,8 @@ CAMLexport value caml_cairo_show_glyphs(value vcr, value vglyphs)
   cairo_t *cr = CAIRO_VAL(vcr);  
   int i, num_glyphs = Wosize_val(vglyphs);
   cairo_glyph_t *glyphs, *p;
-  
-  glyphs = malloc(num_glyphs * sizeof(cairo_glyph_t));
-  for(i=0, p = glyphs; i < num_glyphs; i++, p++) {
-    SET_GLYPH_VAL(p, Field(vglyphs, i));
-  }
+
+  ARRAY_GLYPH_VAL(glyphs, p, vglyphs, num_glyphs);
   cairo_show_glyphs(cr, glyphs, num_glyphs);
   free(glyphs);
   caml_check_status(cr);
@@ -1091,18 +1081,16 @@ CAMLexport value caml_cairo_show_text_glyphs
   cairo_t *cr = CAIRO_VAL(vcr);  
   cairo_glyph_t *glyphs, *p;
   cairo_text_cluster_t *clusters, *q;
-  int i, num_glyphs, num_clusters = Wosize_val(vclusters);
+  int i, num_glyphs, num_clusters;
   
   ARRAY_GLYPH_VAL(glyphs, p, vglyphs, num_glyphs);
-  clusters = malloc(num_clusters * sizeof(cairo_text_cluster_t));
-  for(i=0, q = clusters; i < num_clusters; i++, q++) {
-    SET_CLUSTER_VAL(q, Field(vclusters, i));
-  }
+  ARRAY_CLUSTER_VAL(clusters, q, vglyphs, num_glyphs);
   cairo_show_text_glyphs(cr, String_val(vutf8), string_length(vutf8), 
                          glyphs, num_glyphs, clusters, num_clusters,
                          /* FIXME: is it a binary | ? */
                          CLUSTER_FLAGS_VAL(vcluster_flags));
   free(glyphs);
+  free(clusters);
   caml_check_status(cr);
   CAMLreturn(Val_unit);
 }
@@ -1117,6 +1105,7 @@ CAMLexport value caml_cairo_glyph_extents(value vcr, value vglyphs)
   
   ARRAY_GLYPH_VAL(glyphs, p, vglyphs, num_glyphs);
   cairo_glyph_extents(CAIRO_VAL(vcr), glyphs, num_glyphs, &te);
+  free(glyphs);
   TEXT_EXTENTS_ASSIGN(vte, te);
   CAMLreturn(vte);
 }

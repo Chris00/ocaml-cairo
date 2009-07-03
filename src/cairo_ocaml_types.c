@@ -189,6 +189,14 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
   p->num_bytes = Int_val(Field(v, 0));          \
   p->num_glyphs = Int_val(Field(v, 1))
 
+#define ARRAY_CLUSTER_VAL(clusters, q, vglyphs, num_glyphs)             \
+  num_clusters = Wosize_val(vclusters);                                 \
+  clusters = malloc(num_clusters * sizeof(cairo_text_cluster_t));       \
+  for(i=0, q = clusters; i < num_clusters; i++, q++) {                  \
+    SET_CLUSTER_VAL(q, Field(vclusters, i));                            \
+  }
+
+
 #define CLUSTER_ASSIGN(v, cluster)                      \
   v = caml_alloc_tuple(2);                              \
   Store_field(v, 0, Val_int(cluster.num_bytes));        \

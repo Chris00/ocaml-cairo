@@ -606,6 +606,7 @@ end
 
 module Glyph =
 struct
+(*   type array (\* FIXME: abstract type for cairo_glyph_t* ? *\) *)
   type t = glyph = { index: int;  x: float;  y: float }
 
   type cluster = {
