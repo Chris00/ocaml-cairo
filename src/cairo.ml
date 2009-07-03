@@ -224,7 +224,6 @@ external show_page : t -> unit = "caml_cairo_show_page"
 
 (* ---------------------------------------------------------------------- *)
 
-type path
 type path_data =
   | MOVE_TO of float * float
   | LINE_TO of float * float
@@ -233,23 +232,25 @@ type path_data =
 
 module Path =
 struct
-  external copy : t -> path = "caml_cairo_copy_path"
-  external copy_flat : t -> path = "caml_cairo_copy_path_flat"
-  external append : t -> path -> unit = "caml_cairo_append_path"
-  external get_current_point : t -> float * float
+  type t
+
+  external copy : context -> t = "caml_cairo_copy_path"
+  external copy_flat : context -> t = "caml_cairo_copy_path_flat"
+  external append : context -> t -> unit = "caml_cairo_append_path"
+  external get_current_point : context -> float * float
     = "caml_cairo_get_current_point"
-  external clear : t -> unit = "caml_cairo_new_path"
-  external sub : t -> unit = "caml_cairo_new_sub_path"
-  external close : t -> unit = "caml_cairo_close_path"
+  external clear : context -> unit = "caml_cairo_new_path"
+  external sub : context -> unit = "caml_cairo_new_sub_path"
+  external close : context -> unit = "caml_cairo_close_path"
 
-  external glyph : t -> glyph array -> unit = "caml_cairo_glyph_path"
-  external text : t -> string -> unit = "caml_cairo_text_path"
-  external extents : t -> rectangle = "caml_cairo_path_extents"
+  external glyph : context -> glyph array -> unit = "caml_cairo_glyph_path"
+  external text : context -> string -> unit = "caml_cairo_text_path"
+  external extents : context -> rectangle = "caml_cairo_path_extents"
 
-  external fold : path -> ('a -> path_data -> 'a) -> 'a -> 'a
+  external fold : t -> ('a -> path_data -> 'a) -> 'a -> 'a
     = "caml_cairo_path_fold"
-  external to_array : path -> path_data array = "caml_cairo_path_to_array"
-  external of_array : path_data array -> path = "caml_cairo_path_of_array"
+  external to_array : t -> path_data array = "caml_cairo_path_to_array"
+  external of_array : path_data array -> t = "caml_cairo_path_of_array"
 end
 
 
@@ -551,7 +552,8 @@ struct
     set_antialias fo antialias;
     set_subpixel_order fo subpixel_order;
     set_hint_style fo hint_style;
-    set_hint_metrics fo hint_metrics
+    set_hint_metrics fo hint_metrics;
+    fo
 end
 
 type slant = Upright | Italic | Oblique
@@ -602,6 +604,11 @@ struct
   type cluster_flags =
     | BACKWARD
 
+  external extents : context -> t array -> text_extents
+    = "caml_cairo_glyph_extents"
+  external show : context -> t array -> unit = "caml_cairo_show_glyphs"
+  external show_text : context -> string -> t array ->
+    cluster array -> cluster_flags -> unit = "caml_cairo_show_text_glyphs"
 end
 
 module Scaled_font =
@@ -655,3 +662,18 @@ external select_font_face : t -> slant -> weight -> string -> unit
 let select_font_face cr ?(slant=Upright) ?(weight=Normal) family =
   select_font_face cr slant weight family
 
+external set_font_size : t -> float -> unit
+  = "caml_cairo_set_font_size"
+
+external set_font_matrix : t -> Matrix.t -> unit
+  = "caml_cairo_set_font_matrix"
+
+external get_font_matrix : t -> Matrix.t = "caml_cairo_get_font_matrix"
+
+external show_text : t -> string -> unit = "caml_cairo_show_text"
+
+external font_extents : t -> Scaled_font.font_extents
+  = "caml_cairo_font_extents"
+
+external text_extents : t -> string -> text_extents
+  = "caml_cairo_text_extents"

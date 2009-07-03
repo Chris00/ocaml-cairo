@@ -172,17 +172,29 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
   p->x = Double_val(Field(v,1));                 \
   p->y = Double_val(Field(v,2))
 
+#define ARRAY_GLYPH_VAL(glyphs, p, vglyphs, num_glyphs) \
+  num_glyphs = Wosize_val(vglyphs);                     \
+  glyphs = malloc(num_glyphs * sizeof(cairo_glyph_t));  \
+  for(i=0, p = glyphs; i < num_glyphs; i++, p++) {      \
+    SET_GLYPH_VAL(p, Field(vglyphs, i));                \
+  }
+
 #define GLYPH_ASSIGN(v, glyph)                          \
   v = caml_alloc_tuple(3);                              \
   Store_field(v, 0, Val_int(glyph.index));              \
   Store_field(v, 1, caml_copy_double(glyph.x));         \
   Store_field(v, 2, caml_copy_double(glyph.y))
 
+#define SET_CLUSTER_VAL(p, v) \
+  p->num_bytes = Int_val(Field(v, 0));          \
+  p->num_glyphs = Int_val(Field(v, 1))
+
 #define CLUSTER_ASSIGN(v, cluster)                      \
   v = caml_alloc_tuple(2);                              \
   Store_field(v, 0, Val_int(cluster.num_bytes));        \
   Store_field(v, 1, Val_int(cluster.num_glyphs))
 
+#define CLUSTER_FLAGS_VAL(v) Int_val(v)
 #define VAL_CLUSTER_FLAGS(v) Val_int(v)
 
 /* Type cairo_matrix_t
@@ -190,21 +202,21 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
 
 /* FIXME: optimize when possible */
 #define SET_MATRIX_VAL(m, v)                    \
-  m->xx = Double_field(v, 0);                   \
-  m->yx = Double_field(v, 1);                   \
-  m->xy = Double_field(v, 2);                   \
-  m->yy = Double_field(v, 3);                   \
-  m->x0 = Double_field(v, 4);                   \
-  m->y0 = Double_field(v, 5)
+  m.xx = Double_field(v, 0);                    \
+  m.yx = Double_field(v, 1);                    \
+  m.xy = Double_field(v, 2);                    \
+  m.yy = Double_field(v, 3);                    \
+  m.x0 = Double_field(v, 4);                    \
+  m.y0 = Double_field(v, 5)
 
 #define MATRIX_ASSIGN(v, m)                     \
   v = caml_alloc(6, Double_array_tag);          \
-  Store_double_field(v, 0, m->xx);              \
-  Store_double_field(v, 1, m->yx);              \
-  Store_double_field(v, 2, m->xy);              \
-  Store_double_field(v, 3, m->yy);              \
-  Store_double_field(v, 4, m->x0);              \
-  Store_double_field(v, 5, m->y0)
+  Store_double_field(v, 0, m.xx);               \
+  Store_double_field(v, 1, m.yx);               \
+  Store_double_field(v, 2, m.xy);               \
+  Store_double_field(v, 3, m.yy);               \
+  Store_double_field(v, 4, m.x0);               \
+  Store_double_field(v, 5, m.y0)
 
 
 /* Text
@@ -270,6 +282,23 @@ DEFINE_CUSTOM_OPERATIONS(font_face, cairo_font_face_destroy, FONT_FACE_VAL)
 
 DEFINE_CUSTOM_OPERATIONS(scaled_font,
                          cairo_scaled_font_destroy, SCALED_FONT_VAL)
+
+#define FONT_EXTENTS_ASSIGN(vfe, fe)                           \
+  vfe = caml_alloc(5 * Double_wosize, Double_array_tag);        \
+  Store_double_field(vfe, 0, fe.ascent);                        \
+  Store_double_field(vfe, 1, fe.descent);                       \
+  Store_double_field(vfe, 2, fe.height);                        \
+  Store_double_field(vfe, 3, fe.max_x_advance);                 \
+  Store_double_field(vfe, 4, fe.max_y_advance)
+
+#define TEXT_EXTENTS_ASSIGN(vte, te)                            \
+  vte = caml_alloc(6 * Double_wosize, Double_array_tag);        \
+  Store_double_field(vte, 0, te.x_bearing);                     \
+  Store_double_field(vte, 1, te.y_bearing);                     \
+  Store_double_field(vte, 2, te.width);                         \
+  Store_double_field(vte, 3, te.height);                        \
+  Store_double_field(vte, 4, te.x_advance);                     \
+  Store_double_field(vte, 5, te.y_advance)
 
 #define SLANT_VAL(v) Int_val(v)
 #define VAL_SLANT(v) Val_int(v)

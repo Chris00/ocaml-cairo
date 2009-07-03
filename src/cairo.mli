@@ -1064,7 +1064,8 @@ sig
     | BACKWARD (** The clusters in the cluster array map to glyphs in
                    the glyph array from end to start. *)
 
-  val extents : context -> t array -> text_extents
+  external extents : context -> t array -> text_extents
+    = "caml_cairo_glyph_extents"
     (** Gets the extents for an array of glyphs. The extents describe a
         user-space rectangle that encloses the "inked" portion of the
         glyphs, (as they would be drawn by {!Cairo.Glyph.show}).
@@ -1075,13 +1076,13 @@ sig
         Note that whitespace glyphs do not contribute to the size of the
         rectangle (extents.width and extents.height). *)
 
-  val show : context -> t array -> unit
+  external show : context -> t array -> unit = "caml_cairo_show_glyphs"
     (** A drawing operator that generates the shape from an array of
         glyphs, rendered according to the current font face, font size (font
         matrix), and font options. *)
 
-  val show_text : context -> string -> t array ->
-    cluster -> cluster_flags -> unit
+  external show_text : context -> string -> t array -> cluster array ->
+    cluster_flags -> unit  = "caml_cairo_show_text_glyphs"
     (** [show_text cr utf8 glyphs clusters cluster_flags]: This
         operation has rendering effects similar to
         {!Cairo.Glyph.show} but, if the target surface supports it,
@@ -1551,7 +1552,8 @@ val select_font_face : t -> ?slant:slant -> ?weight:weight -> string -> unit
       "sans-serif".  Default slant is [Upright], and default weight is
       [Normal].  *)
 
-val set_font_size : t -> float -> unit
+external set_font_size : t -> float -> unit
+  = "caml_cairo_set_font_size"
   (** [set_font_size cr size] sets the current font matrix to a
       scale by a factor of size, replacing any font matrix previously
       set with [set_font_size] or {!Cairo.set_font_matrix}.  This
@@ -1563,7 +1565,8 @@ val set_font_size : t -> float -> unit
       {!Cairo.set_font_matrix} nor {!Cairo.Text.set_scaled_font}),
       the default font size is 10.0. *)
 
-val set_font_matrix : t -> Matrix.t -> unit
+external set_font_matrix : t -> Matrix.t -> unit
+  = "caml_cairo_set_font_matrix"
   (** [set_font_matrix cr matrix] sets the current font matrix to
       [matrix].  The font matrix gives a transformation from the
       design space of the font (in this space, the em-square is 1
@@ -1572,10 +1575,10 @@ val set_font_matrix : t -> Matrix.t -> unit
       matrix can be used to shear the font or stretch it unequally
       along the two axes.  *)
 
-val get_font_matrix : t -> Matrix.t
+external get_font_matrix : t -> Matrix.t = "caml_cairo_get_font_matrix"
   (** Returns the current font matrix.  See {!Cairo.set_font_matrix}. *)
 
-val show_text : t -> string -> unit
+external show_text : t -> string -> unit = "caml_cairo_show_text"
   (** A drawing operator that generates the shape from a string of
       UTF-8 characters, rendered according to the current [font_face],
       [font_size] (font_matrix), and [font_options].
@@ -1592,15 +1595,18 @@ val show_text : t -> string -> unit
       glyph offset by its advance values. This allows for easy display
       of a single logical string with multiple calls to [show_text].  *)
 
-val font_extents : t -> Scaled_font.font_extents
+external font_extents : t -> Scaled_font.font_extents
+  = "caml_cairo_font_extents"
   (** Gets the font extents for the currently selected font. *)
 
-val text_extents : t -> string -> text_extents
-  (** Gets the extents for a string of text. The extents describe a
-      user-space rectangle that encloses the "inked" portion of the text,
-      (as it would be drawn by {!Cairo.show_text}).  Additionally, the
-      [x_advance] and [y_advance] values indicate the amount by which the
-      current point would be advanced by {!Cairo.show_text}.
+external text_extents : t -> string -> text_extents
+  = "caml_cairo_text_extents"
+  (** [text_extents cr utf8] gets the extents for a string of text.
+      The extents describe a user-space rectangle that encloses the
+      "inked" portion of the text, (as it would be drawn by
+      {!Cairo.show_text}).  Additionally, the [x_advance] and
+      [y_advance] values indicate the amount by which the current
+      point would be advanced by {!Cairo.show_text}.
 
       Note that whitespace characters do not directly contribute to
       the size of the rectangle ([extents.width] and
@@ -1768,6 +1774,7 @@ sig
 
   external fold : t -> ('a -> path_data -> 'a) -> 'a -> 'a
     = "caml_cairo_path_fold"
+      (** [fold cr f] folds [f] over all elements of the path. *)
 
   val to_array : t -> path_data array
 

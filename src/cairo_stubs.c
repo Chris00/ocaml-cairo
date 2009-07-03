@@ -680,9 +680,9 @@ CAMLexport value caml_cairo_pattern_get_filter(value vpat)
 CAMLexport value caml_cairo_pattern_set_matrix(value vpat, value vmat)
 {
   /* noalloc */
-  cairo_matrix_t *matrix;
+  cairo_matrix_t matrix;
   SET_MATRIX_VAL(matrix, vmat);
-  cairo_pattern_set_matrix(PATTERN_VAL(vpat), matrix);
+  cairo_pattern_set_matrix(PATTERN_VAL(vpat), &matrix);
   return(Val_unit);
 }
 
@@ -690,8 +690,8 @@ CAMLexport value caml_cairo_pattern_get_matrix(value vpat)
 {
   CAMLparam1(vpat);
   CAMLlocal1(vmat);
-  cairo_matrix_t *matrix;
-  cairo_pattern_get_matrix(PATTERN_VAL(vpat), matrix);
+  cairo_matrix_t matrix;
+  cairo_pattern_get_matrix(PATTERN_VAL(vpat), &matrix);
   MATRIX_ASSIGN(vmat, matrix);
   CAMLreturn(vmat);
 }
@@ -707,18 +707,18 @@ DO1_FUNCTION(cairo_rotate, Double_val)
 CAMLexport value caml_cairo_transform(value vcr, value vmat)
 {
   /* noalloc */
-  cairo_matrix_t *matrix;
+  cairo_matrix_t matrix;
   SET_MATRIX_VAL(matrix, vmat);
-  cairo_transform(CAIRO_VAL(vcr), matrix);
+  cairo_transform(CAIRO_VAL(vcr), &matrix);
   return(Val_unit);
 }
 
 CAMLexport value caml_cairo_set_matrix(value vcr, value vmat)
 {
   /* noalloc */
-  cairo_matrix_t *matrix;
+  cairo_matrix_t matrix;
   SET_MATRIX_VAL(matrix, vmat);
-  cairo_set_matrix(CAIRO_VAL(vcr), matrix);
+  cairo_set_matrix(CAIRO_VAL(vcr), &matrix);
   return(Val_unit);
 }
 
@@ -726,8 +726,8 @@ CAMLexport value caml_cairo_get_matrix(value vcr)
 {
   CAMLparam1(vcr);
   CAMLlocal1(vmat);
-  cairo_matrix_t *matrix;
-  cairo_get_matrix(CAIRO_VAL(vcr), matrix);
+  cairo_matrix_t matrix;
+  cairo_get_matrix(CAIRO_VAL(vcr), &matrix);
   MATRIX_ASSIGN(vmat, matrix);
   CAMLreturn(vmat);
 }
@@ -921,11 +921,11 @@ CAMLexport value caml_cairo_scaled_font_create
 {
   CAMLparam4(vff, vfont_matrix, vctm, voptions);
   CAMLlocal1(vsf);
-  cairo_matrix_t *font_matrix, *ctm;
+  cairo_matrix_t font_matrix, ctm;
   SET_MATRIX_VAL(font_matrix, vfont_matrix);
   SET_MATRIX_VAL(ctm, vctm);
   cairo_scaled_font_t* sf = cairo_scaled_font_create
-    (FONT_FACE_VAL(vff), font_matrix, ctm, FONT_OPTIONS_VAL(voptions));
+    (FONT_FACE_VAL(vff), &font_matrix, &ctm, FONT_OPTIONS_VAL(voptions));
   vsf = ALLOC(scaled_font);
   SCALED_FONT_VAL(vsf) = sf;  
   CAMLreturn(vsf);
@@ -937,12 +937,7 @@ CAMLexport value caml_cairo_scaled_font_extents(value vsf)
   CAMLlocal1(vfe);
   cairo_font_extents_t fe;
   cairo_scaled_font_extents(SCALED_FONT_VAL(vsf), &fe);
-  vfe = caml_alloc(5 * Double_wosize, Double_array_tag);
-  Store_double_field(vfe, 0, fe.ascent);
-  Store_double_field(vfe, 1, fe.descent);
-  Store_double_field(vfe, 2, fe.height);
-  Store_double_field(vfe, 3, fe.max_x_advance);
-  Store_double_field(vfe, 4, fe.max_y_advance);
+  FONT_EXTENTS_ASSIGN(vfe, fe);
   CAMLreturn(vfe);
 }
 
@@ -952,13 +947,7 @@ CAMLexport value caml_cairo_scaled_font_text_extents(value vsf, value vutf8)
   CAMLlocal1(vte);
   cairo_text_extents_t te;
   cairo_scaled_font_text_extents(SCALED_FONT_VAL(vsf), String_val(vutf8), &te);
-  vte = caml_alloc(6 * Double_wosize, Double_array_tag);
-  Store_double_field(vte, 0, te.x_bearing);
-  Store_double_field(vte, 1, te.y_bearing);
-  Store_double_field(vte, 2, te.width);
-  Store_double_field(vte, 3, te.height);
-  Store_double_field(vte, 4, te.x_advance);
-  Store_double_field(vte, 5, te.y_advance);
+  TEXT_EXTENTS_ASSIGN(vte, te);
   CAMLreturn(vte);
 }
 
@@ -1057,8 +1046,8 @@ CAMLexport value caml_cairo_scaled_font_get_font_options(value vsf)
   {                                                                     \
     CAMLparam1(vsf);                                                    \
     CAMLlocal1(vmatrix);                                                \
-    cairo_matrix_t *matrix;                                             \
-    name(SCALED_FONT_VAL(vsf), matrix);                                 \
+    cairo_matrix_t matrix;                                              \
+    name(SCALED_FONT_VAL(vsf), &matrix);                                 \
     MATRIX_ASSIGN(vmatrix, matrix);                                     \
     CAMLreturn(vmatrix);                                                \
   }
@@ -1074,13 +1063,73 @@ CAMLexport value caml_cairo_scaled_font_get_type(value vff)
   CAMLreturn(VAL_FONT_TYPE(ft));
 }
 
+/* Glyphs
+***********************************************************************/
+
+CAMLexport value caml_cairo_show_glyphs(value vcr, value vglyphs)
+{
+  CAMLparam1(vcr);
+  cairo_t *cr = CAIRO_VAL(vcr);  
+  int i, num_glyphs = Wosize_val(vglyphs);
+  cairo_glyph_t *glyphs, *p;
+  
+  glyphs = malloc(num_glyphs * sizeof(cairo_glyph_t));
+  for(i=0, p = glyphs; i < num_glyphs; i++, p++) {
+    SET_GLYPH_VAL(p, Field(vglyphs, i));
+  }
+  cairo_show_glyphs(cr, glyphs, num_glyphs);
+  free(glyphs);
+  caml_check_status(cr);
+  CAMLreturn(Val_unit);
+}
+
+CAMLexport value caml_cairo_show_text_glyphs
+(value vcr, value vutf8, value vglyphs, value vclusters, value vcluster_flags)
+{
+  CAMLparam5(vcr, vutf8, vglyphs, vclusters, vcluster_flags);
+  CAMLlocal1(v);
+  cairo_t *cr = CAIRO_VAL(vcr);  
+  cairo_glyph_t *glyphs, *p;
+  cairo_text_cluster_t *clusters, *q;
+  int i, num_glyphs, num_clusters = Wosize_val(vclusters);
+  
+  ARRAY_GLYPH_VAL(glyphs, p, vglyphs, num_glyphs);
+  clusters = malloc(num_clusters * sizeof(cairo_text_cluster_t));
+  for(i=0, q = clusters; i < num_clusters; i++, q++) {
+    SET_CLUSTER_VAL(q, Field(vclusters, i));
+  }
+  cairo_show_text_glyphs(cr, String_val(vutf8), string_length(vutf8), 
+                         glyphs, num_glyphs, clusters, num_clusters,
+                         /* FIXME: is it a binary | ? */
+                         CLUSTER_FLAGS_VAL(vcluster_flags));
+  free(glyphs);
+  caml_check_status(cr);
+  CAMLreturn(Val_unit);
+}
+
+CAMLexport value caml_cairo_glyph_extents(value vcr, value vglyphs)
+{
+  CAMLparam2(vcr, vglyphs);
+  CAMLlocal1(vte);
+  cairo_glyph_t *glyphs, *p;
+  int i, num_glyphs;
+  cairo_text_extents_t te;
+  
+  ARRAY_GLYPH_VAL(glyphs, p, vglyphs, num_glyphs);
+  cairo_glyph_extents(CAIRO_VAL(vcr), glyphs, num_glyphs, &te);
+  TEXT_EXTENTS_ASSIGN(vte, te);
+  CAMLreturn(vte);
+}
+
+
+
 /* Toy text API
  ***********************************************************************/
 
 CAMLexport value caml_cairo_select_font_face
 (value vcr, value vslant, value vweight, value vfamily)
 {
-  CAMLparam4(vce, vslant, vweight, vfamily);
+  CAMLparam4(vcr, vslant, vweight, vfamily);
   cairo_t *cr = CAIRO_VAL(vcr);
   cairo_select_font_face(cr, String_val(vfamily),
                          SLANT_VAL(vslant), WEIGHT_VAL(vweight));
@@ -1088,6 +1137,51 @@ CAMLexport value caml_cairo_select_font_face
   CAMLreturn(Val_unit);
 }
 
+DO1_FUNCTION(cairo_set_font_size, Double_val)
+
+CAMLexport value caml_cairo_set_font_matrix(value vcr, value vmatrix)
+{
+  CAMLparam2(vcr, vmatrix);
+  cairo_t *cr = CAIRO_VAL(vcr);
+  cairo_matrix_t matrix;
+  SET_MATRIX_VAL(matrix, vmatrix);
+  cairo_set_font_matrix(cr, &matrix);
+  caml_check_status(cr);
+  CAMLreturn(Val_unit);
+}
+
+CAMLexport value caml_cairo_get_font_matrix(value vcr)
+{
+  CAMLparam1(vcr);
+  CAMLlocal1(vmatrix);
+  cairo_t *cr = CAIRO_VAL(vcr);
+  cairo_matrix_t matrix;
+  cairo_get_font_matrix(cr, &matrix);
+  MATRIX_ASSIGN(vmatrix, matrix);
+  CAMLreturn(vmatrix);
+}
+
+DO1_FUNCTION(cairo_show_text, String_val)
+
+CAMLexport value caml_cairo_font_extents(value vcr)
+{
+  CAMLparam1(vcr);
+  CAMLlocal1(vfe);
+  cairo_font_extents_t fe;
+  cairo_font_extents(CAIRO_VAL(vcr), &fe);
+  FONT_EXTENTS_ASSIGN(vfe, fe);
+  CAMLreturn(vfe);
+}
+
+CAMLexport value caml_cairo_text_extents(value vcr, value vutf8)
+{
+  CAMLparam2(vcr, vutf8);
+  CAMLlocal1(vte);
+  cairo_text_extents_t te;
+  cairo_text_extents(CAIRO_VAL(vcr), String_val(vutf8), &te);
+  TEXT_EXTENTS_ASSIGN(vte, te);
+  CAMLreturn(vte);
+}
 
 
 
