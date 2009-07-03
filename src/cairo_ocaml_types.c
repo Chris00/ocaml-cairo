@@ -206,7 +206,7 @@ static void caml_cairo_font_options_finalize(value v)
   cairo_font_options_destroy(FONT_OPTIONS_VAL(v));
 }
 
-static void caml_cairo_font_options_compare(value v1, value v2)
+static int caml_cairo_font_options_compare(value v1, value v2)
 {
   cairo_font_options_t *fo1 = FONT_OPTIONS_VAL(v1);
   cairo_font_options_t *fo2 = FONT_OPTIONS_VAL(v2);
@@ -214,7 +214,7 @@ static void caml_cairo_font_options_compare(value v1, value v2)
      remains a total order. */
   if (cairo_font_options_equal(fo1, fo2)) return(0);
   else if (fo1 < fo2) return(-1);
-  else return(1)
+  else return(1);
 }
 
 static long caml_cairo_font_options_hash(value v)

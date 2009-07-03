@@ -755,13 +755,26 @@ COORD_TRANSFORM(cairo_device_to_user)
 COORD_TRANSFORM(cairo_device_to_user_distance)
 
 
-/* Text - Rendering text and glyphs
+/* Font options
 ***********************************************************************/
 
+DO1_FUNCTION(cairo_set_font_options, FONT_OPTIONS_VAL)
 
-CAMLexport value caml_cairo_font_options_create(value unit)
+CAMLexport value caml_cairo_get_font_options(value vcr)
 {
-  CAMLparam1(unit);
+  CAMLparam1(vcr);
+  CAMLlocal1(vfont_option);
+  cairo_font_options_t *options = cairo_font_options_create();
+  caml_raise_Error(cairo_font_options_status(options));
+  cairo_get_font_options(CAIRO_VAL(vcr), options);
+  vfont_option = ALLOC(font_options);
+  FONT_OPTIONS_VAL(vfont_option) = options;
+  CAMLreturn(vfont_option);
+}
+
+CAMLexport value caml_cairo_font_options_create(value vunit)
+{
+  CAMLparam1(vunit);
   CAMLlocal1(vfo);
   cairo_font_options_t* fo = cairo_font_options_create();
   caml_raise_Error(cairo_font_options_status(fo));
@@ -770,7 +783,58 @@ CAMLexport value caml_cairo_font_options_create(value unit)
   CAMLreturn(vfo);
 }
 
+CAMLexport value caml_cairo_font_options_copy(value vorig)
+{
+  CAMLparam1(vorig);
+  CAMLlocal1(vcopy);
+  cairo_font_options_t* copy = cairo_font_options_copy(FONT_OPTIONS_VAL(vorig));
+  caml_raise_Error(cairo_font_options_status(copy));
+  vcopy = ALLOC(font_options);
+  FONT_OPTIONS_VAL(vcopy) = copy;
+  CAMLreturn(vcopy);
+}
 
+#define SET_FONT_OPTIONS(name, of_val)                  \
+  CAMLexport value caml_##name(value vfo, value v)      \
+  {                                                     \
+    CAMLparam2(vfo, v);                                 \
+    name(FONT_OPTIONS_VAL(vfo), of_val(v));             \
+    CAMLreturn(Val_unit);                               \
+  }
+
+#define GET_FONT_OPTIONS(name, val_of, type)            \
+  CAMLexport value caml_##name(value vfo)               \
+  {                                                     \
+    CAMLparam1(vfo);                                    \
+    type ret = name(FONT_OPTIONS_VAL(vfo));             \
+    CAMLreturn(val_of(ret));                            \
+  }
+
+SET_FONT_OPTIONS(cairo_font_options_merge, FONT_OPTIONS_VAL)
+SET_FONT_OPTIONS(cairo_font_options_set_antialias, ANTIALIAS_VAL)
+GET_FONT_OPTIONS(cairo_font_options_get_antialias,
+                 VAL_ANTIALIAS, cairo_antialias_t)
+
+#define SUBPIXEL_ORDER_VAL(v) Int_val(v)
+#define VAL_SUBPIXEL_ORDER(v) Val_int(v)
+
+SET_FONT_OPTIONS(cairo_font_options_set_subpixel_order, SUBPIXEL_ORDER_VAL)
+GET_FONT_OPTIONS(cairo_font_options_get_subpixel_order,
+                 VAL_SUBPIXEL_ORDER, cairo_subpixel_order_t)
+
+#define HINT_STYLE_VAL(v) Int_val(v)
+#define VAL_HINT_STYLE(v) Val_int(v)
+
+SET_FONT_OPTIONS(cairo_font_options_set_hint_style, HINT_STYLE_VAL)
+GET_FONT_OPTIONS(cairo_font_options_get_hint_style,
+                 VAL_HINT_STYLE, cairo_hint_style_t)
+
+#define HINT_METRICS_VAL(v) Int_val(v)
+#define VAL_HINT_METRICS(v) Val_int(v)
+
+SET_FONT_OPTIONS(cairo_font_options_set_hint_metrics, HINT_METRICS_VAL)
+GET_FONT_OPTIONS(cairo_font_options_get_hint_metrics,
+                 VAL_HINT_METRICS, cairo_hint_metrics_t)
 
 
 /* Local Variables: */

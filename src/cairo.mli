@@ -1043,14 +1043,14 @@ sig
         {!Cairo.Font_options.merge} should be used to copy or merge of
         [Cairo.Font_options.t] values. *)
 
-  val set : context -> t -> unit
+  external set : context -> t -> unit = "caml_cairo_set_font_options"
     (** [set_font_options cr opt] sets a set of custom font rendering
         options for [cr].  Rendering options are derived by merging
         these options with the options derived from underlying
         surface; if the value in options has a default value (like
         [ANTIALIAS_DEFAULT]), then the value from the surface is used.  *)
 
-  val get : context -> t
+  external get : context -> t = "caml_cairo_get_font_options"
     (** Retrieves font rendering options set via
         {!Cairo.Font_options.set}.  Note that the returned options do
         not include any options derived from the underlying surface;
@@ -1061,27 +1061,36 @@ sig
     (** Allocates a new font options object with all options initialized
         to default values.  *)
 
-  val make : antialias -> subpixel_order -> hint_style -> hint_metrics -> t
-    (** Convenience function to create a, options object with properties set. *)
+  val make : ?antialias:antialias -> ?subpixel_order:subpixel_order ->
+    ?hint_style:hint_style -> ?hint_metrics:hint_metrics -> unit -> t
+    (** Convenience function to create an options object with properties set.
+        @param antialias default: [ANTIALIAS_DEFAULT]
+        @param subpixel_order default: [SUBPIXEL_ORDER_DEFAULT]
+        @param hint_style default: [HINT_STYLE_DEFAULT]
+        @param hint_metrics default: [HINT_METRICS_DEFAULT]
+    *)
 
-  val copy : t -> t
+  external copy : t -> t = "caml_cairo_font_options_copy"
     (** [copy original] allocates a new font options object copying
         the option values from [original]. *)
 
-  val merge : t -> t -> unit
+  external merge : t -> t -> unit = "caml_cairo_font_options_merge"
     (** [merge options other] merges non-default options from other
         into options, replacing existing values.  This operation can
         be thought of as somewhat similar to compositing other onto
         options with the operation of {!Cairo.Operator.OVER}. *)
 
-  val set_antialias : t -> antialias -> unit
+  external set_antialias : t -> antialias -> unit
+    = "caml_cairo_font_options_set_antialias"
     (** Sets the antialiasing mode for the font options object.  This
         specifies the type of antialiasing to do when rendering text. *)
 
-  val get_antialias : t -> antialias
+  external get_antialias : t -> antialias
+    = "caml_cairo_font_options_get_antialias"
     (** Gets the antialiasing mode for the font options object. *)
 
-  val set_subpixel_order : t -> subpixel_order -> unit
+  external set_subpixel_order : t -> subpixel_order -> unit
+    = "caml_cairo_font_options_set_subpixel_order"
     (** Sets the subpixel order for the font options object.  The
         subpixel order specifies the order of color elements within
         each pixel on the display device when rendering with an
@@ -1089,29 +1098,34 @@ sig
         {!Cairo.antialias}).  See the documentation for
         {!Cairo.subpixel_order} for full details. *)
 
-  val get_subpixel_order : t -> subpixel_order
+  external get_subpixel_order : t -> subpixel_order
+    = "caml_cairo_font_options_get_subpixel_order"
     (** Gets the subpixel order for the font options object. See the
         documentation for {!Cairo.subpixel_order} for full details. *)
 
-  val set_hint_style : t -> hint_style -> unit
+  external set_hint_style : t -> hint_style -> unit
+    = "caml_cairo_font_options_set_hint_style"
     (** Sets the hint style for font outlines for the font options
         object. This controls whether to fit font outlines to the
         pixel grid, and if so, whether to optimize for fidelity or
         contrast.  See the documentation for {!Cairo.hint_style} for
         full details. *)
 
-  val get_hint_style : t -> hint_style
+  external get_hint_style : t -> hint_style
+    = "caml_cairo_font_options_get_hint_style"
     (** Gets the hint style for font outlines for the font options
         object. See the documentation for {!Cairo.hint_style} for full
         details. *)
 
-  val set_hint_metrics : t -> hint_metrics -> unit
+  external set_hint_metrics : t -> hint_metrics -> unit
+    = "caml_cairo_font_options_set_hint_metrics"
     (** Sets the metrics hinting mode for the font options
         object. This controls whether metrics are quantized to integer
         values in device units. See the documentation for
         {!Cairo.hint_metrics} for full details. *)
 
-  val get_hint_metrics : t -> hint_metrics
+  external get_hint_metrics : t -> hint_metrics
+    = "caml_cairo_font_options_get_hint_metrics"
     (** Gets the metrics hinting mode for the font options object. See
         the documentation for {!Cairo.hint_metrics} for full details. *)
 end

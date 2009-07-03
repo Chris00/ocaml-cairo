@@ -488,6 +488,63 @@ external device_to_user_distance : t -> x:float -> y:float -> float * float
 
 
 (* ---------------------------------------------------------------------- *)
+(* Rendering text and glyphs *)
+
+type subpixel_order =
+  | SUBPIXEL_ORDER_DEFAULT
+  | SUBPIXEL_ORDER_RGB
+  | SUBPIXEL_ORDER_BGR
+  | SUBPIXEL_ORDER_VRGB
+  | SUBPIXEL_ORDER_VBGR
+
+type hint_style =
+  | HINT_STYLE_DEFAULT
+  | HINT_STYLE_NONE
+  | HINT_STYLE_SLIGHT
+  | HINT_STYLE_MEDIUM
+  | HINT_STYLE_FULL
+
+type hint_metrics =
+  | HINT_METRICS_DEFAULT
+  | HINT_METRICS_OFF
+  | HINT_METRICS_ON
+
+module Font_options =
+struct
+  type t
+
+  external set : context -> t -> unit = "caml_cairo_set_font_options"
+  external get : context -> t = "caml_cairo_get_font_options"
+  external create : unit -> t = "caml_cairo_font_options_create"
+  external copy : t -> t = "caml_cairo_font_options_copy"
+  external merge : t -> t -> unit = "caml_cairo_font_options_merge"
+  external set_antialias : t -> antialias -> unit
+    = "caml_cairo_font_options_set_antialias"
+  external get_antialias : t -> antialias
+    = "caml_cairo_font_options_get_antialias"
+  external set_subpixel_order : t -> subpixel_order -> unit
+    = "caml_cairo_font_options_set_subpixel_order"
+  external get_subpixel_order : t -> subpixel_order
+    = "caml_cairo_font_options_get_subpixel_order"
+  external set_hint_style : t -> hint_style -> unit
+    = "caml_cairo_font_options_set_hint_style"
+  external get_hint_style : t -> hint_style
+    = "caml_cairo_font_options_get_hint_style"
+  external set_hint_metrics : t -> hint_metrics -> unit
+    = "caml_cairo_font_options_set_hint_metrics"
+  external get_hint_metrics : t -> hint_metrics
+    = "caml_cairo_font_options_get_hint_metrics"
+
+  let make ?(antialias=ANTIALIAS_DEFAULT)
+      ?(subpixel_order=SUBPIXEL_ORDER_DEFAULT)
+      ?(hint_style=HINT_STYLE_DEFAULT) ?(hint_metrics=HINT_METRICS_DEFAULT) () =
+    let fo = create() in
+    set_antialias fo antialias;
+    set_subpixel_order fo subpixel_order;
+    set_hint_style fo hint_style;
+    set_hint_metrics fo hint_metrics
+end
+
 
 module Glyph =
 struct
