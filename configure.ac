@@ -60,19 +60,13 @@ AC_SUBST(PACKAGE_VERSION)
 AC_SUBST(CPPFLAGS)
 AC_SUBST(LIBS)
 
-AC_SUBST(OCAMLC)
-AC_SUBST(OCAMLOPT)
-AC_SUBST(OCAMLBEST)
 AC_SUBST(OCAMLDEP)
 AC_SUBST(OCAMLMKLIB)
 AC_SUBST(OCAMLDOC)
-AC_SUBST(OCAMLLIB)
-AC_SUBST(OCAMLVERSION)
-AC_SUBST(OCAMLFIND)
 
 # Finally create the Makefile and samples (read only to avoid changing
 # them by mistake)
 AC_CONFIG_FILES([Makefile.ocaml],[chmod a-w Makefile.ocaml])
 #AC_CONFIG_FILES([src/META],[chmod a-w src/META])
-AC_CONFIG_FILES([src/Makefile],[chmod a-w src/Makefile])
+AC_CONFIG_FILES([src/Makefile], [chmod a-w src/Makefile])
 AC_OUTPUT

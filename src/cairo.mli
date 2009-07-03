@@ -1201,7 +1201,7 @@ sig
         they are literally the options passed to
         {!Cairo.Font_options.set}. *)
 
-  val create : unit -> t
+  external create : unit -> t = "caml_cairo_font_options_create"
     (** Allocates a new font options object with all options initialized
         to default values.  *)
 
@@ -1306,11 +1306,12 @@ type weight = Normal | Bold
     FIXME: The behavior of calling a type-specific function with a scaled
     font of the wrong type is undefined. *)
 type font_type =
-  | FONT_TYPE_TOY (** The font was created using cairo's toy font api *)
-  | FONT_TYPE_FT (** The font is of type FreeType *)
-  | FONT_TYPE_WIN32 (** The font is of type Win32 *)
-  | FONT_TYPE_QUARTZ (** The font is of type Quartz *)
-  | FONT_TYPE_USER (** The font was create using cairo's user font api *)
+  [ `Toy (** The font was created using cairo's toy font api *)
+  | `Ft (** The font is of type FreeType *)
+  | `Win32 (** The font is of type Win32 *)
+  | `Quartz (** The font is of type Quartz *)
+  | `User (** The font was create using cairo's user font api *)
+  ]
 
 module Font_face :
 sig
@@ -1323,7 +1324,8 @@ sig
         {!Cairo.set_font_size} and {!Cairo.set_font_matrix}.
 
         Font faces are created using font-backend-specific constructors,
-        or implicitly using the toy text API by way of {!Cairo.select_font_face}.
+        or implicitly using the toy text API by way of
+        {!Cairo.select_font_face}.
 
         There are various types of font faces, depending on the font
         backend they use.  The type of a font face can be queried using
@@ -1333,12 +1335,13 @@ sig
     (** Replaces the current {!Cairo.font_face} object in the {!Cairo.t}
         with font_face. *)
 
-  external get : context -> 'a t = "caml_cairo_get_font_face"
+  external get : context -> font_type t = "caml_cairo_get_font_face"
     (** Gets the current font face for a {!Cairo.t}. *)
 
   external get_type : 'a t -> font_type = "caml_cairo_font_face_get_type"
-  (** This function returns the type of the backend used to create a
-      font face. See {!Cairo.font_type} for available types. *)
+      (** This function returns the type of the backend used to create a
+          font face. See {!Cairo.font_type} for available types.  If ['a]
+          contains a single variant, it will be the returned value. *)
 
   val create : ?family:string -> slant -> weight -> [`Toy] t
     (** [create family slant weight] creates a font face from a

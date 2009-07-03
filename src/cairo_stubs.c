@@ -836,8 +836,6 @@ GET_FONT_OPTIONS(cairo_font_options_get_hint_metrics,
 /* Font face
 ***********************************************************************/
 
-#define VAL_FONT_TYPE(v) Val_int(v)
-
 CAMLexport value caml_cairo_font_face_get_type(value vff)
 {
   CAMLparam1(vff);

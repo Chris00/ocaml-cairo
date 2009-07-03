@@ -245,6 +245,22 @@ static struct custom_operations caml_font_options_ops = {
   custom_deserialize_default };
 
 
+static value caml_cairo_font_type[5];
+
+CAMLexport value caml_cairo_font_type_init(value unit)
+{
+  /* noalloc */
+  caml_cairo_font_type[0] = caml_hash_variant("Toy");
+  caml_cairo_font_type[1] = caml_hash_variant("Ft");
+  caml_cairo_font_type[2] = caml_hash_variant("Win32");
+  caml_cairo_font_type[3] = caml_hash_variant("Quartz");
+  caml_cairo_font_type[4] = caml_hash_variant("User");
+  return(Val_unit);
+}
+
+#define VAL_FONT_TYPE(v) caml_cairo_font_type[v]
+
+
 #define FONT_FACE_VAL(v) (* (cairo_font_face_t**) Data_custom_val(v))
 
 DEFINE_CUSTOM_OPERATIONS(font_face, cairo_font_face_destroy, FONT_FACE_VAL)
@@ -254,3 +270,8 @@ DEFINE_CUSTOM_OPERATIONS(font_face, cairo_font_face_destroy, FONT_FACE_VAL)
 
 DEFINE_CUSTOM_OPERATIONS(scaled_font,
                          cairo_scaled_font_destroy, SCALED_FONT_VAL)
+
+
+/* Local Variables: */
+/* compile-command: "make -k cairo_stubs.o" */
+/* End: */

@@ -557,11 +557,15 @@ end
 type slant = Upright | Italic | Oblique
 type weight = Normal | Bold
 type font_type =
-  | FONT_TYPE_TOY
-  | FONT_TYPE_FT
-  | FONT_TYPE_WIN32
-  | FONT_TYPE_QUARTZ
-  | FONT_TYPE_USER
+    [ `Toy
+    | `Ft
+    | `Win32
+    | `Quartz
+    | `User
+    ]
+
+external font_type_init : unit -> unit = "caml_cairo_font_type_init" "noalloc"
+let () = font_type_init()
 
 module Font_face =
 struct
