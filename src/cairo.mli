@@ -1506,6 +1506,10 @@ sig
         [scaled_font].  The scale matrix is product of the font matrix
         and the ctm associated with the scaled font, and hence is the
         matrix mapping from font space to device space. *)
+
+  external get_type : 'a t -> font_type = "caml_cairo_scaled_font_get_type"
+    (** This function returns the type of the backend used to create a
+        scaled font.  See {!Cairo.font_type} for available types. *)
 end
 
 

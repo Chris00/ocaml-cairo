@@ -1030,6 +1030,14 @@ SCALED_FONT_GET_MATRIX(cairo_scaled_font_get_font_matrix)
 SCALED_FONT_GET_MATRIX(cairo_scaled_font_get_ctm)
 SCALED_FONT_GET_MATRIX(cairo_scaled_font_get_scale_matrix)
 
+CAMLexport value caml_cairo_scaled_font_get_type(value vff)
+{
+  CAMLparam1(vff);
+  cairo_font_type_t ft = cairo_scaled_font_get_type(SCALED_FONT_VAL(vff));
+  CAMLreturn(VAL_FONT_TYPE(ft));
+}
+
+
 
 /* Local Variables: */
 /* compile-command: "make -k cairo_stubs.o" */

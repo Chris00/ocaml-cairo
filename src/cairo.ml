@@ -637,6 +637,8 @@ struct
   external get_ctm : _ t -> Matrix.t = "caml_cairo_scaled_font_get_ctm"
   external get_scale_matrix : _ t -> Matrix.t
     = "caml_cairo_scaled_font_get_scale_matrix"
+
+  external get_type : _ t -> font_type = "caml_cairo_scaled_font_get_type"
 end
 
 
