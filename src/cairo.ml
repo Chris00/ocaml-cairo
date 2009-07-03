@@ -56,24 +56,23 @@ let () = Callback.register_exception "Cairo.Error" (Error INVALID_RESTORE)
 
 external status_to_string  : status -> string = "caml_cairo_status_to_string"
 
-type t
-type context = t
+type context
 type surface
 type surface_content = COLOR | ALPHA | COLOR_ALPHA
 type 'a pattern
 type any_pattern = [`Solid | `Surface | `Gradient | `Linear | `Radial] pattern
 type glyph = { index: int;  x: float;  y: float }
 
-external create : surface -> t = "caml_cairo_create"
-external save : t -> unit = "caml_cairo_save"
-external restore : t -> unit = "caml_cairo_restore"
+external create : surface -> context = "caml_cairo_create"
+external save : context -> unit = "caml_cairo_save"
+external restore : context -> unit = "caml_cairo_restore"
 
-external get_target : t -> surface = "caml_cairo_get_target"
+external get_target : context -> surface = "caml_cairo_get_target"
 
 module Group =
 struct
-  external push_group : t -> unit = "caml_cairo_push_group"
-  external push_group_with_content : t -> surface_content -> unit
+  external push_group : context -> unit = "caml_cairo_push_group"
+  external push_group_with_content : context -> surface_content -> unit
     = "caml_cairo_push_group_with_content"
 
   let push ?content cr =
@@ -81,24 +80,25 @@ struct
     | None -> push_group cr
     | Some c -> push_group_with_content cr c
 
-  external pop : t -> any_pattern = "caml_cairo_pop_group"
-  external pop_to_source : t -> unit = "caml_cairo_pop_group_to_source"
+  external pop : context -> any_pattern = "caml_cairo_pop_group"
+  external pop_to_source : context -> unit = "caml_cairo_pop_group_to_source"
 
-  external get_target : t -> surface = "caml_cairo_get_group_target"
+  external get_target : context -> surface = "caml_cairo_get_group_target"
 end
 
-external set_source_rgb : t -> r:float -> g:float -> b:float -> unit
+external set_source_rgb : context -> r:float -> g:float -> b:float -> unit
   = "caml_cairo_set_source_rgb"
 
-external set_source_rgba : t -> r:float -> g:float -> b:float -> a:float -> unit
+external set_source_rgba :
+  context -> r:float -> g:float -> b:float -> a:float -> unit
   = "caml_cairo_set_source_rgba"
 
-external set_source : t -> 'a pattern -> unit = "caml_cairo_set_source"
+external set_source : context -> 'a pattern -> unit = "caml_cairo_set_source"
 
-external set_source_surface : t -> surface -> x:float -> y:float -> unit
+external set_source_surface : context -> surface -> x:float -> y:float -> unit
   = "caml_cairo_set_source_surface"
 
-external get_source : t -> any_pattern = "caml_cairo_get_source"
+external get_source : context -> any_pattern = "caml_cairo_get_source"
 
 type antialias =
   | ANTIALIAS_DEFAULT
@@ -106,44 +106,48 @@ type antialias =
   | ANTIALIAS_GRAY
   | ANTIALIAS_SUBPIXEL
 
-external set_antialias : t -> antialias -> unit = "caml_cairo_set_antialias"
-external get_antialias : t -> antialias = "caml_cairo_get_antialias"
+external set_antialias : context -> antialias -> unit
+  = "caml_cairo_set_antialias"
+external get_antialias : context -> antialias = "caml_cairo_get_antialias"
 
-external set_dash_stub : t -> float array -> ofs:float -> unit
+external set_dash_stub : context -> float array -> ofs:float -> unit
   = "caml_cairo_set_dash"
 
 let set_dash cr ?(ofs=0.0) dashes = set_dash_stub cr dashes ~ofs
 
-external get_dash : t -> float array * float = "caml_cairo_get_dash"
+external get_dash : context -> float array * float = "caml_cairo_get_dash"
 
 type fill_rule =
   | WINDING
   | EVEN_ODD
 
-external set_fill_rule : t -> fill_rule -> unit = "caml_cairo_set_fill_rule"
-external get_fill_rule : t -> fill_rule = "caml_cairo_get_fill_rule"
+external set_fill_rule : context -> fill_rule -> unit
+  = "caml_cairo_set_fill_rule"
+external get_fill_rule : context -> fill_rule = "caml_cairo_get_fill_rule"
 
 type line_cap =
   | BUTT
   | ROUND
   | SQUARE
 
-external set_line_cap : t -> line_cap -> unit = "caml_cairo_set_line_cap"
-external get_line_cap : t -> line_cap = "caml_cairo_get_line_cap"
+external set_line_cap : context -> line_cap -> unit = "caml_cairo_set_line_cap"
+external get_line_cap : context -> line_cap = "caml_cairo_get_line_cap"
 
 type line_join =
   | JOIN_MITER
   | JOIN_ROUND
   | JOIN_BEVEL
 
-external set_line_join : t -> line_join -> unit = "caml_cairo_set_line_join"
-external get_line_join : t -> line_join = "caml_cairo_get_line_join"
+external set_line_join : context -> line_join -> unit
+  = "caml_cairo_set_line_join"
+external get_line_join : context -> line_join = "caml_cairo_get_line_join"
 
-external set_line_width : t -> float -> unit = "caml_cairo_set_line_width"
-external get_line_width : t -> float = "caml_cairo_get_line_width"
+external set_line_width : context -> float -> unit = "caml_cairo_set_line_width"
+external get_line_width : context -> float = "caml_cairo_get_line_width"
 
-external set_miter_limit : t -> float -> unit = "caml_cairo_set_miter_limit"
-external get_miter_limit : t -> float = "caml_cairo_get_miter_limit"
+external set_miter_limit : context -> float -> unit
+  = "caml_cairo_set_miter_limit"
+external get_miter_limit : context -> float = "caml_cairo_get_miter_limit"
 
 type operator =
   | CLEAR
@@ -161,14 +165,14 @@ type operator =
   | ADD
   | SATURATE
 
-external set_operator : t -> operator -> unit = "caml_cairo_set_operator"
-external get_operator : t -> operator = "caml_cairo_get_operator"
+external set_operator : context -> operator -> unit = "caml_cairo_set_operator"
+external get_operator : context -> operator = "caml_cairo_get_operator"
 
-external set_tolerance : t -> float -> unit = "caml_cairo_set_tolerance"
-external get_tolerance : t -> float = "caml_cairo_get_tolerance"
+external set_tolerance : context -> float -> unit = "caml_cairo_set_tolerance"
+external get_tolerance : context -> float = "caml_cairo_get_tolerance"
 
-external clip_stub : t -> unit = "caml_cairo_clip"
-external clip_preserve : t -> unit = "caml_cairo_clip_preserve"
+external clip_stub : context -> unit = "caml_cairo_clip"
+external clip_preserve : context -> unit = "caml_cairo_clip_preserve"
 
 let clip ?(preserve=false) cr =
   if preserve then clip_preserve cr else clip_stub cr
@@ -180,47 +184,49 @@ type rectangle = {
   height:float
 }
 
-external clip_extents : t -> rectangle = "caml_cairo_clip_extents"
+external clip_extents : context -> rectangle = "caml_cairo_clip_extents"
 
-external clip_reset : t -> unit = "caml_cairo_reset_clip"
+external clip_reset : context -> unit = "caml_cairo_reset_clip"
 
-external clip_rectangle_list : t -> rectangle list
+external clip_rectangle_list : context -> rectangle list
   = "caml_cairo_copy_clip_rectangle_list"
 
-external fill_stub : t -> unit = "caml_cairo_fill"
-external fill_preserve : t -> unit = "caml_cairo_fill_preserve"
+external fill_stub : context -> unit = "caml_cairo_fill"
+external fill_preserve : context -> unit = "caml_cairo_fill_preserve"
 
 let fill ?(preserve=false) cr =
   if preserve then fill_preserve cr else fill_stub cr
 
-external fill_extents : t -> rectangle = "caml_cairo_fill_extents"
+external fill_extents : context -> rectangle = "caml_cairo_fill_extents"
 
-external in_fill : t -> x:float -> y:float -> bool = "caml_cairo_in_fill"
+external in_fill : context -> x:float -> y:float -> bool = "caml_cairo_in_fill"
 
-external mask : t -> 'a pattern -> unit = "caml_cairo_mask"
-external mask_surface : t -> surface -> x:float -> y:float -> unit
+external mask : context -> 'a pattern -> unit = "caml_cairo_mask"
+external mask_surface : context -> surface -> x:float -> y:float -> unit
   = "caml_cairo_mask_surface"
 
-external paint_stub : t -> unit = "caml_cairo_paint"
-external paint_with_alpha : t -> float -> unit = "caml_cairo_paint_with_alpha"
+external paint_stub : context -> unit = "caml_cairo_paint"
+external paint_with_alpha : context -> float -> unit
+  = "caml_cairo_paint_with_alpha"
 
 let paint ?alpha cr =
   match alpha with
   | None -> paint_stub cr
   | Some a -> paint_with_alpha cr a
 
-external stroke_stub : t -> unit = "caml_cairo_stroke"
-external stroke_preserve : t -> unit = "caml_cairo_stroke_preserve"
+external stroke_stub : context -> unit = "caml_cairo_stroke"
+external stroke_preserve : context -> unit = "caml_cairo_stroke_preserve"
 
 let stroke ?(preserve=false) cr =
   if preserve then stroke_preserve cr else stroke_stub cr
 
-external stroke_extents : t -> rectangle = "caml_cairo_stroke_extents"
+external stroke_extents : context -> rectangle = "caml_cairo_stroke_extents"
 
-external in_stroke : t -> x:float -> y:float -> bool = "caml_cairo_in_stroke"
+external in_stroke : context -> x:float -> y:float -> bool
+  = "caml_cairo_in_stroke"
 
-external copy_page : t -> unit = "caml_cairo_copy_page"
-external show_page : t -> unit = "caml_cairo_show_page"
+external copy_page : context -> unit = "caml_cairo_copy_page"
+external show_page : context -> unit = "caml_cairo_show_page"
 
 (* ---------------------------------------------------------------------- *)
 
@@ -254,27 +260,28 @@ struct
 end
 
 
-external arc : t -> x:float -> y:float -> r:float -> a1:float -> a2:float
+external arc : context -> x:float -> y:float -> r:float -> a1:float -> a2:float
   -> unit = "caml_cairo_arc_bc" "caml_cairo_arc"
-external arc_negative : t -> x:float -> y:float -> r:float -> a1:float ->
+external arc_negative : context -> x:float -> y:float -> r:float -> a1:float ->
   a2:float -> unit = "caml_cairo_arc_negative_bc" "caml_cairo_arc_negative"
 
-external curve_to : t -> x1:float -> y1:float -> x2:float -> y2:float ->
+external curve_to : context -> x1:float -> y1:float -> x2:float -> y2:float ->
   x3:float -> y3:float -> unit
   = "caml_cairo_curve_to_bc" "caml_cairo_curve_to"
 
-external line_to : t -> x:float -> y:float -> unit = "caml_cairo_line_to"
-external move_to : t -> x:float -> y:float -> unit = "caml_cairo_move_to"
-external rectangle : t -> x:float -> y:float -> width:float -> height:float
-  -> unit = "caml_cairo_rectangle"
+external line_to : context -> x:float -> y:float -> unit = "caml_cairo_line_to"
+external move_to : context -> x:float -> y:float -> unit = "caml_cairo_move_to"
+external rectangle :
+  context -> x:float -> y:float -> width:float -> height:float -> unit
+  = "caml_cairo_rectangle"
 
-external rel_curve_to : t -> x1:float -> y1:float -> x2:float -> y2:float ->
-  x3:float -> y3:float -> unit
+external rel_curve_to : context -> x1:float -> y1:float ->
+  x2:float -> y2:float -> x3:float -> y3:float -> unit
   = "caml_cairo_rel_curve_to_bc" "caml_cairo_rel_curve_to"
 
-external rel_line_to : t -> x:float -> y:float -> unit
+external rel_line_to : context -> x:float -> y:float -> unit
   = "caml_cairo_rel_line_to"
-external rel_move_to : t -> x:float -> y:float -> unit
+external rel_move_to : context -> x:float -> y:float -> unit
   = "caml_cairo_rel_move_to"
 
 
@@ -467,24 +474,29 @@ end
 (* ---------------------------------------------------------------------- *)
 (* Transformations - Manipulating the current transformation matrix  *)
 
-external translate : t -> tx:float -> ty:float -> unit = "caml_cairo_translate"
-external scale : t -> sx:float -> sy:float -> unit = "caml_cairo_scale"
-external rotate : t -> angle:float -> unit = "caml_cairo_rotate"
+external translate : context -> tx:float -> ty:float -> unit
+  = "caml_cairo_translate"
+external scale : context -> sx:float -> sy:float -> unit = "caml_cairo_scale"
+external rotate : context -> angle:float -> unit = "caml_cairo_rotate"
 
-external transform : t -> Matrix.t -> unit = "caml_cairo_transform" "noalloc"
-external set_matrix : t -> Matrix.t -> unit = "caml_cairo_set_matrix" "noalloc"
+external transform : context -> Matrix.t -> unit
+  = "caml_cairo_transform" "noalloc"
+external set_matrix : context -> Matrix.t -> unit
+  = "caml_cairo_set_matrix" "noalloc"
 
-external get_matrix : t -> Matrix.t = "caml_cairo_get_matrix"
+external get_matrix : context -> Matrix.t = "caml_cairo_get_matrix"
 
-external identity_matrix : t -> unit = "caml_cairo_identity_matrix"
+external identity_matrix : context -> unit = "caml_cairo_identity_matrix"
 
-external user_to_device : t -> x:float -> y:float -> float * float
+external user_to_device : context -> x:float -> y:float -> float * float
   = "caml_cairo_user_to_device"
-external user_to_device_distance : t -> x:float -> y:float -> float * float
+external user_to_device_distance :
+  context -> x:float -> y:float -> float * float
   = "caml_cairo_user_to_device_distance"
-external device_to_user : t -> x:float -> y:float -> float * float
+external device_to_user : context -> x:float -> y:float -> float * float
   = "caml_cairo_device_to_user"
-external device_to_user_distance : t -> x:float -> y:float -> float * float
+external device_to_user_distance :
+  context -> x:float -> y:float -> float * float
   = "caml_cairo_device_to_user_distance"
 
 
@@ -573,10 +585,10 @@ module Font_face =
 struct
   type 'a t
 
-  external get_type : 'a t -> font_type = "caml_cairo_font_face_get_type"
-
   external set : context -> _ t -> unit = "caml_cairo_set_font_face"
-  external get : context -> 'a t = "caml_cairo_get_font_face"
+  external get : context -> font_type t = "caml_cairo_get_font_face"
+
+  external get_type : 'a t -> font_type = "caml_cairo_font_face_get_type"
 
   external create_stub : family:string -> slant -> weight -> [`Toy] t
     = "caml_cairo_toy_font_face_create"
@@ -656,24 +668,24 @@ struct
 end
 
 
-external select_font_face : t -> slant -> weight -> string -> unit
+external select_font_face : context -> slant -> weight -> string -> unit
   = "caml_cairo_select_font_face"
 
 let select_font_face cr ?(slant=Upright) ?(weight=Normal) family =
   select_font_face cr slant weight family
 
-external set_font_size : t -> float -> unit
+external set_font_size : context -> float -> unit
   = "caml_cairo_set_font_size"
 
-external set_font_matrix : t -> Matrix.t -> unit
+external set_font_matrix : context -> Matrix.t -> unit
   = "caml_cairo_set_font_matrix"
 
-external get_font_matrix : t -> Matrix.t = "caml_cairo_get_font_matrix"
+external get_font_matrix : context -> Matrix.t = "caml_cairo_get_font_matrix"
 
-external show_text : t -> string -> unit = "caml_cairo_show_text"
+external show_text : context -> string -> unit = "caml_cairo_show_text"
 
-external font_extents : t -> Scaled_font.font_extents
+external font_extents : context -> Scaled_font.font_extents
   = "caml_cairo_font_extents"
 
-external text_extents : t -> string -> text_extents
+external text_extents : context -> string -> text_extents
   = "caml_cairo_text_extents"

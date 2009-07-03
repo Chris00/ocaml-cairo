@@ -396,8 +396,7 @@ end
 (* ---------------------------------------------------------------------- *)
 (** {2:cairo_t The cairo drawing context} *)
 
-type t
-type context = t
+type context
   (** The cairo drawing context.  This is the main object used when
       drawing with cairo.  To draw with cairo, you create a [t], set
       the target surface, and drawing options for the [t], create
@@ -405,7 +404,7 @@ type context = t
       {!Cairo.line_to}, and then draw shapes with {!Cairo.stroke} or
       {!Cairo.fill}.  *)
 
-external create : Surface.t -> t = "caml_cairo_create"
+external create : Surface.t -> context = "caml_cairo_create"
  (** [create target] creates a new context with all graphics state
      parameters set to default values and with [target] as a target
      surface. The target surface should be constructed with a
@@ -414,23 +413,23 @@ external create : Surface.t -> t = "caml_cairo_create"
 
      @raise Out_of_memory if the context could not be allocated. *)
 
-external save : t -> unit = "caml_cairo_save"
+external save : context -> unit = "caml_cairo_save"
   (** [save cr] makes a copy of the current state of [cr] and saves it
       on an internal stack of saved states for [cr].  When [restore]
       is called, [cr] will be restored to the saved state.  Multiple
       calls to [save] and [restore] can be nested; each call to
       [restore] restores the state from the matching paired [save].  *)
-external restore : t -> unit = "caml_cairo_restore"
+external restore : context -> unit = "caml_cairo_restore"
   (** [restore cr] restores [cr] to the state saved by a preceding
       call to [save] and removes that state from the stack of saved
       states. *)
 
-external get_target : t -> Surface.t = "caml_cairo_get_target"
+external get_target : context -> Surface.t = "caml_cairo_get_target"
   (** Gets the target surface for the cairo context as passed to [create]. *)
 
 module Group :
 sig
-  val push : ?content:Surface.content -> t -> unit
+  val push : ?content:Surface.content -> context -> unit
     (** Temporarily redirects drawing to an intermediate surface known
         as a group.  The redirection lasts until the group is completed
         by a call to {!Cairo.Group.pop} or {!Cairo.Group.pop_to_source}.
@@ -456,7 +455,7 @@ sig
         intermediate group will have a content type of
         CAIRO_CONTENT_COLOR_ALPHA.  *)
 
-  external pop : t -> Pattern.any = "caml_cairo_pop_group"
+  external pop : context -> Pattern.any = "caml_cairo_pop_group"
     (** Terminates the redirection begun by a call to
         {!Cairo.Group.push} and returns a new pattern containing the
         results of all drawing operations performed to the group.
@@ -469,7 +468,7 @@ sig
         @return a newly created (surface) pattern containing the results
         of all drawing operations performed to the group.  *)
 
-  external pop_to_source : t -> unit = "caml_cairo_pop_group_to_source"
+  external pop_to_source : context -> unit = "caml_cairo_pop_group_to_source"
     (** Terminates the redirection begun by a call to [Group.push] and
         installs the resulting pattern as the source pattern in the
         given cairo context.
@@ -482,14 +481,14 @@ sig
         ]}
     *)
 
-  external get_target : t -> Surface.t = "caml_cairo_get_group_target"
+  external get_target : context -> Surface.t = "caml_cairo_get_group_target"
     (** Gets the current destination surface for the context.  This is
         either the original target surface as passed to [create] or
         the target surface for the current group as started by the most
         recent call to [Group.push]. *)
 end
 
-external set_source_rgb : t -> r:float -> g:float -> b:float -> unit
+external set_source_rgb : context -> r:float -> g:float -> b:float -> unit
   = "caml_cairo_set_source_rgb"
   (** [set_source_rgb cr r g b] sets the source pattern within [cr] to
       an opaque color.  This opaque color will then be used for any
@@ -502,7 +501,8 @@ external set_source_rgb : t -> r:float -> g:float -> b:float -> unit
       The default source pattern is opaque black, (that is, it is
       equivalent to [set_source_rgb cr 0. 0. 0.]). *)
 
-external set_source_rgba : t -> r:float -> g:float -> b:float -> a:float -> unit
+external set_source_rgba : context ->
+  r:float -> g:float -> b:float -> a:float -> unit
   = "caml_cairo_set_source_rgba"
   (** [set_source_rgba cr r g b a] sets the source pattern within [cr]
       to a translucent color.  This color will then be used for any
@@ -515,7 +515,7 @@ external set_source_rgba : t -> r:float -> g:float -> b:float -> a:float -> unit
       The default source pattern is opaque black, (that is, it is
       equivalent to [set_source_rgba cr 0. 0. 0. 1.0]). *)
 
-external set_source : t -> 'a Pattern.t -> unit = "caml_cairo_set_source"
+external set_source : context -> 'a Pattern.t -> unit = "caml_cairo_set_source"
   (** [set_source cr source] sets the source pattern within [cr] to
       [source].  This pattern will then be used for any subsequent
       drawing operation until a new source pattern is set.
@@ -528,7 +528,7 @@ external set_source : t -> 'a Pattern.t -> unit = "caml_cairo_set_source"
       The default source pattern is a solid pattern that is opaque
       black (that is, it is equivalent to [set_source_rgb cr 0. 0. 0.]). *)
 
-external set_source_surface : t -> Surface.t -> x:float -> y:float -> unit
+external set_source_surface : context -> Surface.t -> x:float -> y:float -> unit
   = "caml_cairo_set_source_surface"
   (** [set_source_surface cr surface x y] is a convenience for
       creating a pattern from surface and setting it as the source in [cr]
@@ -548,7 +548,7 @@ external set_source_surface : t -> Surface.t -> x:float -> y:float -> unit
       modified if desired (e.g. to create a repeating pattern with
       {!Cairo.Pattern.set_extend}). *)
 
-external get_source : t -> Pattern.any = "caml_cairo_get_source"
+external get_source : context -> Pattern.any = "caml_cairo_get_source"
   (** [get_source cr] gets the current source pattern for [cr]. *)
 
 (** Specifies the type of antialiasing to do when rendering text or shapes. *)
@@ -563,7 +563,8 @@ type antialias =
                            the order of subpixel elements on devices
                            such as LCD panels *)
 
-external set_antialias : t -> antialias -> unit = "caml_cairo_set_antialias"
+external set_antialias : context -> antialias -> unit
+  = "caml_cairo_set_antialias"
     (** Set the antialiasing mode of the rasterizer used for drawing
         shapes.  This value is a hint, and a particular backend may or
         may not support a particular value.  At the current time, no
@@ -572,11 +573,11 @@ external set_antialias : t -> antialias -> unit = "caml_cairo_set_antialias"
         Note that this option does not affect text rendering, instead
         see {!Cairo.Font_options.set_antialias}. *)
 
-external get_antialias : t -> antialias = "caml_cairo_get_antialias"
+external get_antialias : context -> antialias = "caml_cairo_get_antialias"
   (** Gets the current shape antialiasing mode, as set by
       {!Cairo.set_antialias}. *)
 
-val set_dash : t -> ?ofs:float -> float array -> unit
+val set_dash : context -> ?ofs:float -> float array -> unit
   (** [set_dash cr dashes] sets the dash pattern to be used by
       {!Cairo.stroke}.  A dash pattern is specified by dashes, an
       array of positive values.  Each value provides the length of
@@ -597,7 +598,7 @@ val set_dash : t -> ?ofs:float -> float array -> unit
       the time of stroking.  This is not necessarily the same as the
       user space at the time of [set_dash].  *)
 
-external get_dash : t -> float array * float = "caml_cairo_get_dash"
+external get_dash : context -> float array * float = "caml_cairo_get_dash"
   (** Gets the current dash array ([( [| |], 0.)] if dashing is not
       currently in effect). *)
 
@@ -624,7 +625,8 @@ type fill_rule =
                  total number of intersections is odd, the point will
                  be filled. *)
 
-external set_fill_rule : t -> fill_rule -> unit = "caml_cairo_set_fill_rule"
+external set_fill_rule : context -> fill_rule -> unit
+  = "caml_cairo_set_fill_rule"
     (** [set_fill_rule cr fill_rule] sets the current fill rule within
         the cairo context [cr].  The fill rule is used to determine
         which regions are inside or outside a complex (potentially
@@ -632,7 +634,7 @@ external set_fill_rule : t -> fill_rule -> unit = "caml_cairo_set_fill_rule"
         {!Cairo.fill} and {!Cairo.clip}.  See {!Cairo.fill_rule} for
         details on the semantics of each available fill rule.  *)
 
-external get_fill_rule : t -> fill_rule = "caml_cairo_get_fill_rule"
+external get_fill_rule : context -> fill_rule = "caml_cairo_get_fill_rule"
     (** Gets the current fill rule, as set by [set_fill_rule]. *)
 
 
@@ -643,7 +645,7 @@ type line_cap =
   | ROUND (** use a round ending, the center of the circle is the end point *)
   | SQUARE (** use squared ending, the center of the square is the end point *)
 
-external set_line_cap : t -> line_cap -> unit = "caml_cairo_set_line_cap"
+external set_line_cap : context -> line_cap -> unit = "caml_cairo_set_line_cap"
     (** [set_line_cap cr line_cap] sets the current line cap style
         within the cairo context [cr].  See {!Cairo.line_cap} for
         details about how the available line cap styles are drawn.
@@ -654,7 +656,7 @@ external set_line_cap : t -> line_cap -> unit = "caml_cairo_set_line_cap"
         during path construction.
 
         The default line cap style is [BUTT].  *)
-external get_line_cap : t -> line_cap = "caml_cairo_get_line_cap"
+external get_line_cap : context -> line_cap = "caml_cairo_get_line_cap"
     (** Gets the current line cap style, as set by {!Cairo.set_line_cap}. *)
 
 
@@ -667,7 +669,8 @@ type line_join =
   | JOIN_BEVEL (** use a cut-off join, the join is cut off at half the line
                    width from the joint point *)
 
-external set_line_join : t -> line_join -> unit = "caml_cairo_set_line_join"
+external set_line_join : context -> line_join -> unit
+  = "caml_cairo_set_line_join"
     (** Sets the current line join style within the cairo context.
         See {!Cairo.line_join} for details about how the available
         line join styles are drawn.
@@ -678,11 +681,11 @@ external set_line_join : t -> line_join -> unit = "caml_cairo_set_line_join"
         during path construction.
 
         The default line join style is [MITER]. *)
-external get_line_join : t -> line_join = "caml_cairo_get_line_join"
+external get_line_join : context -> line_join = "caml_cairo_get_line_join"
     (** Gets the current line join style, as set by {!Cairo.set_line_join}. *)
 
 
-external set_line_width : t -> float -> unit = "caml_cairo_set_line_width"
+external set_line_width : context -> float -> unit = "caml_cairo_set_line_width"
     (** Sets the current line width within the cairo context. The line
         width value specifies the diameter of a pen that is circular in
         user space, (though device-space pen may be an ellipse in general
@@ -703,13 +706,15 @@ external set_line_width : t -> float -> unit = "caml_cairo_set_line_width"
         path construction.
 
         The default line width value is [2.0].  *)
-external get_line_width : t -> float = "caml_cairo_get_line_width"
+
+external get_line_width : context -> float = "caml_cairo_get_line_width"
     (** This function returns the current line width value exactly as
         set by {!Cairo.set_line_width}.  Note that the value is
         unchanged even if the CTM has changed between the calls to
         [set_line_width] and [get_line_width]. *)
 
-external set_miter_limit : t -> float -> unit = "caml_cairo_set_miter_limit"
+external set_miter_limit : context -> float -> unit
+  = "caml_cairo_set_miter_limit"
     (** Sets the current miter limit within the cairo context.
 
         If the current line join style is set to [MITER] (see
@@ -733,7 +738,7 @@ external set_miter_limit : t -> float -> unit = "caml_cairo_set_miter_limit"
         A miter limit for a desired angle can be computed as: miter
         limit = 1/sin(angle/2).  *)
 
-external get_miter_limit : t -> float = "caml_cairo_get_miter_limit"
+external get_miter_limit : context -> float = "caml_cairo_get_miter_limit"
     (** Gets the current miter limit, as set by {!Cairo.set_miter_limit}. *)
 
 
@@ -774,17 +779,17 @@ type operator =
   | SATURATE (** like over, but assuming source and dest are
                  disjoint geometries *)
 
-external set_operator : t -> operator -> unit = "caml_cairo_set_operator"
+external set_operator : context -> operator -> unit = "caml_cairo_set_operator"
     (** Sets the compositing operator to be used for all drawing
         operations.  See {!Cairo.operator} for details on the
         semantics of each available compositing operator.
 
         The default operator is [OVER]. *)
 
-external get_operator : t -> operator = "caml_cairo_get_operator"
+external get_operator : context -> operator = "caml_cairo_get_operator"
     (** Gets the current compositing operator for a cairo context.  *)
 
-external set_tolerance : t -> float -> unit = "caml_cairo_set_tolerance"
+external set_tolerance : context -> float -> unit = "caml_cairo_set_tolerance"
     (** Sets the tolerance used when converting paths into trapezoids.
         Curved segments of the path will be subdivided until the
         maximum deviation between the original path and the polygonal
@@ -793,7 +798,7 @@ external set_tolerance : t -> float -> unit = "caml_cairo_set_tolerance"
         value, better appearance.  (Reducing the value from the
         default value of [0.1] is unlikely to improve appearance
         significantly.)  *)
-external get_tolerance : t -> float = "caml_cairo_get_tolerance"
+external get_tolerance : context -> float = "caml_cairo_get_tolerance"
     (** Gets the current tolerance value, as set by {!Cairo.set_tolerance}. *)
 
 
@@ -805,7 +810,7 @@ type rectangle = {
   height:float   (** height of the rectangle  *)
 }
 
-val clip : ?preserve:bool -> t -> unit
+val clip : ?preserve:bool -> context -> unit
   (** Establishes a new clip region by intersecting the current clip
       region with the current path as it would be filled by
       {!Cairo.fill} and according to the current fill rule (see
@@ -818,11 +823,11 @@ val clip : ?preserve:bool -> t -> unit
       means of temporarily restricting the clip region.
   *)
 
-external clip_extents : t -> rectangle = "caml_cairo_clip_extents"
+external clip_extents : context -> rectangle = "caml_cairo_clip_extents"
   (** Computes a bounding box in user coordinates covering the area
       inside the current clip.  *)
 
-external clip_reset : t -> unit = "caml_cairo_reset_clip"
+external clip_reset : context -> unit = "caml_cairo_reset_clip"
   (** Reset the current clip region to its original, unrestricted
       state.  That is, set the clip region to an infinitely large
       shape containing the target surface.  Equivalently, if infinity is too
@@ -835,7 +840,7 @@ external clip_reset : t -> unit = "caml_cairo_reset_clip"
       {!Cairo.restore} around {!Cairo.clip} as a more robust means of
       temporarily restricting the clip region. *)
 
-external clip_rectangle_list : t -> rectangle list
+external clip_rectangle_list : context -> rectangle list
   = "caml_cairo_copy_clip_rectangle_list"
   (** Gets the current clip region as a list of rectangles in user
       coordinates.
@@ -844,7 +849,7 @@ external clip_rectangle_list : t -> rectangle list
       region cannot be represented as a list of user-space rectangles.  *)
 
 
-val fill : ?preserve:bool -> t -> unit
+val fill : ?preserve:bool -> context -> unit
   (** A drawing operator that fills the current path according to the
       current fill rule, (each sub-path is implicitly closed before
       being filled).  After [fill], the current path will be cleared
@@ -852,7 +857,7 @@ val fill : ?preserve:bool -> t -> unit
 
       See also {!Cairo.set_fill_rule}. *)
 
-external fill_extents : t -> rectangle = "caml_cairo_fill_extents"
+external fill_extents : context -> rectangle = "caml_cairo_fill_extents"
   (** Computes a bounding box in user coordinates covering the area
       that would be affected, (the "inked" area), by a [fill]
       operation given the current path and fill parameters.  If the
@@ -871,7 +876,7 @@ external fill_extents : t -> rectangle = "caml_cairo_fill_extents"
 
       See {!Cairo.fill} and {!Cairo.set_fill_rule}. *)
 
-external in_fill : t -> x:float -> y:float -> bool = "caml_cairo_in_fill"
+external in_fill : context -> x:float -> y:float -> bool = "caml_cairo_in_fill"
   (** Tests whether the given point is inside the area that would be
       affected by a [fill] operation given the current path and
       filling parameters.  Surface dimensions and clipping are not
@@ -879,12 +884,12 @@ external in_fill : t -> x:float -> y:float -> bool = "caml_cairo_in_fill"
 
       See also {!Cairo.fill} and {!Cairo.set_fill_rule}.  *)
 
-external mask : t -> 'a Pattern.t -> unit = "caml_cairo_mask"
+external mask : context -> 'a Pattern.t -> unit = "caml_cairo_mask"
   (** [mask cr pattern]: a drawing operator that paints the current
       source using the alpha channel of [pattern] as a mask.  (Opaque
       areas of [pattern] are painted with the source, transparent
       areas are not painted.) *)
-external mask_surface : t -> Surface.t -> x:float -> y:float -> unit
+external mask_surface : context -> Surface.t -> x:float -> y:float -> unit
   = "caml_cairo_mask_surface"
   (** [mask_surface cr surface x y]: a drawing operator that paints
       the current source using the alpha channel of [surface] as a
@@ -894,14 +899,14 @@ external mask_surface : t -> Surface.t -> x:float -> y:float -> unit
       @param x  X coordinate at which to place the origin of [surface].
       @param y  Y coordinate at which to place the origin of [surface]. *)
 
-val paint : ?alpha:float -> t -> unit
+val paint : ?alpha:float -> context -> unit
   (** A drawing operator that paints the current source everywhere
       within the current clip region.  If [alpha] is set, the drawing
       is faded out using the alpha value.
 
       @param alpha  alpha value, between 0 (transparent) and 1 (opaque).  *)
 
-val stroke : ?preserve:bool -> t -> unit
+val stroke : ?preserve:bool -> context -> unit
   (** A drawing operator that strokes the current path according to
       the current line width, line join, line cap, and dash settings.
       After [stroke], the current path will be cleared from the cairo
@@ -930,7 +935,7 @@ val stroke : ?preserve:bool -> t -> unit
       In no case will a cap style of [BUTT] cause anything to be drawn
       in the case of either degenerate segments or sub-paths. *)
 
-val stroke_extents : t -> rectangle
+val stroke_extents : context -> rectangle
   (** Computes a bounding box in user coordinates covering the area
       that would be affected, (the "inked" area), by a {!Cairo.stroke}
       operation operation given the current path and stroke
@@ -951,13 +956,14 @@ val stroke_extents : t -> rectangle
       See {!Cairo.stroke}, {!Cairo.set_line_width}, {!Cairo.set_line_join},
       {!Cairo.set_line_cap}, and {!Cairo.set_dash}. *)
 
-external in_stroke : t -> x:float -> y:float -> bool = "caml_cairo_in_stroke"
+external in_stroke : context -> x:float -> y:float -> bool
+  = "caml_cairo_in_stroke"
   (** Tests whether the given point is inside the area that would be
       affected by a {!Cairo.stroke} operation given the current path
       and stroking parameters. Surface dimensions and clipping are not
       taken into account.  *)
 
-external copy_page : t -> unit = "caml_cairo_copy_page"
+external copy_page : context -> unit = "caml_cairo_copy_page"
   (** [copy_page cr] emits the current page for backends that support
       multiple pages, but doesn't clear it, so, the contents of the
       current page will be retained for the next page too.  Use
@@ -966,7 +972,7 @@ external copy_page : t -> unit = "caml_cairo_copy_page"
 
       This is a convenience function that simply calls
       {!Cairo.Surface.copy_page} on [cr]'s target. *)
-external show_page : t -> unit = "caml_cairo_show_page"
+external show_page : context -> unit = "caml_cairo_show_page"
   (** [show_page cr] emits and clears the current page for backends
       that support multiple pages.  Use {!Cairo.copy_page} if you
       don't want to clear the page.
@@ -1517,7 +1523,8 @@ sig
 end
 
 
-val select_font_face : t -> ?slant:slant -> ?weight:weight -> string -> unit
+val select_font_face : context -> ?slant:slant -> ?weight:weight -> string ->
+  unit
   (** [select_font_face cr family ?slant ?weight] selects a family
       and style of font from a simplified description as a family
       name, slant and weight. Cairo provides no operation to list
@@ -1552,7 +1559,7 @@ val select_font_face : t -> ?slant:slant -> ?weight:weight -> string -> unit
       "sans-serif".  Default slant is [Upright], and default weight is
       [Normal].  *)
 
-external set_font_size : t -> float -> unit
+external set_font_size : context -> float -> unit
   = "caml_cairo_set_font_size"
   (** [set_font_size cr size] sets the current font matrix to a
       scale by a factor of size, replacing any font matrix previously
@@ -1565,7 +1572,7 @@ external set_font_size : t -> float -> unit
       {!Cairo.set_font_matrix} nor {!Cairo.Text.set_scaled_font}),
       the default font size is 10.0. *)
 
-external set_font_matrix : t -> Matrix.t -> unit
+external set_font_matrix : context -> Matrix.t -> unit
   = "caml_cairo_set_font_matrix"
   (** [set_font_matrix cr matrix] sets the current font matrix to
       [matrix].  The font matrix gives a transformation from the
@@ -1575,10 +1582,10 @@ external set_font_matrix : t -> Matrix.t -> unit
       matrix can be used to shear the font or stretch it unequally
       along the two axes.  *)
 
-external get_font_matrix : t -> Matrix.t = "caml_cairo_get_font_matrix"
+external get_font_matrix : context -> Matrix.t = "caml_cairo_get_font_matrix"
   (** Returns the current font matrix.  See {!Cairo.set_font_matrix}. *)
 
-external show_text : t -> string -> unit = "caml_cairo_show_text"
+external show_text : context -> string -> unit = "caml_cairo_show_text"
   (** A drawing operator that generates the shape from a string of
       UTF-8 characters, rendered according to the current [font_face],
       [font_size] (font_matrix), and [font_options].
@@ -1595,11 +1602,11 @@ external show_text : t -> string -> unit = "caml_cairo_show_text"
       glyph offset by its advance values. This allows for easy display
       of a single logical string with multiple calls to [show_text].  *)
 
-external font_extents : t -> Scaled_font.font_extents
+external font_extents : context -> Scaled_font.font_extents
   = "caml_cairo_font_extents"
   (** Gets the font extents for the currently selected font. *)
 
-external text_extents : t -> string -> text_extents
+external text_extents : context -> string -> text_extents
   = "caml_cairo_text_extents"
   (** [text_extents cr utf8] gets the extents for a string of text.
       The extents describe a user-space rectangle that encloses the
@@ -1781,7 +1788,7 @@ sig
   val of_array : path_data array -> t
 end
 
-external arc : t ->
+external arc : context ->
   x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
   = "caml_cairo_arc_bc" "caml_cairo_arc"
   (** [arc xc yc radius angla1 angle2] adds a circular arc of the
@@ -1826,7 +1833,7 @@ external arc : t ->
       ]}
   *)
 
-external arc_negative : t ->
+external arc_negative : context ->
   x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
   = "caml_cairo_arc_negative_bc" "caml_cairo_arc_negative"
   (** [arc_negative xc yc radius angla1 angle2] adds a circular arc of
@@ -1839,7 +1846,7 @@ external arc_negative : t ->
       See {!Cairo.arc} for more details.  This function differs only
       in the direction of the arc between the two angles. *)
 
-external curve_to : t ->
+external curve_to : context ->
   x1:float -> y1:float -> x2:float -> y2:float -> x3:float -> y3:float -> unit
   = "caml_cairo_curve_to_bc" "caml_cairo_curve_to"
   (** Adds a cubic Bézier spline to the path from the current point to
@@ -1851,7 +1858,7 @@ external curve_to : t ->
       function will behave as if preceded by a call to
       {!Cairo.move_to}[ cr x1 y1]. *)
 
-external line_to : t -> x:float -> y:float -> unit = "caml_cairo_line_to"
+external line_to : context -> x:float -> y:float -> unit = "caml_cairo_line_to"
   (** Adds a line to the path from the current point to position (x,
       y) in user-space coordinates. After this call the current point
       will be (x, y).
@@ -1859,12 +1866,13 @@ external line_to : t -> x:float -> y:float -> unit = "caml_cairo_line_to"
       If there is no current point before the call to cairo_line_to()
       this function will behave as {!Cairo.move_to}[ cr x y]. *)
 
-external move_to : t -> x:float -> y:float -> unit = "caml_cairo_move_to"
+external move_to : context -> x:float -> y:float -> unit = "caml_cairo_move_to"
   (** Begin a new sub-path.  After this call the current point will be
       (x, y). *)
 
-external rectangle : t -> x:float -> y:float -> width:float -> height:float
-  -> unit = "caml_cairo_rectangle"
+external rectangle : context ->
+  x:float -> y:float -> width:float -> height:float -> unit
+  = "caml_cairo_rectangle"
   (** Adds a closed sub-path rectangle of the given size to the
       current path at position (x, y) in user-space coordinates.
 
@@ -1878,7 +1886,7 @@ external rectangle : t -> x:float -> y:float -> width:float -> height:float
       ]}
   *)
 
-external rel_curve_to : t ->
+external rel_curve_to : context ->
   x1:float -> y1:float -> x2:float -> y2:float -> x3:float -> y3:float -> unit
   = "caml_cairo_rel_curve_to_bc" "caml_cairo_rel_curve_to"
   (** Relative-coordinate version of {!Cairo.curve_to}.  All offsets
@@ -1895,7 +1903,7 @@ external rel_curve_to : t ->
       It is an error to call this function with no current point.
       Doing so will cause [Error NO_CURRENT_POINT] to be raised.  *)
 
-external rel_line_to : t -> x:float -> y:float -> unit
+external rel_line_to : context -> x:float -> y:float -> unit
   = "caml_cairo_rel_line_to"
   (** Relative-coordinate version of {!Cairo.line_to}.  Adds a line to
       the path from the current point to a point that is offset from the
@@ -1908,7 +1916,7 @@ external rel_line_to : t -> x:float -> y:float -> unit
       It is an error to call this function with no current point.
       Doing so will cause [Error NO_CURRENT_POINT] to be raised.  *)
 
-external rel_move_to : t -> x:float -> y:float -> unit
+external rel_move_to : context -> x:float -> y:float -> unit
   = "caml_cairo_rel_move_to"
   (** Begin a new sub-path. After this call the current point will
       offset by (x, y).
@@ -1932,7 +1940,8 @@ external rel_move_to : t -> x:float -> y:float -> unit
     See also {!Cairo.Matrix}. *)
 
 
-external translate : t -> tx:float -> ty:float -> unit = "caml_cairo_translate"
+external translate : context -> tx:float -> ty:float -> unit
+  = "caml_cairo_translate"
   (** Modifies the current transformation matrix (CTM) by translating
       the user-space origin by ([tx], [ty]).  This offset is
       interpreted as a user-space coordinate according to the CTM in
@@ -1940,58 +1949,62 @@ external translate : t -> tx:float -> ty:float -> unit = "caml_cairo_translate"
       translation of the user-space origin takes place after any
       existing transformation. *)
 
-external scale : t -> sx:float -> sy:float -> unit = "caml_cairo_scale"
+external scale : context -> sx:float -> sy:float -> unit = "caml_cairo_scale"
   (** Modifies the current transformation matrix (CTM) by scaling the
       X and Y user-space axes by [sx] and [sy] respectively.  The
       scaling of the axes takes place after any existing
       transformation of user space. *)
 
-external rotate : t -> angle:float -> unit = "caml_cairo_rotate"
+external rotate : context -> angle:float -> unit = "caml_cairo_rotate"
   (** Modifies the current transformation matrix (CTM) by rotating the
       user-space axes by [angle] radians.  The rotation of the axes
       takes places after any existing transformation of user
       space. The rotation direction for positive angles is from the
       positive X axis toward the positive Y axis. *)
 
-external transform : t -> Matrix.t -> unit = "caml_cairo_transform" "noalloc"
+external transform : context -> Matrix.t -> unit
+  = "caml_cairo_transform" "noalloc"
   (** [transform cr matrix] modifies the current transformation matrix
       (CTM) by applying [matrix] as an additional transformation.  The
       new transformation of user space takes place after any existing
       transformation. *)
 
-external set_matrix : t -> Matrix.t -> unit = "caml_cairo_set_matrix" "noalloc"
+external set_matrix : context -> Matrix.t -> unit
+  = "caml_cairo_set_matrix" "noalloc"
   (** [set_matrix cr matrix] Modifies the current transformation
       matrix (CTM) by setting it equal to [matrix]. *)
 
-external get_matrix : t -> Matrix.t = "caml_cairo_get_matrix"
+external get_matrix : context -> Matrix.t = "caml_cairo_get_matrix"
   (** Return the current transformation matrix (CTM). *)
 
-external identity_matrix : t -> unit = "caml_cairo_identity_matrix"
+external identity_matrix : context -> unit = "caml_cairo_identity_matrix"
   (** Resets the current transformation matrix (CTM) by setting it
       equal to the identity matrix.  That is, the user-space and
       device-space axes will be aligned and one user-space unit will
       transform to one device-space unit. *)
 
-external user_to_device : t -> x:float -> y:float -> float * float
+external user_to_device : context -> x:float -> y:float -> float * float
   = "caml_cairo_user_to_device"
   (** [user_to_device cr x y] transform a coordinate from user space
       to device space by multiplying the given point by the current
       transformation matrix (CTM). *)
 
-external user_to_device_distance : t -> x:float -> y:float -> float * float
+external user_to_device_distance :
+  context -> x:float -> y:float -> float * float
   = "caml_cairo_user_to_device_distance"
   (** [user_to_device_distance cr dx dy] transform a distance vector
       from user space to device space.  This function is similar to
       {!Cairo.user_to_device} except that the translation components
       of the CTM will be ignored when transforming ([dx],[dy]). *)
 
-external device_to_user : t -> x:float -> y:float -> float * float
+external device_to_user : context -> x:float -> y:float -> float * float
   = "caml_cairo_device_to_user"
   (** Transform a coordinate from device space to user space by
       multiplying the given point by the inverse of the current
       transformation matrix (CTM). *)
 
-external device_to_user_distance : t -> x:float -> y:float -> float * float
+external device_to_user_distance :
+  context -> x:float -> y:float -> float * float
   = "caml_cairo_device_to_user_distance"
   (** [device_to_user_distance cr dx dy] transform a distance vector
       from device space to user space.  This function is similar to
