@@ -1355,13 +1355,16 @@ sig
         The {!Cairo.select_font_face} function uses this to create font
         faces. See that function for limitations of toy font faces. *)
 
-  val get_family : [`Toy] t -> string
+  external get_family : [`Toy] t -> string
+    = "caml_cairo_toy_font_face_get_family"
     (** Gets the familly name of a toy font. *)
 
-  val get_slant : [`Toy] t -> slant
+  external get_slant : [`Toy] t -> slant
+    = "caml_cairo_toy_font_face_get_slant"
     (** Gets the slant a toy font. *)
 
-  val get_weight : [`Toy] t -> weight
+  external get_weight : [`Toy] t -> weight
+    = "caml_cairo_toy_font_face_get_weight"
     (** Gets the weight a toy font. *)
 end
 
@@ -1536,8 +1539,7 @@ val select_font_face : t -> ?slant:slant -> ?weight:weight -> string -> unit
 
       Similarly, when using the "real" font support, you can call
       directly into the underlying font system, (such as fontconfig
-      or freetype), for operations such as listing available fonts,
-      etc.
+      or freetype), for operations such as listing available fonts, etc.
 
       It is expected that most applications will need to use a more
       comprehensive font handling and text layout library, (for
@@ -1546,8 +1548,8 @@ val select_font_face : t -> ?slant:slant -> ?weight:weight -> string -> unit
       If text is drawn without a call to {!Cairo.select_font_face},
       (nor {!Cairo.Font_face.set} nor {!Cairo.set_scaled_font}), the
       default family is platform-specific, but is essentially
-      "sans-serif".  Default slant is CAIRO_FONT_SLANT_NORMAL, and
-      default weight is CAIRO_FONT_WEIGHT_NORMAL.  *)
+      "sans-serif".  Default slant is [Upright], and default weight is
+      [Normal].  *)
 
 val set_font_size : t -> float -> unit
   (** [set_font_size cr size] sets the current font matrix to a

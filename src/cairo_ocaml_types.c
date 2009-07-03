@@ -271,6 +271,11 @@ DEFINE_CUSTOM_OPERATIONS(font_face, cairo_font_face_destroy, FONT_FACE_VAL)
 DEFINE_CUSTOM_OPERATIONS(scaled_font,
                          cairo_scaled_font_destroy, SCALED_FONT_VAL)
 
+#define SLANT_VAL(v) Int_val(v)
+#define VAL_SLANT(v) Val_int(v)
+#define WEIGHT_VAL(v) Int_val(v)
+#define VAL_WEIGHT(v) Val_int(v)
+
 
 /* Local Variables: */
 /* compile-command: "make -k cairo_stubs.o" */

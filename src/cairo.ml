@@ -573,14 +573,21 @@ struct
 
   external get_type : 'a t -> font_type = "caml_cairo_font_face_get_type"
 
+  external set : context -> _ t -> unit = "caml_cairo_set_font_face"
+  external get : context -> 'a t = "caml_cairo_get_font_face"
+
   external create_stub : family:string -> slant -> weight -> [`Toy] t
-    = "caml_"
+    = "caml_cairo_toy_font_face_create"
 
   let create ?(family="") slant weight =
     create_stub family slant weight
 
-  external set : context -> _ t -> unit = "caml_cairo_set_font_face"
-  external get : context -> 'a t = "caml_cairo_get_font_face"
+  external get_family : [`Toy] t -> string
+    = "caml_cairo_toy_font_face_get_family"
+  external get_slant : [`Toy] t -> slant
+    = "caml_cairo_toy_font_face_get_slant"
+  external get_weight : [`Toy] t -> weight
+    = "caml_cairo_toy_font_face_get_weight"
 end
 
 module Glyph =
@@ -641,4 +648,10 @@ struct
   external get_type : _ t -> font_type = "caml_cairo_scaled_font_get_type"
 end
 
+
+external select_font_face : t -> slant -> weight -> string -> unit
+  = "caml_cairo_select_font_face"
+
+let select_font_face cr ?(slant=Upright) ?(weight=Normal) family =
+  select_font_face cr slant weight family
 

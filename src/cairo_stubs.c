@@ -862,6 +862,43 @@ CAMLexport value caml_cairo_get_font_face(value vcr)
   CAMLreturn(vff);
 }
 
+CAMLexport value caml_cairo_toy_font_face_create
+(value vfamily, value vslant, value vweight)
+{
+  CAMLparam3(vfamily, vslant, vweight);
+  CAMLlocal1(vff);
+  cairo_font_face_t* ff;
+  ff = cairo_toy_font_face_create(String_val(vfamily), SLANT_VAL(vslant),
+                                  WEIGHT_VAL(vweight));
+  vff = ALLOC(font_face);
+  FONT_FACE_VAL(vff) = ff;
+  CAMLreturn(vff);
+}
+  
+CAMLexport value caml_cairo_toy_font_face_get_family(value vff)
+{
+  CAMLparam1(vff);
+  const char* family = cairo_toy_font_face_get_family(FONT_FACE_VAL(vff));
+  /* Since the string is going to be copied, it does not matter that
+     it belongs to the font face. */
+  CAMLreturn(caml_copy_string(family));
+}
+
+CAMLexport value caml_cairo_toy_font_face_get_slant(value vff)
+{
+  CAMLparam1(vff);
+  cairo_font_slant_t slant = cairo_toy_font_face_get_slant(FONT_FACE_VAL(vff));
+  CAMLreturn(VAL_SLANT(slant));
+}
+
+CAMLexport value caml_cairo_toy_font_face_get_weight(value vff)
+{
+  CAMLparam1(vff);
+  cairo_font_weight_t w = cairo_toy_font_face_get_weight(FONT_FACE_VAL(vff));
+  CAMLreturn(VAL_WEIGHT(w));
+}
+
+
 /* Scaled font
 ***********************************************************************/
 
@@ -1036,6 +1073,21 @@ CAMLexport value caml_cairo_scaled_font_get_type(value vff)
   cairo_font_type_t ft = cairo_scaled_font_get_type(SCALED_FONT_VAL(vff));
   CAMLreturn(VAL_FONT_TYPE(ft));
 }
+
+/* Toy text API
+ ***********************************************************************/
+
+CAMLexport value caml_cairo_select_font_face
+(value vcr, value vslant, value vweight, value vfamily)
+{
+  CAMLparam4(vce, vslant, vweight, vfamily);
+  cairo_t *cr = CAIRO_VAL(vcr);
+  cairo_select_font_face(cr, String_val(vfamily),
+                         SLANT_VAL(vslant), WEIGHT_VAL(vweight));
+  caml_check_status(cr);
+  CAMLreturn(Val_unit);
+}
+
 
 
 
