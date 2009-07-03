@@ -1482,6 +1482,10 @@ sig
         be used to render later using [scaled_font].
         See {!Cairo.Glyph.show_text}. *)
 
+  external get_font_face : 'a t -> 'a Font_face.t
+    = "caml_cairo_scaled_font_get_font_face"
+    (** Gets the font face that this scaled font was created for. *)
+
   external get_font_options : _ t -> Font_options.t
     = "caml_cairo_scaled_font_get_font_options"
     (** [get_font_options scaled_font] returns the font options with

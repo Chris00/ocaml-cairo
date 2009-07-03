@@ -627,6 +627,8 @@ struct
     -> Glyph.t array * Glyph.cluster array * Glyph.cluster_flags
     = "caml_cairo_scaled_font_text_to_glyphs"
 
+  external get_font_face : 'a t -> 'a Font_face.t
+    = "caml_cairo_scaled_font_get_font_face"
   external get_font_options : _ t -> Font_options.t
     = "caml_cairo_scaled_font_get_font_options"
 

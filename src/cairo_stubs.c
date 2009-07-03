@@ -989,6 +989,21 @@ CAMLexport value caml_cairo_scaled_font_text_to_glyphs
   CAMLreturn(vtriplet);
 }
 
+CAMLexport value caml_cairo_scaled_font_get_font_face(value vsf)
+{
+  CAMLparam1(vsf);
+  CAMLlocal1(vff);
+  cairo_font_face_t* ff;
+  ff = cairo_scaled_font_get_font_face(SCALED_FONT_VAL(vsf));
+  /* FIXME: The documentation does not say whether it is shared or
+     not; assuming it is as for other functions. */
+  cairo_font_face_reference(ff);
+  vff = ALLOC(font_face);
+  FONT_FACE_VAL(vff) = ff;
+  CAMLreturn(vff);
+}
+
+
 CAMLexport value caml_cairo_scaled_font_get_font_options(value vsf)
 {
   CAMLparam1(vsf);
