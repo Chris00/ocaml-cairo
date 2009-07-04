@@ -1,0 +1,13 @@
+# Findlib META file for cairo                                       -*-conf-*-
+name = "cairo"
+version = "@PACKAGE_VERSION@"
+description = "A Vector Graphics Library."
+requires = "bigarray"
+archive(byte) = "cairo.cma"
+archive(native) = "cairo.cmxa"
+
+package "lablgtk2" (
+  version = "@PACKAGE_VERSION@"
+  require ="lablgtk2"
+  description = "Rendering on Gtk canvas."
+)
