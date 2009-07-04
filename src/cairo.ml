@@ -619,6 +619,35 @@ struct
     = "caml_cairo_surface_has_show_text_glyphs"
 end
 
+module Image =
+struct
+  type format =
+    | ARGB32
+    | RGB24
+    | A8
+    | A1
+
+  external create : format -> width:int -> height:int -> Surface.t
+    = "caml_cairo_image_surface_create"
+
+  open Bigarray
+
+  external create_for_data :
+    data:(char, int8_unsigned_elt, c_layout) Array2.t ->
+    format -> width:int -> height:int -> Surface.t
+    = "caml_cairo_image_surface_create_for_data"
+
+  external get_data : Surface.t -> (char, int8_unsigned_elt, c_layout) Array2.t
+    = "caml_cairo_image_surface_get_data"
+  external get_format : Surface.t -> format
+    = "caml_cairo_image_surface_get_format"
+  external get_width : Surface.t -> int = "caml_cairo_image_surface_get_width"
+  external get_height : Surface.t -> int = "caml_cairo_image_surface_get_height"
+  external get_stride : Surface.t -> int = "caml_cairo_image_surface_get_stride"
+
+end
+
+
 (* ---------------------------------------------------------------------- *)
 
 module Pattern =

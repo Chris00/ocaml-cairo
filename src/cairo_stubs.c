@@ -1222,7 +1222,7 @@ CAMLexport value caml_cairo_surface_get_content(value vsurf)
   CAMLlocal1(vcontent);
   cairo_surface_t *surface = SURFACE_VAL(vsurf);
   cairo_content_t content = cairo_surface_get_content(surface);
-  CONTENT_ASSIGN1(vcontent, content);
+  CONTENT_ASSIGN(vcontent, content);
   CAMLreturn(vcontent);
 }
 
@@ -1281,6 +1281,69 @@ CAMLexport value caml_cairo_surface_has_show_text_glyphs(value vsurf)
   cairo_bool_t b = cairo_surface_has_show_text_glyphs(SURFACE_VAL(vsurf));
   return(Val_bool(b));
 }
+
+
+/* Image
+***********************************************************************/
+
+#define FORMAT_VAL(x) Int_val(x)
+#define VAL_FORMAT(x) Val_int(x)
+
+CAMLexport value caml_cairo_image_surface_create(value vformat,
+                                                 value vwidth, value vheight)
+{
+  CAMLparam3(vformat, vwidth, vheight);
+  CAMLlocal1(vsurf);
+  cairo_surface_t* surf = cairo_image_surface_create
+    (FORMAT_VAL(vformat), Int_val(vwidth), Int_val(vheight));
+  caml_raise_Error(cairo_surface_status(surf));
+  SURFACE_ASSIGN(vsurf, surf);
+  CAMLreturn(vsurf);
+}
+
+CAMLexport value caml_cairo_image_surface_create_for_data
+(value vdata, value vformat, value vwidth, value vheight)
+{
+  CAMLparam4(vdata, vformat, vwidth, vheight);
+  CAMLlocal1(vsurf);
+  cairo_surface_t* surf;
+  unsigned char *data;
+  cairo_format_t format = FORMAT_VAL(vformat);
+  int width =  Int_val(vwidth);
+  int stride = cairo_format_stride_for_width(format, width);;
+  
+  data;
+  surf = cairo_image_surface_create_for_data(data, format, width,
+                                             Int_val(vheight), stride);
+  caml_raise_Error(cairo_surface_status(surf));
+  SURFACE_ASSIGN(vsurf, surf);
+  CAMLreturn(vsurf);
+}
+
+CAMLexport value caml_cairo_image_surface_get_data(value vsurf)
+{
+  CAMLparam1(vsurf);
+  CAMLlocal1(vdata);
+  unsigned char* data = cairo_image_surface_get_data(SURFACE_VAL(vsurf));
+  
+  CAMLreturn(vdata);
+}
+
+
+#define GET_SURFACE(name, val_of, type)                         \
+  CAMLexport value caml_##name(value vsurf)                     \
+  {                                                             \
+    CAMLparam1(vsurf);                                          \
+    CAMLlocal1(vret);                                           \
+    type ret = name(SURFACE_VAL(vsurf));                        \
+    vret = val_of(ret);                                         \
+    CAMLreturn(vret);                                           \
+  }
+
+GET_SURFACE(cairo_image_surface_get_format, VAL_FORMAT, cairo_format_t)
+GET_SURFACE(cairo_image_surface_get_width, Val_int, int)
+GET_SURFACE(cairo_image_surface_get_height, Val_int, int)
+GET_SURFACE(cairo_image_surface_get_stride, Val_int, int)
 
 
 

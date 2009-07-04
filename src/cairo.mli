@@ -1029,6 +1029,73 @@ sig
           not use it.  *)
 end
 
+(** Image surfaces provide the ability to render to memory buffers
+    either allocated by cairo or by the calling code. The supported image
+    formats are those defined in {!Cairo.Image.format}.  *)
+module Image :
+sig
+  (** This is used to identify the memory format of image data.  *)
+  type format =
+    | ARGB32 (** each pixel is a 32-bit quantity, with alpha in the
+                 upper 8 bits, then red, then green, then blue. The
+                 32-bit quantities are stored native-endian.
+                 Pre-multiplied alpha is used.  (That is, 50%
+                 transparent red is 0x80800000, not 0x80ff0000.) *)
+    | RGB24 (** each pixel is a 32-bit quantity, with the upper 8 bits
+                unused. Red, Green, and Blue are stored in the
+                remaining 24 bits in that order. *)
+    | A8 (** each pixel is a 8-bit quantity holding an alpha value. *)
+    | A1 (** each pixel is a 1-bit quantity holding an alpha
+             value. Pixels are packed together into 32-bit quantities.
+             The ordering of the bits matches the endianess of the
+             platform.  On a big-endian machine, the first pixel is in
+             the uppermost bit, on a little-endian machine the first
+             pixel is in the least-significant bit. *)
+
+  external create : format -> width:int -> height:int -> Surface.t
+    = "caml_cairo_image_surface_create"
+      (** Creates an image surface of the specified format and
+          dimensions. Initially the surface contents are all 0.
+          (Specifically, within each pixel, each color or alpha
+          channel belonging to format will be 0. The contents of bits
+          within a pixel, but not belonging to the given format are
+          undefined). *)
+
+  open Bigarray
+
+  external create_for_data :
+    data:(char, int8_unsigned_elt, c_layout) Array2.t ->
+    format -> width:int -> height:int -> Surface.t
+    = "caml_cairo_image_surface_create_for_data"
+      (** Creates an image surface for the provided pixel data.  The
+          output buffer must be kept around until the cairo_surface_t
+          is destroyed or cairo_surface_finish() is called on the
+          surface. The initial contents of buffer will be used as the
+          initial image contents; you must explicitly clear the
+          buffer, using, for example, cairo_rectangle() and
+          cairo_fill() if you want it cleared. *)
+
+  external get_data : Surface.t -> (char, int8_unsigned_elt, c_layout) Array2.t
+    = "caml_cairo_image_surface_get_data"
+      (** Get the data of the image surface (shared), for direct
+          inspection or modification. *)
+
+  external get_format : Surface.t -> format
+    = "caml_cairo_image_surface_get_format"
+      (** Get the format of the surface. *)
+
+  external get_width : Surface.t -> int = "caml_cairo_image_surface_get_width"
+      (** Get the width of the image surface in pixels. *)
+
+  external get_height : Surface.t -> int = "caml_cairo_image_surface_get_height"
+      (** Get the height of the image surface in pixels. *)
+
+  external get_stride : Surface.t -> int = "caml_cairo_image_surface_get_stride"
+      (** Get the stride of the image surface in bytes. *)
+end
+
+
+
 
 
 (* ---------------------------------------------------------------------- *)
