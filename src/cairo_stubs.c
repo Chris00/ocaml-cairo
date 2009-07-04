@@ -66,7 +66,7 @@ CAMLexport value caml_cairo_push_group_with_content(value vcr, value vcontent)
   CAMLparam2(vcr, vcontent);
   cairo_t *cr = CAIRO_VAL(vcr);
   cairo_content_t content;
-  CONTENT_ASSIGN(content, vcontent);
+  SET_CONTENT_VAL(content, vcontent);
   cairo_push_group_with_content(cr, content);
   caml_check_status(cr);
   CAMLreturn(Val_unit);
@@ -870,7 +870,7 @@ CAMLexport value caml_cairo_toy_font_face_create
   FONT_FACE_VAL(vff) = ff;
   CAMLreturn(vff);
 }
-  
+
 CAMLexport value caml_cairo_toy_font_face_get_family(value vff)
 {
   CAMLparam1(vff);
@@ -923,7 +923,7 @@ CAMLexport value caml_cairo_scaled_font_create
   cairo_scaled_font_t* sf = cairo_scaled_font_create
     (FONT_FACE_VAL(vff), &font_matrix, &ctm, FONT_OPTIONS_VAL(voptions));
   vsf = ALLOC(scaled_font);
-  SCALED_FONT_VAL(vsf) = sf;  
+  SCALED_FONT_VAL(vsf) = sf;
   CAMLreturn(vsf);
 }
 
@@ -980,7 +980,7 @@ CAMLexport value caml_cairo_scaled_font_text_to_glyphs
   int num_clusters;
   cairo_text_cluster_flags_t cluster_flags;
   cairo_status_t status;
-  
+
   status = cairo_scaled_font_text_to_glyphs
     (SCALED_FONT_VAL(vsf), Double_val(vx), Double_val(vy),
      String_val(vutf8), string_length(vutf8),
@@ -1062,7 +1062,7 @@ CAMLexport value caml_cairo_scaled_font_get_type(value vff)
 CAMLexport value caml_cairo_show_glyphs(value vcr, value vglyphs)
 {
   CAMLparam1(vcr);
-  cairo_t *cr = CAIRO_VAL(vcr);  
+  cairo_t *cr = CAIRO_VAL(vcr);
   int i, num_glyphs = Wosize_val(vglyphs);
   cairo_glyph_t *glyphs, *p;
 
@@ -1078,14 +1078,14 @@ CAMLexport value caml_cairo_show_text_glyphs
 {
   CAMLparam5(vcr, vutf8, vglyphs, vclusters, vcluster_flags);
   CAMLlocal1(v);
-  cairo_t *cr = CAIRO_VAL(vcr);  
+  cairo_t *cr = CAIRO_VAL(vcr);
   cairo_glyph_t *glyphs, *p;
   cairo_text_cluster_t *clusters, *q;
   int i, num_glyphs, num_clusters;
-  
+
   ARRAY_GLYPH_VAL(glyphs, p, vglyphs, num_glyphs);
   ARRAY_CLUSTER_VAL(clusters, q, vglyphs, num_glyphs);
-  cairo_show_text_glyphs(cr, String_val(vutf8), string_length(vutf8), 
+  cairo_show_text_glyphs(cr, String_val(vutf8), string_length(vutf8),
                          glyphs, num_glyphs, clusters, num_clusters,
                          /* FIXME: is it a binary | ? */
                          CLUSTER_FLAGS_VAL(vcluster_flags));
@@ -1102,7 +1102,7 @@ CAMLexport value caml_cairo_glyph_extents(value vcr, value vglyphs)
   cairo_glyph_t *glyphs, *p;
   int i, num_glyphs;
   cairo_text_extents_t te;
-  
+
   ARRAY_GLYPH_VAL(glyphs, p, vglyphs, num_glyphs);
   cairo_glyph_extents(CAIRO_VAL(vcr), glyphs, num_glyphs, &te);
   free(glyphs);
@@ -1170,6 +1170,116 @@ CAMLexport value caml_cairo_text_extents(value vcr, value vutf8)
   cairo_text_extents(CAIRO_VAL(vcr), String_val(vutf8), &te);
   TEXT_EXTENTS_ASSIGN(vte, te);
   CAMLreturn(vte);
+}
+
+
+/* Surface
+***********************************************************************/
+
+CAMLexport value caml_cairo_surface_create_similar
+(value vother, value vcontent, value vwidth, value vheight)
+{
+  CAMLparam4(vother, vcontent, vwidth, vheight);
+  CAMLlocal1(vsurf);
+  cairo_content_t content;
+  cairo_surface_t* surf;
+
+  SET_CONTENT_VAL(content, vcontent);
+  surf = cairo_surface_create_similar(SURFACE_VAL(vother), content,
+                                      Int_val(vwidth), Int_val(vheight));
+  caml_raise_Error(cairo_surface_status(surf));
+  SURFACE_ASSIGN(vsurf, surf);
+  CAMLreturn(vsurf);
+}
+
+#define DO_SURFACE(name)                                       \
+  CAMLexport value caml_##name(value vsurf)                    \
+  {                                                            \
+    /* noalloc */                                              \
+    cairo_surface_t *surface = SURFACE_VAL(vsurf);             \
+    name(surface);                                             \
+    caml_raise_Error(cairo_surface_status(surface));           \
+    return(Val_unit);                                          \
+  }
+
+DO_SURFACE(cairo_surface_flush)
+
+CAMLexport value caml_cairo_surface_get_font_options(value vsurf)
+{
+  CAMLparam1(vsurf);
+  CAMLlocal1(vfo);
+  cairo_surface_t *surface = SURFACE_VAL(vsurf);
+  cairo_font_options_t *fo = cairo_font_options_create();
+  caml_raise_Error(cairo_font_options_status(fo));
+  cairo_surface_get_font_options(surface, fo);
+  FONT_OPTIONS_ASSIGN(vfo, fo);
+  CAMLreturn(vfo);
+}
+
+CAMLexport value caml_cairo_surface_get_content(value vsurf)
+{
+  CAMLparam1(vsurf);
+  CAMLlocal1(vcontent);
+  cairo_surface_t *surface = SURFACE_VAL(vsurf);
+  cairo_content_t content = cairo_surface_get_content(surface);
+  CONTENT_ASSIGN1(vcontent, content);
+  CAMLreturn(vcontent);
+}
+
+DO_SURFACE(cairo_surface_mark_dirty)
+
+CAMLexport value caml_cairo_surface_mark_dirty_rectangle
+(value vsurf, value vx, value vy, value vwidth, value vheight)
+{
+  /* noalloc */
+  cairo_surface_mark_dirty_rectangle
+    (SURFACE_VAL(vsurf), Int_val(vx), Int_val(vy),
+     Int_val(vwidth), Int_val(vheight));
+  return(Val_unit);
+}
+
+#define SET_SURFACE_XY(name)                                    \
+  CAMLexport value caml_##name(value vsurf, value vx, value vy) \
+  {                                                             \
+    /* noalloc */                                               \
+    name(SURFACE_VAL(vsurf), Double_val(vx), Double_val(vy));   \
+    return(Val_unit);                                           \
+  }
+
+#define GET_SURFACE_XY(name)                                    \
+  CAMLexport value caml_##name(value vsurf)                     \
+  {                                                             \
+    CAMLparam1(vsurf);                                          \
+    CAMLlocal1(vcouple);                                        \
+    double x, y;                                                \
+    name(SURFACE_VAL(vsurf), &x, &y);                           \
+    vcouple = caml_alloc_tuple(2);                              \
+    Store_field(vcouple, 0, caml_copy_double(x));               \
+    Store_field(vcouple, 1, caml_copy_double(y));               \
+    CAMLreturn(vcouple);                                        \
+  }
+
+SET_SURFACE_XY(cairo_surface_set_device_offset)
+GET_SURFACE_XY(cairo_surface_get_device_offset)
+SET_SURFACE_XY(cairo_surface_set_fallback_resolution)
+GET_SURFACE_XY(cairo_surface_get_fallback_resolution)
+
+
+CAMLexport value caml_cairo_surface_get_type(value vsurf)
+{
+  /* noalloc */
+  cairo_surface_type_t k = cairo_surface_get_type(SURFACE_VAL(vsurf));
+  return(VAL_SURFACE_KIND(k));
+}
+
+DO_SURFACE(cairo_surface_copy_page)
+DO_SURFACE(cairo_surface_show_page)
+
+CAMLexport value caml_cairo_surface_has_show_text_glyphs(value vsurf)
+{
+  /* noalloc */
+  cairo_bool_t b = cairo_surface_has_show_text_glyphs(SURFACE_VAL(vsurf));
+  return(Val_bool(b));
 }
 
 

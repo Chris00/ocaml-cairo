@@ -98,14 +98,48 @@ DEFINE_CUSTOM_OPERATIONS(surface, cairo_surface_destroy, SURFACE_VAL)
 
 /* Type cairo_content_t */
 
-#define CONTENT_ASSIGN(v, vcontent)                                     \
+#define SET_CONTENT_VAL(c, vcontent)                                    \
   switch (Int_val(vcontent))                                            \
     {                                                                   \
-    case 0 : v = CAIRO_CONTENT_COLOR;  break;                           \
-    case 1 : v = CAIRO_CONTENT_ALPHA;  break;                           \
-    case 2 : v = CAIRO_CONTENT_COLOR_ALPHA;  break;                     \
+    case 0 : c = CAIRO_CONTENT_COLOR;  break;                           \
+    case 1 : c = CAIRO_CONTENT_ALPHA;  break;                           \
+    case 2 : c = CAIRO_CONTENT_COLOR_ALPHA;  break;                     \
     default : caml_failwith("Decode Cairo.content");                    \
     }
+
+#define CONTENT_ASSIGN(vcontent, content)                               \
+  switch (content)                                                      \
+    {                                                                   \
+    case CAIRO_CONTENT_COLOR: vcontent = Val_int(0); break;             \
+    case CAIRO_CONTENT_ALPHA: vcontent = Val_int(1); break;             \
+    case CAIRO_CONTENT_COLOR_ALPHA: vcontent = Val_int(2); break;       \
+    default : caml_failwith("Assign Cairo.content");                    \
+    }
+  
+static value caml_cairo_surface_kind[14];
+
+CAMLexport value caml_cairo_surface_kind_init(value unit)
+{
+  /* noalloc */
+  caml_cairo_surface_kind[0] = caml_hash_variant("Image");
+  caml_cairo_surface_kind[1] = caml_hash_variant("PDF");
+  caml_cairo_surface_kind[2] = caml_hash_variant("PS");
+  caml_cairo_surface_kind[3] = caml_hash_variant("XLib");
+  caml_cairo_surface_kind[4] = caml_hash_variant("XCB");
+  caml_cairo_surface_kind[5] = caml_hash_variant("GLITZ");
+  caml_cairo_surface_kind[6] = caml_hash_variant("Quartz");
+  caml_cairo_surface_kind[7] = caml_hash_variant("Win32");
+  caml_cairo_surface_kind[8] = caml_hash_variant("BEOS");
+  caml_cairo_surface_kind[9] = caml_hash_variant("DirectFB");
+  caml_cairo_surface_kind[10] = caml_hash_variant("SVG");
+  caml_cairo_surface_kind[11] = caml_hash_variant("OS2");
+  caml_cairo_surface_kind[12] = caml_hash_variant("Win32_printing");
+  caml_cairo_surface_kind[13] = caml_hash_variant("Quartz_image");
+  return(Val_unit);
+}
+
+#define VAL_SURFACE_KIND(k) caml_cairo_surface_kind[k]
+
 
 /* Type cairo_path_t
 ***********************************************************************/
