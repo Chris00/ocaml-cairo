@@ -15,7 +15,9 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the file
    LICENSE for more details. */
 
+#include <string.h>
 #include <cairo.h>
+#include <cairo-pdf.h>
 
 #include <caml/mlvalues.h>
 #include <caml/alloc.h>
@@ -1283,7 +1285,7 @@ CAMLexport value caml_cairo_surface_has_show_text_glyphs(value vsurf)
 }
 
 
-/* Image
+/* Image surfaces
 ***********************************************************************/
 
 #define FORMAT_VAL(x) Int_val(x)
@@ -1373,6 +1375,54 @@ GET_SURFACE(cairo_image_surface_get_format, VAL_FORMAT, cairo_format_t)
 GET_SURFACE(cairo_image_surface_get_width, Val_int, int)
 GET_SURFACE(cairo_image_surface_get_height, Val_int, int)
 GET_SURFACE(cairo_image_surface_get_stride, Val_int, int)
+
+/* PDF surface
+***********************************************************************/
+
+static cairo_status_t caml_cairo_output_string
+(void *fn, const unsigned char *data, unsigned int length)
+{
+  value s, r;
+  /* should protect s ? */
+  s = caml_alloc_string(length);
+  memmove(String_val(s), data, length);
+  r = caml_callback_exn(* ((value *) fn), s);
+  if (Is_exception_result(r))
+    return(CAIRO_STATUS_WRITE_ERROR);
+  else
+    return(CAIRO_STATUS_SUCCESS);
+}
+
+CAMLexport value caml_cairo_pdf_surface_create_for_stream
+(value voutput, value vwidth, value vheight)
+{
+  CAMLparam3(voutput, vwidth, vheight);
+  CAMLlocal1(vsurf);
+  cairo_surface_t* surf;
+  
+  surf = cairo_pdf_surface_create_for_stream
+    (&caml_cairo_output_string, &voutput, Int_val(vwidth), Int_val(vheight));
+  caml_raise_Error(cairo_surface_status(surf));
+  SURFACE_ASSIGN(vsurf, surf);
+  CAMLreturn(vsurf);
+}
+
+CAMLexport value caml_cairo_pdf_surface_create
+(value vfname, value vwidth, value vheight)
+{
+  CAMLparam3(vfname, vwidth, vheight);
+  CAMLlocal1(vsurf);
+  cairo_surface_t* surf;
+  
+  surf = cairo_pdf_surface_create(String_val(vfname),
+                                  Int_val(vwidth), Int_val(vheight));
+  caml_raise_Error(cairo_surface_status(surf));
+  SURFACE_ASSIGN(vsurf, surf);
+  CAMLreturn(vsurf);
+}
+
+
+
 
 
 

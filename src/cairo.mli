@@ -1120,7 +1120,37 @@ end
 
 module PDF :
 sig
+  val create : fname:string -> width:int -> height:int -> Surface.t
+    (** Creates a PDF surface of the specified size in points to be
+        written to [fname].
 
+        @param width width of the surface, in points (1 point = 1/72.0 inch)
+        @param height height of the surface, in points (1 point = 1/72.0 inch)
+    *)
+
+  val create_for_stream : output:(string -> unit) ->
+    width:int -> height:int -> Surface.t
+    (** Creates a PDF surface of the specified size in points to be
+        written incrementally to the stream represented by [output].
+        Any exception that [output] raises is considered as a write
+        error.
+
+        @param width width of the surface, in points (1 point = 1/72.0 inch)
+        @param height height of the surface, in points (1 point = 1/72.0 inch)
+    *)
+
+  external set_size : Surface.t -> width:int -> height:int -> Surface.t
+    = "caml_cairo_pdf_surface_set_size"
+    (** Changes the size of a PDF surface for the current (and
+        subsequent) pages.
+        @param width width of the surface, in points (1 point = 1/72.0 inch)
+        @param height height of the surface, in points (1 point = 1/72.0 inch)
+
+        This function should only be called before any drawing
+        operations have been performed on the current page.  The
+        simplest way to do this is to call this function immediately
+        after creating the surface or immediately after completing a
+        page with either {!Cairo.show_page} or {!Cairo.copy_page}. *)
 end
 
 module PNG :

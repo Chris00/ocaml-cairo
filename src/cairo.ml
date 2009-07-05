@@ -729,7 +729,17 @@ end
 
 module PDF =
 struct
+  external create_for_stream : output:(string -> unit) ->
+    width:int -> height:int -> Surface.t
+    = "caml_cairo_pdf_surface_create_for_stream"
 
+  external create : fname:string -> width:int -> height:int -> Surface.t
+    = "caml_cairo_pdf_surface_create"
+    (* Do we want to implement it in terms of [create_for_stream]?
+       The "problem" is the absence of close function... *)
+
+  external set_size : Surface.t -> width:int -> height:int -> Surface.t
+    = "caml_cairo_pdf_surface_set_size"
 end
 
 module PNG =
