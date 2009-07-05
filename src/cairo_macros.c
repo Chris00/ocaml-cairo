@@ -122,3 +122,28 @@
     Store_double_field(bb, 3, y2 - y1);                         \
     CAMLreturn(bb);                                             \
   }
+
+
+/* Unavailable Cairo backend functions
+***********************************************************************/
+
+/* holds the pointer to the Unavailable exception; shared several
+   functions. */
+value * caml_cairo_Unavailable = NULL;
+
+#define RAISE_UNAVAILABLE(name, args ...)                               \
+  CAMLexport value caml_##name(args)                                    \
+  {                                                                     \
+    if (caml_cairo_Unavailable == NULL)                                 \
+      caml_cairo_Unavailable = caml_named_value("Cairo.Unavailable");   \
+    caml_raise_constant(* caml_cairo_Unavailable);                      \
+  }                                                                     \
+  
+#define UNAVAILABLE1(name) RAISE_UNAVAILABLE(name, value v1)
+#define UNAVAILABLE2(name) RAISE_UNAVAILABLE(name, value v1, value v2)
+#define UNAVAILABLE3(name) RAISE_UNAVAILABLE(name, value v1, value v2, value v3)
+#define UNAVAILABLE4(name) RAISE_UNAVAILABLE(name, value v1, value v2,  \
+                                             value v3, value v4)
+#define UNAVAILABLE5(name) RAISE_UNAVAILABLE(name, value v1, value v2,  \
+                                             value v3, value v4, value v5)
+

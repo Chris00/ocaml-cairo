@@ -1291,6 +1291,8 @@ CAMLexport value caml_cairo_surface_has_show_text_glyphs(value vsurf)
 #define FORMAT_VAL(x) Int_val(x)
 #define VAL_FORMAT(x) Val_int(x)
 
+#ifdef CAIRO_HAS_IMAGE_SURFACE
+
 CAMLexport value caml_cairo_image_surface_create(value vformat,
                                                  value vwidth, value vheight)
 {
@@ -1376,6 +1378,21 @@ GET_SURFACE(cairo_image_surface_get_width, Val_int, int)
 GET_SURFACE(cairo_image_surface_get_height, Val_int, int)
 GET_SURFACE(cairo_image_surface_get_stride, Val_int, int)
 
+#else
+
+UNAVAILABLE3(cairo_image_surface_create)
+UNAVAILABLE2(cairo_format_stride_for_width)
+UNAVAILABLE5(cairo_image_surface_create_for_data8)
+UNAVAILABLE5(cairo_image_surface_create_for_data32)
+UNAVAILABLE1(cairo_image_surface_get_UINT8)
+UNAVAILABLE1(cairo_image_surface_get_INT32)
+UNAVAILABLE1(cairo_image_surface_get_format)
+UNAVAILABLE1(cairo_image_surface_get_width)
+UNAVAILABLE1(cairo_image_surface_get_height)
+UNAVAILABLE1(cairo_image_surface_get_stride)
+
+#endif /* CAIRO_HAS_IMAGE_SURFACE */
+
 /* PDF surface
 ***********************************************************************/
 
@@ -1392,6 +1409,9 @@ static cairo_status_t caml_cairo_output_string
   else
     return(CAIRO_STATUS_SUCCESS);
 }
+
+
+#ifdef CAIRO_HAS_PDF_SURFACE
 
 CAMLexport value caml_cairo_pdf_surface_create_for_stream
 (value voutput, value vwidth, value vheight)
@@ -1421,6 +1441,23 @@ CAMLexport value caml_cairo_pdf_surface_create
   CAMLreturn(vsurf);
 }
 
+CAMLexport value caml_cairo_pdf_surface_set_size
+(value vsurf, value vwidth, value vheight)
+{
+  /* noalloc */
+  cairo_pdf_surface_set_size(SURFACE_VAL(vsurf),
+                             Int_val(vwidth), Int_val(vheight));
+  return(Val_unit);
+}
+
+
+#else
+
+UNAVAILABLE3(cairo_pdf_surface_create_for_stream)
+UNAVAILABLE3(cairo_pdf_surface_create)
+UNAVAILABLE3(cairo_pdf_surface_set_size)
+
+#endif /* CAIRO_HAS_PDF_SURFACE */
 
 
 

@@ -56,6 +56,9 @@ let () = Callback.register_exception "Cairo.Error" (Error INVALID_RESTORE)
 
 external status_to_string  : status -> string = "caml_cairo_status_to_string"
 
+exception Unavailable
+let () = Callback.register_exception "Cairo.Unavailable" Unavailable
+
 type context
 type surface
 type content = COLOR | ALPHA | COLOR_ALPHA
@@ -738,8 +741,8 @@ struct
     (* Do we want to implement it in terms of [create_for_stream]?
        The "problem" is the absence of close function... *)
 
-  external set_size : Surface.t -> width:int -> height:int -> Surface.t
-    = "caml_cairo_pdf_surface_set_size"
+  external set_size : Surface.t -> width:int -> height:int -> unit
+    = "caml_cairo_pdf_surface_set_size" "noalloc"
 end
 
 module PNG =

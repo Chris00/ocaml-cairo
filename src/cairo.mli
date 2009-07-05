@@ -85,6 +85,10 @@ exception Error of status
 external status_to_string  : status -> string = "caml_cairo_status_to_string"
     (** Provides a human-readable description of a status. *)
 
+exception Unavailable
+  (** Exception raised by functions of backend modules when they are
+      not available in the installed Cairo library. *)
+
 type context
   (** The cairo drawing context.  This is the main object used when
       drawing with cairo.  To draw with cairo, you create a [t], set
@@ -1139,8 +1143,8 @@ sig
         @param height height of the surface, in points (1 point = 1/72.0 inch)
     *)
 
-  external set_size : Surface.t -> width:int -> height:int -> Surface.t
-    = "caml_cairo_pdf_surface_set_size"
+  external set_size : Surface.t -> width:int -> height:int -> unit
+    = "caml_cairo_pdf_surface_set_size" "noalloc"
     (** Changes the size of a PDF surface for the current (and
         subsequent) pages.
         @param width width of the surface, in points (1 point = 1/72.0 inch)
