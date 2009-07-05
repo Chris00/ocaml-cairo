@@ -1459,7 +1459,36 @@ UNAVAILABLE3(cairo_pdf_surface_set_size)
 
 #endif /* CAIRO_HAS_PDF_SURFACE */
 
+/* PNG functions
+***********************************************************************/
 
+#ifdef CAIRO_HAS_PNG_FUNCTIONS
+
+
+
+#else
+
+
+
+#endif /* CAIRO_HAS_PNG_FUNCTIONS */
+
+/* Postscript surface
+***********************************************************************/
+
+#ifdef CAIRO_HAS_PS_SURFACE
+
+#else
+
+#endif /* CAIRO_HAS_PS_SURFACE */
+
+/* SVG surface
+***********************************************************************/
+
+#ifdef CAIRO_HAS_SVG_SURFACE
+
+#else
+
+#endif /* CAIRO_HAS_SVG_SURFACE */
 
 
 
