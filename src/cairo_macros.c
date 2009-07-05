@@ -1,5 +1,11 @@
 #define FLOAT_ARRAY_LENGTH(a) Wosize_val(a) / Double_wosize
 
+#define SET_FLOAT_ARRAY(p, varray, length)                      \
+  p = malloc(length * sizeof(double));                          \
+  for(i = 0; i < length; i++)  p[i] = Double_field(varray, i)
+
+#define FREE_FLOAT_ARRAY(p) free(p)
+
 
 #define DO_FUNCTION(name)                       \
   CAMLexport value caml_##name(value vcr)       \

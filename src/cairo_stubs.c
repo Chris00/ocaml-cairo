@@ -134,8 +134,10 @@ CAMLexport value caml_cairo_set_dash(value vcr, value vdashes, value voffset)
   double *dashes;
   const int num_dashes = FLOAT_ARRAY_LENGTH(vdashes);
   int i;
-  for(i = 0; i < num_dashes; i++)  dashes[i] = Double_field(vdashes, i);
+  
+  SET_FLOAT_ARRAY(dashes, vdashes, num_dashes);
   cairo_set_dash(cr, dashes, num_dashes, Double_val(voffset));
+  FREE_FLOAT_ARRAY(dashes);
   caml_check_status(cr);
   CAMLreturn(Val_unit);
 }

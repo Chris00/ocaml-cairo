@@ -879,10 +879,9 @@ sig
           to external resources. For example, for the Xlib backend it
           means that cairo will no longer access the drawable.  After
           calling {!Cairo.Surface.finish} the only valid operations on
-          a surface are getting and setting user, referencing, and
-          flushing and finishing it.  Further drawing to the surface
-          will not affect the surface but will instead raise
-          [Error(SURFACE_FINISHED)].  *)
+          a surface are flushing and finishing it.  Further drawing to
+          the surface will not affect the surface but will instead
+          raise [Error(SURFACE_FINISHED)].  *)
 
   external flush : t -> unit = "caml_cairo_surface_flush"
       (** Do any pending drawing for the surface and also restore any
@@ -2379,9 +2378,4 @@ external device_to_user_distance :
       of the inverse CTM will be ignored when transforming ([dx],[dy]). *)
 
 
-(* ---------------------------------------------------------------------- *)
 
-
-
-(* set_user_data *)
-(* get_user_data *)
