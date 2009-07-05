@@ -20,8 +20,8 @@ native: cairo.cmxa
 cairo.cma cairo.cmxa: cairo.cmo cairo.cmx cairo_stubs.o
 	ocamlmklib -o cairo -oc cairo_stubs $(LIBS) $(CPPFLAGS) $^
 
-cairo_stubs.o: cairo_stubs.c
-	$(OCAMLC) $(CPPFLAGS) -c $^
+cairo_stubs.o: cairo_stubs.c  cairo_macros.c cairo_ocaml_types.c
+	$(OCAMLC) $(CPPFLAGS) -c $<
 
 
 .PHONY: doc

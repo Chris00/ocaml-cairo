@@ -43,10 +43,11 @@ DEFINE_CUSTOM_OPERATIONS(cairo, cairo_destroy, CAIRO_VAL)
 static void caml_raise_Error(cairo_status_t status)
 {
   static value * exn = NULL;
+
   if (status != CAIRO_STATUS_SUCCESS) {
     if (exn == NULL) {
       /* First time around, look up by name */
-      exn = caml_named_value("Cairo.error");
+      exn = caml_named_value("Cairo.Error");
     }
     if (status == CAIRO_STATUS_NO_MEMORY)
       caml_raise_out_of_memory();
@@ -115,7 +116,7 @@ DEFINE_CUSTOM_OPERATIONS(surface, cairo_surface_destroy, SURFACE_VAL)
     case CAIRO_CONTENT_COLOR_ALPHA: vcontent = Val_int(2); break;       \
     default : caml_failwith("Assign Cairo.content");                    \
     }
-  
+
 static value caml_cairo_surface_kind[14];
 
 CAMLexport value caml_cairo_surface_kind_init(value unit)

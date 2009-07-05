@@ -853,7 +853,7 @@ sig
     (** A {!Cairo.Surface.t} represents an image, either as the
         destination of a drawing operation or as source when drawing onto
         another surface.  To draw to a {!Cairo.Surface.t}, create a cairo
-        context with the surface as the target, using {!Cairo.create}a.
+        context with the surface as the target, using {!Cairo.create}.
 
         There are different subtypes of {!Cairo.Surface.t} for
         different drawing backends; for example, {!Cairo.Image.create}
