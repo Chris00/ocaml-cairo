@@ -773,7 +773,7 @@ struct
     r:float -> g:float -> b:float -> unit
     = "caml_cairo_pattern_add_color_stop_rgb" "noalloc"
 
-  let add_color_stop_rgb cr ?(ofs=0.0) ~r ~g ~b =
+  let add_color_stop_rgb cr ?(ofs=0.0) r g b =
     add_color_stop_rgb_stub cr ~ofs ~r ~g ~b
 
   external add_color_stop_rgba_stub : [> `Gradient] t -> ofs:float ->
@@ -781,8 +781,8 @@ struct
     = "caml_cairo_pattern_add_color_stop_rgba_bc"
     "caml_cairo_pattern_add_color_stop_rgba" "noalloc"
 
-  let add_color_stop_rgba cr ?(ofs=0.0) ~r ~g ~b =
-    add_color_stop_rgba_stub cr ~ofs ~r ~g ~b
+  let add_color_stop_rgba cr ?(ofs=0.0) r g b a =
+    add_color_stop_rgba_stub cr ~ofs ~r ~g ~b ~a
 
   external get_color_stop_count : [> `Gradient] t -> int
     = "caml_cairo_pattern_get_color_stop_count"

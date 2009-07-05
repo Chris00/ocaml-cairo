@@ -1219,7 +1219,7 @@ sig
           the needed property is not present. *)
 
   val add_color_stop_rgb : [> `Gradient] t -> ?ofs:float ->
-    r:float -> g:float -> b:float -> unit
+    float -> float -> float -> unit
     (** Adds an opaque color stop to a gradient pattern.  The offset
         [ofs] specifies the location along the gradient's control
         vector (default: [0.0]).  For example, a linear gradient's
@@ -1236,7 +1236,7 @@ sig
         making sharp color transitions instead of the typical blend. *)
 
   val add_color_stop_rgba : [> `Gradient] t -> ?ofs:float ->
-    r:float -> g:float -> b:float -> a:float -> unit
+    float -> float -> float -> float -> unit
     (** Adds a translucent color stop to a gradient pattern. The
         offset specifies the location along the gradient's control
         vector. For example, a linear gradient's control vector is from
