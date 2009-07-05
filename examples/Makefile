@@ -6,7 +6,7 @@ OCAMLINCLUDES = ../src
 LIBS_CMXA = bigarray.cmxa cairo.cmxa
 OCAMLOPT_FLAGS = -dtypes -inline 3 -g
 
-default: arcs.com
+default: arcs.com clip.com curve_to.com
 
 
 include $(ROOT)/Makefile.ocaml

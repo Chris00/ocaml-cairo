@@ -1,4 +1,4 @@
-(* Examples taken from http://cairographics.org/samples/ *)
+(* Examples by Øyvind Kolås taken from http://cairographics.org/samples/ *)
 
 let pi = 4. *. atan 1.
 
