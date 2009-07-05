@@ -18,32 +18,32 @@
 
 (** Cairo: A Vector Graphics Library (bindings).
 
-    - Drawing:
-    {!cairo_t}: The cairo drawing context
-    {!paths}: Creating paths and manipulating path data
-    {!patterns}: Sources for drawing.
-    {!transformations}: Manipulating the current transformation matrix.
-    {!text}: Rendering text and glyphs.
+    {b Drawing:}
+    - {!cairo_t}: The cairo drawing context
+    - {!paths}: Creating paths and manipulating path data
+    - {!Pattern}: Sources for drawing.
+    - {!transformations}: Manipulating the current transformation matrix.
+    - {!text}: Rendering text and glyphs.
 
-    - Fonts:
-    {!Font_face}: Base module for font faces.
-    {!Scaled_font}: Font face at particular size and options.
-    {!Font_options}: How a font should be rendered.
-    {!Ft}: FreeType Fonts -- Font support for FreeType.
-    {!Win32_font}: Win32 Fonts -- Font support for Microsoft Windows.
-    {!Quartz_font}: Quartz (CGFont) Fonts -- Font support via CGFont on OS X.
-    {!User_font}: Font support with font data provided by the user.
+    {b Fonts:}
+    - {!Font_face}: Base module for font faces.
+    - {!Scaled_font}: Font face at particular size and options.
+    - {!Font_options}: How a font should be rendered.
+    - {!Ft}: FreeType Fonts -- Font support for FreeType.
+    - {!Win32_font}: Win32 Fonts -- Font support for Microsoft Windows.
+    - {!Quartz_font}: Quartz (CGFont) Fonts -- Font support via CGFont on OS X.
+    - {!User_font}: Font support with font data provided by the user.
 
-    - Surfaces:
-    {!Surface}: Base module for surfaces.
-    {!Images}: Image Surfaces -- Rendering to memory buffers.
-    {!PDF}: PDF Surfaces -- Rendering PDF documents.
-    {!PNG}: PNG Support -- Reading and writing PNG images.
-    {!PS}: PostScript Surfaces -- Rendering PostScript documents.
-    {!SVG}: SVG Surfaces -- Rendering SVG documents.
-    {!XLib}: XLib Surfaces -- X Window System rendering using XLib.
-    {!Win32}: Win32 Surfaces -- Microsoft Windows surface support.
-    {!Quartz}: Quartz Surfaces -- Rendering to Quartz surfaces.
+    {!surface_backends}:
+    - {!Surface}: Base module for surfaces.
+    - {!Image}: Image Surfaces -- Rendering to memory buffers.
+    - {!PDF}: PDF Surfaces -- Rendering PDF documents.
+    - {!PNG}: PNG Support -- Reading and writing PNG images.
+    - {!PS}: PostScript Surfaces -- Rendering PostScript documents.
+    - {!SVG}: SVG Surfaces -- Rendering SVG documents.
+    - {!XLib}: XLib Surfaces -- X Window System rendering using XLib.
+    - {!Win32}: Win32 Surfaces -- Microsoft Windows surface support.
+    - {!Quartz}: Quartz Surfaces -- Rendering to Quartz surfaces.
 *)
 
 type status =
@@ -855,32 +855,42 @@ sig
         another surface.  To draw to a {!Cairo.Surface.t}, create a cairo
         context with the surface as the target, using {!Cairo.create}a.
 
-        There are different subtypes of {!Cairo.Surface.t} for different
-        drawing backends; for example, {!Cairo.Image.surface_create}
-        creates a bitmap image in memory.  The type of a surface can be
-        queried with {!Cairo.Surface.get_type}.  *)
+        There are different subtypes of {!Cairo.Surface.t} for
+        different drawing backends; for example, {!Cairo.Image.create}
+        creates a bitmap image in memory.  The type of a surface can
+        be queried with {!Cairo.Surface.get_type}.  *)
 
   external create_similar : t -> content -> width:int -> height:int -> t
     = "caml_cairo_surface_create_similar"
-    (** [create_similar other content width height] create a new
-        surface that is as compatible as possible with the existing
-        surface [other].  For example the new surface will have the
-        same fallback resolution and font options as [other].
-        Generally, the new surface will also use the same backend as
-        other, unless that is not possible for some reason. The type
-        of the returned surface may be examined with
-        {!Cairo.Surface.get_type}.
+      (** [create_similar other content width height] create a new
+          surface that is as compatible as possible with the existing
+          surface [other].  For example the new surface will have the
+          same fallback resolution and font options as [other].
+          Generally, the new surface will also use the same backend as
+          other, unless that is not possible for some reason. The type
+          of the returned surface may be examined with
+          {!Cairo.Surface.get_type}.
 
-        Initially the surface contents are all 0 (transparent if
-        contents have transparency, black otherwise.) *)
+          Initially the surface contents are all 0 (transparent if
+          contents have transparency, black otherwise.) *)
+
+  external finish : t -> unit = "caml_cairo_surface_finish"
+      (** This function finishes the surface and drops all references
+          to external resources. For example, for the Xlib backend it
+          means that cairo will no longer access the drawable.  After
+          calling {!Cairo.Surface.finish} the only valid operations on
+          a surface are getting and setting user, referencing, and
+          flushing and finishing it.  Further drawing to the surface
+          will not affect the surface but will instead raise
+          [Error(SURFACE_FINISHED)].  *)
 
   external flush : t -> unit = "caml_cairo_surface_flush"
-    (** Do any pending drawing for the surface and also restore any
-        temporary modification's cairo has made to the surface's
-        state.  This function must be called before switching from
-        drawing on the surface with cairo to drawing on it directly
-        with native APIs.  If the surface doesn't support direct
-        access, then this function does nothing.  *)
+      (** Do any pending drawing for the surface and also restore any
+          temporary modification's cairo has made to the surface's
+          state.  This function must be called before switching from
+          drawing on the surface with cairo to drawing on it directly
+          with native APIs.  If the surface doesn't support direct
+          access, then this function does nothing.  *)
 
   external get_font_options : t -> Font_options.t
     = "caml_cairo_surface_get_font_options"
@@ -1021,17 +1031,24 @@ sig
   external has_show_text_glyphs : t -> bool
     = "caml_cairo_surface_has_show_text_glyphs"
       (** Returns whether the surface supports sophisticated
-          {!Cairo.Glyphs.show_text} operations.  That is, whether it
+          {!Cairo.Glyph.show_text} operations.  That is, whether it
           actually uses the provided text and cluster data to a
-          {!Cairo.Glyphs.show_text} call.
+          {!Cairo.Glyph.show_text} call.
 
           Note: Even if this function returns [false], a
-          {!Cairo.Glyphs.show_text} operation targeted at surface will
+          {!Cairo.Glyph.show_text} operation targeted at surface will
           still succeed.  It just will act like a {!Cairo.Glyph.show}
           operation.  Users can use this function to avoid computing
           UTF-8 text and cluster mapping if the target surface does
           not use it.  *)
 end
+
+(** {2:surface_backends Surface backends}
+
+    Below are the surface backends that do not depend of a particular
+    platform.  {!XLib}, {!Win32}, and {!Quartz} are defined in their
+    own modules.
+*)
 
 (** Image surfaces provide the ability to render to memory buffers
     either allocated by cairo or by the calling code. The supported image
@@ -1122,6 +1139,8 @@ sig
         possible alpha channel is ignored. *)
 end
 
+(** The PDF surface is used to render cairo graphics to Adobe PDF
+    files and is a multi-page vector surface backend. *)
 module PDF :
 sig
   val create : fname:string -> width:int -> height:int -> Surface.t
@@ -1157,15 +1176,21 @@ sig
         page with either {!Cairo.show_page} or {!Cairo.copy_page}. *)
 end
 
+(** The PNG functions allow reading PNG images into image surfaces,
+    and writing any surface to a PNG file.  *)
 module PNG :
 sig
 
 end
 
+(** The PostScript surface is used to render cairo graphics to Adobe
+    PostScript files and is a multi-page vector surface backend.  *)
 module PS :
 sig
 end
 
+(** The SVG surface is used to render cairo graphics to SVG files and
+    is a multi-page vector surface backend.  *)
 module SVG :
 sig
 end
@@ -1174,7 +1199,7 @@ end
 
 (* ---------------------------------------------------------------------- *)
 
-(** {2:patterns  Sources for drawing} *)
+(** {2  Sources for drawing} *)
 module Pattern :
 sig
   type 'a t
@@ -1402,13 +1427,15 @@ end
 (** {2:cairo_t The cairo drawing context functions} *)
 
 external create : Surface.t -> context = "caml_cairo_create"
- (** [create target] creates a new context with all graphics state
-     parameters set to default values and with [target] as a target
-     surface. The target surface should be constructed with a
-     backend-specific function such as {!Cairo.Image.surface_create}
-     (or any other [..._surface_create] variant).
+  (** [create target] creates a new context with all graphics state
+      parameters set to default values and with [target] as a target
+      surface. The target surface should be constructed with a
+      backend-specific function such as {!Cairo.Image.create} (or any
+      other {i Backend}[.create] variant).  For many backends, you
+      should not forget to call {!Cairo.Surface.finish} for the data
+      to be completely outputted.
 
-     @raise Out_of_memory if the context could not be allocated. *)
+      @raise Out_of_memory if the context could not be allocated. *)
 
 external save : context -> unit = "caml_cairo_save"
   (** [save cr] makes a copy of the current state of [cr] and saves it
@@ -1641,6 +1668,7 @@ external set_line_cap : context -> line_cap -> unit = "caml_cairo_set_line_cap"
         during path construction.
 
         The default line cap style is [BUTT].  *)
+
 external get_line_cap : context -> line_cap = "caml_cairo_get_line_cap"
     (** Gets the current line cap style, as set by {!Cairo.set_line_cap}. *)
 
@@ -2014,11 +2042,11 @@ sig
 
         Most path construction functions alter the current point.  See the
         following for details on how they affect the current point:
-        {!Cairo.Path.make}, {!Cairo.Path.sub}, {!Cairo.Path.append},
+        {!Cairo.Path.clear}, {!Cairo.Path.sub}, {!Cairo.Path.append},
         {!Cairo.Path.close}, {!Cairo.move_to}, {!Cairo.line_to},
         {!Cairo.curve_to}, {!Cairo.rel_move_to}, {!Cairo.rel_line_to},
         {!Cairo.rel_curve_to}, {!Cairo.arc}, {!Cairo.arc_negative},
-        {!Cairo.rectangle}, {!Cairo.contextext_path}, {!Cairo.Path.glyph}.
+        {!Cairo.rectangle}, {!Cairo.Path.text}, {!Cairo.Path.glyph}.
 
         Some functions use and alter the current point but do not
         otherwise change current path: {!Cairo.show_text}.

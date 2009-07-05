@@ -52,7 +52,18 @@ if test "$OCAMLC" = "no"; then
 fi
 
 AC_PROG_FINDLIB
+if test "$OCAMLFIND" = "no"; then
+   OCAMLFIND=
+   LINKPKG=
+else
+   LINKPKG=-linkpkg
+   OCAMLC="$OCAMLFIND ocamlc"
+   OCAMLOPT="$OCAMLFIND ocamlopt"
+   OCAMLDEP="$OCAMLFIND ocamldep"
+   OCAMLDOC="$OCAMLFIND ocamldoc"
+fi
 
+AC_SUBST(LINKPKG)
 
 # substitutions to perform
 AC_SUBST(PACKAGE_NAME)

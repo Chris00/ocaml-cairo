@@ -578,6 +578,7 @@ struct
 
   external create_similar : t -> content -> width:int -> height:int -> t
     = "caml_cairo_surface_create_similar"
+  external finish : t -> unit = "caml_cairo_surface_finish"
   external flush : t -> unit = "caml_cairo_surface_flush"
   external get_font_options : t -> Font_options.t
     = "caml_cairo_surface_get_font_options"

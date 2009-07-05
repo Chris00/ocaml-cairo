@@ -1,13 +1,15 @@
 ROOT=.
 include Makefile.conf
 
-.PHONY: default all opt byte native install uninstall htdoc doc
+.PHONY: default all opt byte native install uninstall htdoc doc examples
 default: byte opt
 all: byte
 opt: native
 htdoc: doc
 byte native install uninstall doc:
 	$(MAKE) -C src $@
+examples:
+	$(MAKE) -C examples
 
 # Depends on the version number set in delimited_overloading.mli :
 cairo.godiva: cairo.godiva.in
@@ -33,5 +35,5 @@ sync-scm:
 
 .PHONY: clean
 clean:
-	$(RM) $(wildcard *~) cairo.godiva
+	$(RM) $(wildcard *~) cairo.godiva *.pdf
 	$(MAKE) -C src $@

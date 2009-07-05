@@ -3,6 +3,8 @@
 *.cmxa
 *.annot
 .depend.ocaml
+*.exe
+*.com
 # Automake & configure
 autom4te.cache
 configure
@@ -12,3 +14,5 @@ config.status
 Makefile.ocaml
 src/Makefile
 doc/html
+# Examples output
+*.pdf

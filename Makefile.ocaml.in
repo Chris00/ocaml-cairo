@@ -34,12 +34,12 @@ OCAMLOPT_FLAGS += $(if $(OCAMLINCLUDES), $(addprefix -I , $(OCAMLINCLUDES)))
 %.exe: %.cmo
 	$(OCAMLC) -o $@ $(PP_FLAGS) $(OCAMLC_FLAGS) \
 	  $(LIBS_CMA) $(filter %.cmo %.cma,$(filter-out $<,$+)) \
-	  $(OCAML_PACKAGES) -linkpkg $<
+	  $(OCAML_PACKAGES) @LINKPKG@ $<
 
 %.com: %.cmx
 	$(OCAMLOPT) -o $@ $(PP_FLAGS) $(OCAMLOPT_FLAGS) \
 	  $(LIBS_CMXA) $(filter %.cmx %.cmxa,$(filter-out $<,$+)) \
-	  $(OCAML_PACKAGES) -linkpkg $<
+	  $(OCAML_PACKAGES) @LINKPKG@ $<
 
 .depend.ocaml: $(wildcard *.ml) $(wildcard *.mli)
 	@echo "Building $@ ... "

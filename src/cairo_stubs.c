@@ -1204,6 +1204,7 @@ CAMLexport value caml_cairo_surface_create_similar
     return(Val_unit);                                          \
   }
 
+DO_SURFACE(cairo_surface_finish)
 DO_SURFACE(cairo_surface_flush)
 
 CAMLexport value caml_cairo_surface_get_font_options(value vsurf)
