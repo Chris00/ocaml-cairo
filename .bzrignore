@@ -16,3 +16,5 @@ src/Makefile
 doc/html
 # Examples output
 *.pdf
+# Documentation
+doc/html

@@ -8,7 +8,7 @@ opt: native
 htdoc: doc
 byte native install uninstall doc:
 	$(MAKE) -C src $@
-examples:
+examples: native
 	$(MAKE) -C examples
 
 # Depends on the version number set in delimited_overloading.mli :
