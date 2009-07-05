@@ -6,7 +6,10 @@ OCAMLINCLUDES = ../src
 LIBS_CMXA = bigarray.cmxa cairo.cmxa
 OCAMLOPT_FLAGS = -dtypes -inline 3 -g
 
-default: hello.com
+default: arcs.com
 
 
 include $(ROOT)/Makefile.ocaml
+
+clean::
+	$(RM) *.com *.exe

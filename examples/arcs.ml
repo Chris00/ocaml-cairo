@@ -27,7 +27,7 @@ let draw_arc cr arc =
 
 
 let () =
-  let surface = Cairo.PDF.create "hello.pdf" 1000 1000 in
+  let surface = Cairo.PDF.create "arcs.pdf" 500 300 in
   let cr = Cairo.create surface in
 
   (* Arc *)
