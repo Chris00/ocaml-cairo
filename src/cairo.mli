@@ -1816,10 +1816,10 @@ external get_tolerance : context -> float = "caml_cairo_get_tolerance"
 
 (** A data structure for holding a rectangle. *)
 type rectangle = {
-  x:float;       (** X coordinate of the left side of the rectangle *)
-  y:float;       (** Y coordinate of the the top side of the rectangle  *)
-  width:float;   (** width of the rectangle *)
-  height:float   (** height of the rectangle  *)
+  x:float;   (** X coordinate of the left side of the rectangle *)
+  y:float;   (** Y coordinate of the the top side of the rectangle  *)
+  w:float;   (** width of the rectangle *)
+  h:float;   (** height of the rectangle  *)
 }
 
 val clip : ?preserve:bool -> context -> unit

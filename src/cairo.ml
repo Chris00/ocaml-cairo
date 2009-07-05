@@ -183,8 +183,8 @@ let clip ?(preserve=false) cr =
 type rectangle = {
   x:float;
   y:float;
-  width:float;
-  height:float
+  w:float;
+  h:float
 }
 
 external clip_extents : context -> rectangle = "caml_cairo_clip_extents"
