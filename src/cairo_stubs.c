@@ -1301,33 +1301,62 @@ CAMLexport value caml_cairo_image_surface_create(value vformat,
   CAMLreturn(vsurf);
 }
 
-CAMLexport value caml_cairo_image_surface_create_for_data
-(value vdata, value vformat, value vwidth, value vheight)
+CAMLexport value caml_cairo_format_stride_for_width(value vformat, value vw)
 {
-  CAMLparam4(vdata, vformat, vwidth, vheight);
-  CAMLlocal1(vsurf);
-  cairo_surface_t* surf;
-  unsigned char *data;
-  cairo_format_t format = FORMAT_VAL(vformat);
-  int width =  Int_val(vwidth);
-  int stride = cairo_format_stride_for_width(format, width);;
-  
-  data;
-  surf = cairo_image_surface_create_for_data(data, format, width,
-                                             Int_val(vheight), stride);
-  caml_raise_Error(cairo_surface_status(surf));
-  SURFACE_ASSIGN(vsurf, surf);
-  CAMLreturn(vsurf);
+  /* noalloc */
+  return Val_int(cairo_format_stride_for_width(FORMAT_VAL(vformat),
+                                               Int_val(vw)));
 }
 
-CAMLexport value caml_cairo_image_surface_get_data(value vsurf)
-{
-  CAMLparam1(vsurf);
-  CAMLlocal1(vdata);
-  unsigned char* data = cairo_image_surface_get_data(SURFACE_VAL(vsurf));
-  
-  CAMLreturn(vdata);
-}
+
+/* FIXME: cairo_surface_destroy does not seem to clear the data
+   (confirm), thus one only has to "attach" the bigarray to the
+   surface to avoid it to be destroyed earlier. */
+#define SURFACE_CREATE_DATA(name)                                       \
+  CAMLexport value caml_cairo_image_surface_create_for_##name           \
+  (value vb, value vformat, value vwidth, value vheight, value vstride) \
+  {                                                                     \
+    CAMLparam5(vb, vformat, vwidth, vheight, vstride);                  \
+    CAMLlocal1(vsurf);                                                  \
+    cairo_surface_t* surf;                                              \
+    const int width =  Int_val(vwidth);                                 \
+    struct caml_ba_array *b = Caml_ba_array_val(vb);                    \
+                                                                        \
+    if ((b->flags & CAML_BA_MANAGED_MASK) == CAML_BA_MAPPED_FILE)       \
+      caml_invalid_argument("Caml.Image.create_for_" #name              \
+                            ": cannot use a memory mapped file.");      \
+    surf = cairo_image_surface_create_for_data                          \
+      (b->data, FORMAT_VAL(vformat),                                    \
+       width, Int_val(vheight), Int_val(vstride));                      \
+    caml_raise_Error(cairo_surface_status(surf));                       \
+    SURFACE_ASSIGN(vsurf, surf);                                        \
+    CAMLreturn(vsurf);                                                  \
+  }
+
+SURFACE_CREATE_DATA(data8)
+SURFACE_CREATE_DATA(data32)
+
+#define SURFACE_GET_DATA(type, num_dims, dims ...)                      \
+  CAMLexport value caml_cairo_image_surface_get_##type(value vsurf)     \
+  {                                                                     \
+    CAMLparam1(vsurf);                                                  \
+    CAMLlocal1(vb);                                                     \
+    unsigned char* data = cairo_image_surface_get_data(SURFACE_VAL(vsurf)); \
+    intnat dim[num_dims] = {dims};                                      \
+                                                                        \
+    if (data == NULL)                                                   \
+      caml_invalid_argument("Cairo.Image.get_data: not an image surface."); \
+    vb = caml_ba_alloc(CAML_BA_##type | CAML_BA_C_LAYOUT | CAML_BA_EXTERNAL, \
+                       num_dims, data, dim);                            \
+    CAMLreturn(vb);                                                     \
+  }
+
+SURFACE_GET_DATA(UINT8, 1,
+                 cairo_image_surface_get_stride(SURFACE_VAL(vsurf))
+                 * cairo_image_surface_get_height(SURFACE_VAL(vsurf)) )
+SURFACE_GET_DATA(INT32, 2,
+                 cairo_image_surface_get_stride(SURFACE_VAL(vsurf)),
+                 cairo_image_surface_get_height(SURFACE_VAL(vsurf)) )
 
 
 #define GET_SURFACE(name, val_of, type)                         \

@@ -1061,28 +1061,47 @@ sig
           within a pixel, but not belonging to the given format are
           undefined). *)
 
-  open Bigarray
+  type data8 =
+      (int, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
+        (** Images represented as an array of 8 bytes values. *)
 
-  external create_for_data :
-    data:(char, int8_unsigned_elt, c_layout) Array2.t ->
-    format -> width:int -> height:int -> Surface.t
-    = "caml_cairo_image_surface_create_for_data"
-      (** Creates an image surface for the provided pixel data.  The
-          output buffer must be kept around until the cairo_surface_t
-          is destroyed or cairo_surface_finish() is called on the
-          surface. The initial contents of buffer will be used as the
-          initial image contents; you must explicitly clear the
-          buffer, using, for example, cairo_rectangle() and
-          cairo_fill() if you want it cleared. *)
+  type data32 =
+      (int32, Bigarray.int32_elt, Bigarray.c_layout) Bigarray.Array2.t
+        (** Images represented as an array of 32 bytes (RGB or RGBA) values. *)
 
-  external get_data : Surface.t -> (char, int8_unsigned_elt, c_layout) Array2.t
-    = "caml_cairo_image_surface_get_data"
-      (** Get the data of the image surface (shared), for direct
-          inspection or modification. *)
+  val create_for_data8 : data:data8 ->
+    format -> width:int -> ?stride:int -> height:int -> Surface.t
+    (** Creates an image surface for the provided pixel data.  The
+        initial contents of buffer will be used as the initial image
+        contents; you must explicitly clear the buffer, using, for
+        example, {!Cairo.rectangle} and {!Cairo.fill} if you want it
+        cleared. *)
+
+  val create_for_data32 : data:data32 ->
+    ?width:int -> ?height:int -> alpha:bool -> Surface.t
+    (** Same as {!Cairo.Image.create_for_data8} except that the stride
+        will necessarily be the bigarray 1st dimension and the [width]
+        and [height] will be by default taken from the bigarray 1st
+        and 2nd dimensions respectively.  If [alpha] is true, then the
+        [ARGB32] format is selected, otherwise [RGB24] is used. *)
+
+  val get_data8 : Surface.t -> data8
+    (** Get the data of the image surface (shared), for direct
+        inspection or modification. *)
+
+  val get_data32 : Surface.t -> data32
+    (** Get the data of the image surface (shared), for direct
+        inspection or modification.  The 1st (resp. 2nd) dimension of
+        the bigarray correspond to the width (resp. height) of the
+        surface.
+
+        @raise Invalid_argument if the format is not [ARGB32] or
+        [RGB24] because the array dimensions would not reflect the
+        image coordinates.  *)
 
   external get_format : Surface.t -> format
     = "caml_cairo_image_surface_get_format"
-      (** Get the format of the surface. *)
+    (** Get the format of the surface. *)
 
   external get_width : Surface.t -> int = "caml_cairo_image_surface_get_width"
       (** Get the width of the image surface in pixels. *)
@@ -1094,7 +1113,23 @@ sig
       (** Get the stride of the image surface in bytes. *)
 end
 
+module PDF :
+sig
 
+end
+
+module PNG :
+sig
+
+end
+
+module PS :
+sig
+end
+
+module SVG :
+sig
+end
 
 
 

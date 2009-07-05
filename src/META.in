@@ -11,3 +11,14 @@ package "lablgtk2" (
   require ="lablgtk2"
   description = "Rendering on Gtk canvas."
 )
+package "win32" (
+  version = "@PACKAGE_VERSION@"
+#  require =""
+  description = "Rendering in Windows."
+)
+package "quartz" (
+  version = "@PACKAGE_VERSION@"
+#  require =""
+  description = "Rendering on Quartz (Mac OS)."
+)
+

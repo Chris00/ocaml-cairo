@@ -630,20 +630,90 @@ struct
   external create : format -> width:int -> height:int -> Surface.t
     = "caml_cairo_image_surface_create"
 
-  open Bigarray
-
-  external create_for_data :
-    data:(char, int8_unsigned_elt, c_layout) Array2.t ->
-    format -> width:int -> height:int -> Surface.t
-    = "caml_cairo_image_surface_create_for_data"
-
-  external get_data : Surface.t -> (char, int8_unsigned_elt, c_layout) Array2.t
-    = "caml_cairo_image_surface_get_data"
   external get_format : Surface.t -> format
     = "caml_cairo_image_surface_get_format"
   external get_width : Surface.t -> int = "caml_cairo_image_surface_get_width"
   external get_height : Surface.t -> int = "caml_cairo_image_surface_get_height"
   external get_stride : Surface.t -> int = "caml_cairo_image_surface_get_stride"
+
+  (* [hold_value v] just keep [v] it its closure but do nothing with it. *)
+  let hold_value v _ = ()
+
+  external stride_for_width : format -> width:int -> int
+    = "caml_cairo_format_stride_for_width" "noalloc"
+
+  open Bigarray
+  type data8 =
+      (int, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
+  type data32 =
+      (int32, Bigarray.int32_elt, Bigarray.c_layout) Bigarray.Array2.t
+
+  external create_for_data8 : data:data8 ->
+    format -> width:int -> height:int -> stride:int -> Surface.t
+    = "caml_cairo_image_surface_create_for_data8"
+  external create_for_data32 : data:data32 ->
+    format -> width:int -> height:int -> stride:int -> Surface.t
+    = "caml_cairo_image_surface_create_for_data32"
+
+  let create_for_data8 ~data format ~width ?stride ~height =
+    let stride = match stride with
+      | None -> stride_for_width format width
+      | Some s -> s (* check provided by Cairo code *) in
+    if abs(stride * height) > Array1.dim data then
+      failwith(Printf.sprintf "Cairo.Image.create_for_data8: bigarray too \
+	small for the required stride=%i and height=%i" stride height);
+    let surf = create_for_data8 data format width height stride in
+    Gc.finalise (hold_value data) surf;
+    surf
+
+  let create_for_data32 ~data ?(width=Array2.dim1 data)
+      ?(height=Array2.dim2 data) ~alpha =
+    let format = if alpha then ARGB32 else RGB24 in
+    let surf = create_for_data32 data format width height (Array2.dim1 data) in
+    Gc.finalise (hold_value data) surf;
+    surf
+
+  external get_data8 : Surface.t -> (int, int8_unsigned_elt, c_layout) Array1.t
+    = "caml_cairo_image_surface_get_UINT8"
+  external get_data32 : Surface.t -> (int32, int32_elt, c_layout) Array2.t
+    = "caml_cairo_image_surface_get_INT32"
+
+  let get_data8 surface =
+    let data = get_data8 surface in
+    (* Keep the surface in the finalizer of this bigarray so it is
+       considered reachable at least as long as [data] is. *)
+    Gc.finalise (hold_value surface) data;
+    data
+
+  let get_data32 surface =
+    let format = get_format surface in
+    if format <> ARGB32 && format <> RGB24 then
+      invalid_arg "Cairo.Image.get_data32: image format must be \
+		   ARGB32 or RGB24";
+    if get_width surface <> get_stride surface then
+      invalid_arg "Cairo.Image.get_data32: width <> stride";
+    let data = get_data32 surface in
+    Gc.finalise (hold_value surface) data;
+    data
+end
+
+module PDF =
+struct
+
+end
+
+module PNG =
+struct
+
+end
+
+module PS =
+struct
+
+end
+
+module SVG =
+struct
 
 end
 
