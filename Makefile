@@ -29,6 +29,10 @@ tar:
 	bzr export /tmp/$(TARBALL) -r "tag:$(VERSION)"
 	@echo "Created tarball '/tmp/$(TARBALL)'."
 
+.PHONY: web
+web: doc
+	cd doc/html && scp *.html *.css $(FORGE_DOC)/cairo
+
 .PHONY: sync-scm
 sync-scm:
 	bzr push  svn+ssh://svn.forge.ocamlcore.org/svnroot/archimedes/cairo
