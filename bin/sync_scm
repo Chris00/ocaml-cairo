@@ -1,3 +1,0 @@
-#!/bin/sh
-
-bzr push svn+ssh://svn.forge.ocamlcore.org/svnroot/archimedes/cairo/
