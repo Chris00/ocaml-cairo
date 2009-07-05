@@ -1111,6 +1111,11 @@ sig
 
   external get_stride : Surface.t -> int = "caml_cairo_image_surface_get_stride"
       (** Get the stride of the image surface in bytes. *)
+
+  val output_ppm : out_channel -> ?width:int -> ?height:int -> data32 -> unit
+    (** Convenience function to write the subarray of size ([width],
+        [height]) representing an image to the PPM format.  The
+        possible alpha channel is ignored. *)
 end
 
 module PDF :

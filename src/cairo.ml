@@ -695,6 +695,36 @@ struct
     let data = get_data32 surface in
     Gc.finalise (hold_value surface) data;
     data
+
+
+  let output_ppm fh ?width ?height (data: data32) =
+    let width = match width with
+      | None -> Array2.dim1 data
+      | Some w ->
+          if w > Array2.dim1 data then
+            invalid_arg "Cairo.Image.output_ppm: width > Array2.dim1 data";
+          if w <= 0 then
+            invalid_arg "Cairo.Image.output_ppm: width <= 0";
+          w in
+    let height = match height with
+      | None -> Array2.dim2 data
+      | Some h ->
+          if h > Array2.dim2 data then
+            invalid_arg "Cairo.Image.output_ppm: height > Array2.dim2 data";
+          if h <= 0 then
+            invalid_arg "Cairo.Image.output_ppm: height <= 0";
+          h in
+    Printf.fprintf fh "P6 %d %d 255\n" width height;
+    for i = 0 to width - 1 do
+      for j = 0 to height - 1 do
+        (* Output pixel RGB *)
+        let p = Int32.to_int data.{i, j} in
+        output_byte fh ((p lsr 16) land 0xFF);
+        output_byte fh ((p lsr 8) land 0xFF);
+        output_byte fh (p land 0xFF)
+      done
+    done
+      (* flush fh ?? *)
 end
 
 module PDF =
