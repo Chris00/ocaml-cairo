@@ -6,7 +6,11 @@ OCAMLINCLUDES = ../src
 LIBS_CMXA = bigarray.cmxa cairo.cmxa
 OCAMLOPT_FLAGS = -dtypes -inline 3 -g
 
-default: arcs.com clip.com curve_to.com
+SOURCES = arcs.ml clip.ml curve_to.ml dash.ml fill_stroke.ml \
+  fill_style.ml gradient.ml set_line_cap.ml set_line_join.ml \
+  text.ml text_align_center.ml text_extents.ml
+
+default: $(SOURCES:.ml=.com)
 
 
 include $(ROOT)/Makefile.ocaml
