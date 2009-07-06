@@ -7,8 +7,7 @@ LIBS = @LIBS@
 DOC_DIR = $(ROOT)/doc/html/
 # Native code versions must be installed if and only if make opt was
 # called previously (i.e. the files exist):
-INSTALL_FILES = cairo.mli \
-  $(wildcard )
+INSTALL_FILES = cairo.mli $(wildcard *.cma *.cmxa)
 
 .PHONY: default all opt byte native
 default: @OCAMLBEST@

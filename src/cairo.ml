@@ -640,8 +640,8 @@ struct
   external get_height : Surface.t -> int = "caml_cairo_image_surface_get_height"
   external get_stride : Surface.t -> int = "caml_cairo_image_surface_get_stride"
 
-  (* [hold_value v] just keep [v] it its closure but do nothing with it. *)
-  let hold_value v _ = ()
+  (* [hold_value v] just keep [v] in its closure but do nothing with it. *)
+  let hold_value _v _ = ()
 
   external stride_for_width : format -> width:int -> int
     = "caml_cairo_format_stride_for_width" "noalloc"

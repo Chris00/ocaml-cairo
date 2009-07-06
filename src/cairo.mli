@@ -224,7 +224,7 @@ type text_extents = {
     the pangocairo that is part of the Pango text layout and rendering
     library.  Pango is available from http://www.pango.org/
 
-    See the {!text_toy} module for the "toy" text API.  *)
+    See also the {!text_toy}.  *)
 module Glyph :
 sig
   (** The [Glyph.t] structure holds information about a single glyph
