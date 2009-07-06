@@ -37,7 +37,10 @@ web: doc
 sync-scm sync_scm:
 	bzr push  svn+ssh://svn.forge.ocamlcore.org/svnroot/archimedes/cairo
 
-.PHONY: clean
+.PHONY: clean dist-clean
 clean:
 	$(RM) $(wildcard *~) cairo.godiva *.pdf
 	$(MAKE) -C src $@
+
+dist-clean::
+	$(RM) -r aclocal.m4 autom4te.cache config.log config.status
