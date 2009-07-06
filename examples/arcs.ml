@@ -27,7 +27,7 @@ let draw_arc cr arc =
 
 
 let () =
-  let surface = Cairo.PDF.create "arcs.pdf" 500. 300. in
+  let surface = Cairo.PS.create "arcs.ps" 500. 300. in
   let cr = Cairo.create surface in
 
   (* Arc *)
@@ -38,4 +38,5 @@ let () =
   Cairo.set_source_rgb cr 0. 0.8 0.;
   draw_arc cr Cairo.arc_negative;
 
+  Cairo.PNG.write surface "arcs.png";
   Cairo.Surface.finish surface
