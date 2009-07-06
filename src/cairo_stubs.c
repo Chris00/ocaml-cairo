@@ -1469,13 +1469,79 @@ UNAVAILABLE3(cairo_pdf_surface_set_size)
 /* PNG functions
 ***********************************************************************/
 
+static cairo_status_t caml_cairo_input_string
+(void *fn, unsigned char *data, unsigned int length)
+{
+  value s, r;
+  /* Contrarily to what is customary, it is the caller which specifies
+     the length of the data to read and we know no upper bound, so
+     there is no way to preallocate a single OCaml string for all read
+     operations. */
+  s = caml_alloc_string(length);
+  
+  r = caml_callback2_exn(* ((value *) fn), s, Val_int(length));
+  if (Is_exception_result(r)) return(CAIRO_STATUS_READ_ERROR);
+  else {
+    memmove(data, String_val(s), length);
+    return(CAIRO_STATUS_SUCCESS);
+  }
+}
+
 #ifdef CAIRO_HAS_PNG_FUNCTIONS
+
+CAMLexport value caml_cairo_image_surface_create_from_png(value fname)
+{
+  CAMLparam1(fname);
+  CAMLlocal1(vsurf);
+  cairo_surface_t* surf;
+  
+  surf = cairo_image_surface_create_from_png(String_val(fname));
+  caml_raise_Error(cairo_surface_status(surf));
+  SURFACE_ASSIGN(vsurf, surf);
+  CAMLreturn(vsurf);
+}
+
+CAMLexport value caml_cairo_image_surface_create_from_png_stream(value vinput)
+{
+  CAMLparam1(vinput);
+  CAMLlocal1(vsurf);
+  cairo_surface_t* surf;
+
+  surf = cairo_image_surface_create_from_png_stream(&caml_cairo_input_string,
+                                                    &vinput);
+  if (surf == NULL) caml_raise_Error(CAIRO_STATUS_READ_ERROR);
+  caml_raise_Error(cairo_surface_status(surf));
+  SURFACE_ASSIGN(vsurf, surf);
+  CAMLreturn(vsurf);    
+}
+
+CAMLexport value caml_cairo_surface_write_to_png(value vsurf, value vfname)
+{
+  /* noalloc */
+  cairo_status_t status;
+  
+  status = cairo_surface_write_to_png(SURFACE_VAL(vsurf), String_val(vfname));
+  caml_raise_Error(status);
+  return(Val_unit);
+}
+
+CAMLexport value caml_cairo_surface_write_to_png_stream(value vsurf,
+                                                        value voutput)
+{
+  CAMLparam2(vsurf, voutput);
+  cairo_status_t status = cairo_surface_write_to_png_stream
+    (SURFACE_VAL(vsurf), &caml_cairo_output_string, &voutput);
+  caml_raise_Error(status);
+  CAMLreturn(Val_unit);
+}
 
 
 
 #else
 
-
+UNAVAILABLE1(cairo_image_surface_create_from_png)
+UNAVAILABLE1(cairo_image_surface_create_from_png_stream)
+UNAVAILABLE1(cairo_surface_write_to_png)
 
 #endif /* CAIRO_HAS_PNG_FUNCTIONS */
 

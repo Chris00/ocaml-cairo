@@ -748,7 +748,18 @@ end
 
 module PNG =
 struct
+  external create : string -> Surface.t
+    = "caml_cairo_image_surface_create_from_png"
 
+  external create_from_stream : input:(string -> int -> unit) -> Surface.t
+    = "caml_cairo_image_surface_create_from_png_stream"
+    (* FIXME: must hold the input function to avoid it is being
+       reclaimed before the surface? *)
+
+  external write : Surface.t -> string -> unit
+    = "caml_cairo_surface_write_to_png"
+  external write_to_stream : Surface.t -> output:(string -> unit) -> unit
+    = "caml_cairo_surface_write_to_png_stream"
 end
 
 module PS =

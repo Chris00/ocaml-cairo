@@ -34,7 +34,7 @@
     - {!Quartz_font}: Quartz (CGFont) Fonts -- Font support via CGFont on OS X.
     - {!User_font}: Font support with font data provided by the user.
 
-    {!surface_backends}:
+    {b {!surfaces}} (platform independent {!surface_backends} and others):
     - {!Surface}: Base module for surfaces.
     - {!Image}: Image Surfaces -- Rendering to memory buffers.
     - {!PDF}: PDF Surfaces -- Rendering PDF documents.
@@ -44,6 +44,8 @@
     - {!XLib}: XLib Surfaces -- X Window System rendering using XLib.
     - {!Win32}: Win32 Surfaces -- Microsoft Windows surface support.
     - {!Quartz}: Quartz Surfaces -- Rendering to Quartz surfaces.
+
+    @author Christophe Troestler
 *)
 
 type status =
@@ -534,6 +536,9 @@ type font_type =
   | `User (** The font was create using cairo's user font api *)
   ]
 
+(** {!Cairo.Font_face.t} represents a particular font at a particular
+    weight, slant, and other characteristic but no size,
+    transformation, or size. *)
 module Font_face :
 sig
   type 'a t
@@ -840,13 +845,18 @@ external text_extents : context -> string -> text_extents
 
 (* ---------------------------------------------------------------------- *)
 
-(** {2 Base module for surfaces} *)
+(** {2:surfaces  Surfaces} *)
 
+(** {3 Base module for surfaces} *)
+
+(** This is used to describe the content that a surface will contain,
+    whether color information, alpha information (translucence
+    vs. opacity), or both.  *)
 type content = COLOR | ALPHA | COLOR_ALPHA
-    (** This is used to describe the content that a surface will
-        contain, whether color information, alpha information
-        (translucence vs. opacity), or both.  *)
 
+(** Abstract representation of all different drawing targets that
+    cairo can render to; the actual drawings are performed using a
+    cairo context.  *)
 module Surface :
 sig
   type t
@@ -1042,7 +1052,7 @@ sig
           not use it.  *)
 end
 
-(** {2:surface_backends Surface backends}
+(** {3:surface_backends   Surface backends}
 
     Below are the surface backends that do not depend of a particular
     platform.  {!XLib}, {!Win32}, and {!Quartz} are defined in their
@@ -1179,7 +1189,27 @@ end
     and writing any surface to a PNG file.  *)
 module PNG :
 sig
+  external create : string -> Surface.t
+    = "caml_cairo_image_surface_create_from_png"
+    (** [create filename] creates a new image surface and initializes
+        the contents to the given PNG file. *)
 
+  external create_from_stream : input:(string -> int -> unit) -> Surface.t
+    = "caml_cairo_image_surface_create_from_png_stream"
+    (** Creates a new image surface from PNG data read incrementally
+        via the [input] function.  The [input s l] function receives a
+        string [s] whose first [l] bytes must be filled with PNG data.
+        Any exception raised by [input] is considered as a read
+        error.  *)
+
+  external write : Surface.t -> string -> unit
+    = "caml_cairo_surface_write_to_png"
+    (** [write surface filename] writes the contents of [surface] to a
+        new file [filename] as a PNG image. *)
+
+  external write_to_stream : Surface.t -> output:(string -> unit) -> unit
+    = "caml_cairo_surface_write_to_png_stream"
+    (** Writes the image surface using the [output] function. *)
 end
 
 (** The PostScript surface is used to render cairo graphics to Adobe
@@ -1197,8 +1227,10 @@ end
 
 
 (* ---------------------------------------------------------------------- *)
+(** {2 Sources for drawing} *)
 
-(** {2  Sources for drawing} *)
+(** Paint (and also mask and brush) with which cairo draws and
+    associated function. *)
 module Pattern :
 sig
   type 'a t
@@ -1450,6 +1482,8 @@ external restore : context -> unit = "caml_cairo_restore"
 external get_target : context -> Surface.t = "caml_cairo_get_target"
   (** Gets the target surface for the cairo context as passed to [create]. *)
 
+(** Temporary redirection of drawing commands to intermediate
+    surfaces. *)
 module Group :
 sig
   val push : ?content:content -> context -> unit
