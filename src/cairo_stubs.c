@@ -19,6 +19,7 @@
 #include <cairo.h>
 #include <cairo-pdf.h>
 #include <cairo-ps.h>
+#include <cairo-svg.h>
 
 #include <caml/mlvalues.h>
 #include <caml/alloc.h>
@@ -1541,24 +1542,27 @@ SURFACE_CREATE_FROM_STREAM(cairo_ps_surface_create_for_stream)
 
 DO1_SURFACE(cairo_ps_surface_restrict_to_level, PS_LEVEL_VAL)
 
-CAMLexport value caml_cairo_ps_get_levels(value unit)
-{
-  CAMLparam1(unit);
-  CAMLlocal2(vlevels, vcons);
-  cairo_ps_level_t const *levels;
-  int num_levels, i;
-  
-  cairo_ps_get_levels(&levels, &num_levels);
-  /* Create OCaml list */
-  vlevels = Val_int(0); /* [] */
-  for(i = 0; i < num_levels; i++) {
-    vcons = caml_alloc_tuple(2);
-    Store_field(vcons, 0, VAL_PS_LEVEL(levels[i]));
-    Store_field(vcons, 1, vlevels);
-    vlevels = vcons; /* new head */
+#define GET_LIST(name, val_of, type)                    \
+  CAMLexport value caml_##name(value unit)              \
+  {                                                     \
+    CAMLparam1(unit);                                   \
+    CAMLlocal2(vlist, vcons);                           \
+    type *array;                                        \
+    int num, i;                                         \
+    /* Fill array */                                    \
+    name(&array, &num);                                 \
+    /* Create OCaml list */                             \
+    vlist = Val_int(0); /* [] */                        \
+    for(i = 0; i < num; i++) {                          \
+      vcons = caml_alloc_tuple(2);                      \
+      Store_field(vcons, 0, val_of(array[i]));          \
+      Store_field(vcons, 1, vlist);                     \
+      vlist = vcons; /* new head */                     \
+    }                                                   \
+    CAMLreturn(vlist);                                  \
   }
-  CAMLreturn(vlevels);
-}
+
+GET_LIST(cairo_ps_get_levels, VAL_PS_LEVEL, cairo_ps_level_t const)
 
 CAMLexport value caml_cairo_ps_level_to_string(value vlevel)
 {
@@ -1603,7 +1607,29 @@ UNAVAILABLE2(cairo_ps_surface_dsc_comment)
 
 #ifdef CAIRO_HAS_SVG_SURFACE
 
+SURFACE_CREATE(cairo_svg_surface_create)
+SURFACE_CREATE_FROM_STREAM(cairo_svg_surface_create_for_stream)
+
+#define SVG_VERSION_VAL(v) ((cairo_svg_version_t) Int_val(v))
+#define VAL_SVG_VERSION(v) Val_int(v)
+
+DO1_SURFACE(cairo_svg_surface_restrict_to_version, SVG_VERSION_VAL)
+GET_LIST(cairo_svg_get_versions, VAL_SVG_VERSION, cairo_svg_version_t const)
+
+CAMLexport value caml_cairo_svg_version_to_string(value vversion)
+{
+  CAMLparam1(vversion);
+  const char* s = cairo_svg_version_to_string(SVG_VERSION_VAL(vversion));
+  CAMLreturn(caml_copy_string(s));
+}
+
 #else
+
+UNAVAILABLE3(cairo_svg_surface_create)
+UNAVAILABLE3(cairo_svg_surface_create_for_stream)
+UNAVAILABLE2(cairo_svg_surface_restrict_to_version)
+UNAVAILABLE1(cairo_svg_get_versions)
+UNAVAILABLE1(cairo_svg_version_to_string)
 
 #endif /* CAIRO_HAS_SVG_SURFACE */
 

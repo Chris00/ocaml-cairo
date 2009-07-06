@@ -39,7 +39,7 @@ sync-scm sync_scm:
 
 .PHONY: clean dist-clean
 clean:
-	$(RM) $(wildcard *~ *.pdf *.ps *.png) cairo.godiva
+	$(RM) $(wildcard *~ *.pdf *.ps *.png *.svg) cairo.godiva
 	$(MAKE) -C src $@
 
 dist-clean::

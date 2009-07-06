@@ -27,7 +27,7 @@ let draw_arc cr arc =
 
 
 let () =
-  let surface = Cairo.PS.create "arcs.ps" 500. 300. in
+  let surface = Cairo.SVG.create "arcs.svg" 500. 300. in
   let cr = Cairo.create surface in
 
   (* Arc *)

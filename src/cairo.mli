@@ -1406,6 +1406,48 @@ end
     is a multi-page vector surface backend.  *)
 module SVG :
 sig
+  external create : fname:string -> width:float -> height:float -> Surface.t
+    = "caml_cairo_svg_surface_create"
+    (** Creates a SVG surface of the specified size in points to be
+        written to [fname].
+        @param width width of the surface, in points (1 point = 1/72.0 inch)
+        @param height height of the surface, in points (1 point = 1/72.0 inch)
+    *)
+
+  external create_for_stream : output:(string -> unit) ->
+    width:float -> height:float -> Surface.t
+    = "caml_cairo_svg_surface_create_for_stream"
+    (** Creates a SVG surface of the specified size in points to be
+        written incrementally to the stream represented by [output].
+        Any exception that [output] raises is considered as a write
+        error.
+
+        @param width width of the surface, in points (1 point = 1/72.0 inch)
+        @param height height of the surface, in points (1 point = 1/72.0 inch)
+    *)
+
+  (** The version number of the SVG specification that a generated SVG
+      file will conform to. *)
+  type version = VERSION_1_1 | VERSION_1_2
+
+  external restrict_to_version : Surface.t -> version -> unit
+    = "caml_cairo_svg_surface_restrict_to_version"
+      (** Restricts the generated SVG file to version. See
+          {!Cairo.SVG.get_versions} for a list of available version
+          values that can be used here.
+
+          This function should only be called before any drawing
+          operations have been performed on the given surface. The
+          simplest way to do this is to call this function immediately
+          after creating the surface. *)
+
+  external get_versions : unit -> version list
+    = "caml_cairo_svg_get_versions"
+      (** Retrieve the list of supported versions.  *)
+
+  external version_to_string : version -> string
+    = "caml_cairo_svg_version_to_string"
+      (** Get the string representation of the given version id. *)
 end
 
 

@@ -797,7 +797,21 @@ end
 
 module SVG =
 struct
+  external create : fname:string -> width:float -> height:float -> Surface.t
+    = "caml_cairo_svg_surface_create"
 
+  external create_for_stream : output:(string -> unit) ->
+    width:float -> height:float -> Surface.t
+    = "caml_cairo_svg_surface_create_for_stream"
+
+  type version = VERSION_1_1 | VERSION_1_2
+
+  external restrict_to_version : Surface.t -> version -> unit
+    = "caml_cairo_svg_surface_restrict_to_version"
+  external get_versions : unit -> version list
+    = "caml_cairo_svg_get_versions"
+  external version_to_string : version -> string
+    = "caml_cairo_svg_version_to_string"
 end
 
 
