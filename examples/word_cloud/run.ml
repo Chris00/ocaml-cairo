@@ -49,7 +49,7 @@ let () =
     let cr = Cairo.create surface in
     Random.self_init();
     Cairo.select_font_face cr font;
-    Cloud.make cr canvas words ~rotate:0.2;
+    Cloud.make cr canvas words ~rotate:0.1;
 
     Cairo.Surface.finish surface
   with Cairo.Error st as e ->

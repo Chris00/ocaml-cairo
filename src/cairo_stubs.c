@@ -158,7 +158,7 @@ CAMLexport value caml_cairo_get_dash(value vcr)
     Store_field(couple, 1, caml_copy_double(0.0));
   }
   else {
-    dashes = malloc(num_dashes * sizeof(double));
+    SET_MALLOC(dashes, num_dashes * sizeof(double));
     cairo_get_dash(cr, dashes, &offset);
     vdashes = caml_alloc(num_dashes * Double_wosize, Double_array_tag);
     for(i = 0; i < num_dashes; i++)
@@ -411,7 +411,7 @@ CAMLexport value caml_cairo_path_of_array(value varray)
   cairo_path_data_t *data;
   int i, num_data;
 
-  path = malloc(sizeof(cairo_path_t));
+  SET_MALLOC(path, sizeof(cairo_path_t));
   path->status = CAIRO_STATUS_SUCCESS;
   path->num_data = num_data;
   /* Compute the total length */
@@ -448,12 +448,16 @@ CAMLexport value caml_cairo_path_of_array(value varray)
   data->header.length = 1;
 
   path->data = malloc(num_data * sizeof(cairo_path_data_t));
+  if (path->data == NULL) {
+    free(path); /* free previously allocated memory */
+    caml_raise_out_of_memory();
+  }
   for(i = 0; i < num_data; i += data->header.length) {
     vdata = Field(varray, i);
     data = &path->data[i];
     SWITCH_PATH_DATA(vdata,MOVE, LINE, CURVE, CLOSE);
   }
-  PATH_ASSIGN(vpath, path);
+  PATH_ASSIGN(vpath, path); /* vpath points to path */
   CAMLreturn(vpath);
 }
 

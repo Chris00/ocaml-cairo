@@ -1,7 +1,11 @@
+#define SET_MALLOC(x, size)                      \
+  x = malloc(size);                              \
+  if (x == NULL) caml_raise_out_of_memory()
+
 #define FLOAT_ARRAY_LENGTH(a) Wosize_val(a) / Double_wosize
 
 #define SET_FLOAT_ARRAY(p, varray, length)                      \
-  p = malloc(length * sizeof(double));                          \
+  SET_MALLOC(p, length * sizeof(double));                       \
   for(i = 0; i < length; i++)  p[i] = Double_field(varray, i)
 
 #define FREE_FLOAT_ARRAY(p) free(p)

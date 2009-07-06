@@ -207,11 +207,11 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
   p->x = Double_val(Field(v,1));                 \
   p->y = Double_val(Field(v,2))
 
-#define ARRAY_GLYPH_VAL(glyphs, p, vglyphs, num_glyphs) \
-  num_glyphs = Wosize_val(vglyphs);                     \
-  glyphs = malloc(num_glyphs * sizeof(cairo_glyph_t));  \
-  for(i=0, p = glyphs; i < num_glyphs; i++, p++) {      \
-    SET_GLYPH_VAL(p, Field(vglyphs, i));                \
+#define ARRAY_GLYPH_VAL(glyphs, p, vglyphs, num_glyphs)         \
+  num_glyphs = Wosize_val(vglyphs);                             \
+  SET_MALLOC(glyphs, num_glyphs * sizeof(cairo_glyph_t));       \
+  for(i=0, p = glyphs; i < num_glyphs; i++, p++) {              \
+    SET_GLYPH_VAL(p, Field(vglyphs, i));                        \
   }
 
 #define GLYPH_ASSIGN(v, glyph)                          \
@@ -226,7 +226,7 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
 
 #define ARRAY_CLUSTER_VAL(clusters, q, vglyphs, num_glyphs)             \
   num_clusters = Wosize_val(vclusters);                                 \
-  clusters = malloc(num_clusters * sizeof(cairo_text_cluster_t));       \
+  SET_MALLOC(clusters, num_clusters * sizeof(cairo_text_cluster_t));    \
   for(i=0, q = clusters; i < num_clusters; i++, q++) {                  \
     SET_CLUSTER_VAL(q, Field(vclusters, i));                            \
   }
