@@ -1521,7 +1521,7 @@ external set_source_rgb : context -> r:float -> g:float -> b:float -> unit
       1. If the values passed in are outside that range, they will be
       clamped.
 
-      The default source pattern is opaque black, (that is, it is
+      The default source pattern is opaque black (that is, it is
       equivalent to [set_source_rgb cr 0. 0. 0.]). *)
 
 external set_source_rgba : context ->

@@ -2,7 +2,7 @@ ROOT=..
 include $(ROOT)/Makefile.conf
 
 # Does not require that the library is installed to compile the examples:
-OCAMLINCLUDES = ../src
+OCAMLINCLUDES = $(ROOT)/src
 LIBS_CMXA = bigarray.cmxa cairo.cmxa
 OCAMLOPT_FLAGS = -dtypes -inline 3 -g
 
@@ -11,6 +11,7 @@ SOURCES = arcs.ml clip.ml curve_to.ml dash.ml fill_stroke.ml \
   text.ml text_align_center.ml text_extents.ml
 
 default: $(SOURCES:.ml=.com)
+	$(MAKE) -C word_cloud
 
 
 include $(ROOT)/Makefile.ocaml
