@@ -134,6 +134,40 @@
   }
 
 
+/* Surface
+***********************************************************************/
+
+#define DO_SURFACE(name)                                       \
+  CAMLexport value caml_##name(value vsurf)                    \
+  {                                                            \
+    /* noalloc */                                              \
+    cairo_surface_t *surface = SURFACE_VAL(vsurf);             \
+    name(surface);                                             \
+    caml_raise_Error(cairo_surface_status(surface));           \
+    return(Val_unit);                                          \
+  }
+
+#define DO1_SURFACE(name, of_val1)                              \
+  CAMLexport value caml_##name(value vsurf, value v1)           \
+  {                                                             \
+    /* noalloc */                                               \
+    cairo_surface_t *surface = SURFACE_VAL(vsurf);              \
+    name(surface, of_val1(v1));                                 \
+    caml_raise_Error(cairo_surface_status(surface));            \
+    return(Val_unit);                                           \
+  }
+
+#define DO2_SURFACE(name, of_val1, of_val2)                     \
+  CAMLexport value caml_##name(value vsurf, value v1, value v2) \
+  {                                                             \
+    /* noalloc */                                               \
+    cairo_surface_t *surface = SURFACE_VAL(vsurf);              \
+    name(surface, of_val1(v1), of_val2(v2));                    \
+    caml_raise_Error(cairo_surface_status(surface));            \
+    return(Val_unit);                                           \
+  }
+
+
 /* Unavailable Cairo backend functions
 ***********************************************************************/
 

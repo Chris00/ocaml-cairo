@@ -3,7 +3,7 @@
 let pi = 4. *. atan 1.
 
 let () =
-  let surface = Cairo.PDF.create "clip.pdf" 300 300 in
+  let surface = Cairo.PDF.create "clip.pdf" 300. 300. in
   let cr = Cairo.create surface in
 
   Cairo.arc cr 128. 128. 76.8 0. (2. *. pi);

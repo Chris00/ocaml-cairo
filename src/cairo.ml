@@ -734,15 +734,15 @@ end
 module PDF =
 struct
   external create_for_stream : output:(string -> unit) ->
-    width:int -> height:int -> Surface.t
+    width:float -> height:float -> Surface.t
     = "caml_cairo_pdf_surface_create_for_stream"
 
-  external create : fname:string -> width:int -> height:int -> Surface.t
+  external create : fname:string -> width:float -> height:float -> Surface.t
     = "caml_cairo_pdf_surface_create"
     (* Do we want to implement it in terms of [create_for_stream]?
        The "problem" is the absence of close function... *)
 
-  external set_size : Surface.t -> width:int -> height:int -> unit
+  external set_size : Surface.t -> width:float -> height:float -> unit
     = "caml_cairo_pdf_surface_set_size" "noalloc"
 end
 
@@ -764,7 +764,35 @@ end
 
 module PS =
 struct
+  external create_for_stream : output:(string -> unit) ->
+    width:float -> height:float -> Surface.t
+    = "caml_cairo_ps_surface_create_for_stream"
+  external create : fname:string -> width:float -> height:float -> Surface.t
+    = "caml_cairo_ps_surface_create"
 
+  type level = LEVEL_2 | LEVEL_3
+
+  external restrict_to_level : Surface.t -> level -> unit
+    = "caml_cairo_ps_surface_restrict_to_level"
+  external get_levels : unit -> level list
+    = "caml_cairo_ps_get_levels"
+  external level_to_string : level -> string = "caml_cairo_ps_level_to_string"
+  external set_eps : Surface.t -> eps:bool -> unit
+    = "caml_cairo_ps_surface_set_eps"
+  external get_eps : Surface.t -> bool = "caml_cairo_ps_surface_get_eps"
+
+  external set_size : Surface.t -> width:float -> height:float -> unit
+    = "caml_cairo_ps_surface_set_size"
+
+  module Dsc =
+  struct
+    external begin_setup : Surface.t -> unit
+      = "caml_cairo_ps_surface_dsc_begin_setup"
+    external begin_page_setup : Surface.t -> unit
+      = "caml_cairo_ps_surface_dsc_begin_page_setup"
+    external comment : Surface.t -> string -> unit
+      = "caml_cairo_ps_surface_dsc_comment"
+  end
 end
 
 module SVG =

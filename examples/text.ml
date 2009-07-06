@@ -5,7 +5,7 @@ open Cairo
 let two_pi = 8. *. atan 1.
 
 let () =
-  let cr = Cairo.create(Cairo.PDF.create "text.pdf" 400 300) in
+  let cr = Cairo.create(Cairo.PDF.create "text.pdf" 400. 300.) in
 
   (* Take the cont from the command line if given: *)
   let font = try Sys.argv.(1) with _ -> "Sans" in

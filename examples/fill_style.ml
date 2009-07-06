@@ -5,7 +5,7 @@ open Cairo
 let two_pi = 8. *. atan 1.
 
 let () =
-  let cr = Cairo.create(Cairo.PDF.create "fill_style.pdf" 400 300) in
+  let cr = Cairo.create(Cairo.PDF.create "fill_style.pdf" 400. 300.) in
 
   set_line_width cr 6.;
 

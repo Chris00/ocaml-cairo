@@ -18,6 +18,7 @@
 #include <string.h>
 #include <cairo.h>
 #include <cairo-pdf.h>
+#include <cairo-ps.h>
 
 #include <caml/mlvalues.h>
 #include <caml/alloc.h>
@@ -1200,16 +1201,6 @@ CAMLexport value caml_cairo_surface_create_similar
   CAMLreturn(vsurf);
 }
 
-#define DO_SURFACE(name)                                       \
-  CAMLexport value caml_##name(value vsurf)                    \
-  {                                                            \
-    /* noalloc */                                              \
-    cairo_surface_t *surface = SURFACE_VAL(vsurf);             \
-    name(surface);                                             \
-    caml_raise_Error(cairo_surface_status(surface));           \
-    return(Val_unit);                                          \
-  }
-
 DO_SURFACE(cairo_surface_finish)
 DO_SURFACE(cairo_surface_flush)
 
@@ -1417,46 +1408,39 @@ static cairo_status_t caml_cairo_output_string
     return(CAIRO_STATUS_SUCCESS);
 }
 
+#define SURFACE_CREATE_FROM_STREAM(name)                                \
+  CAMLexport value caml_##name(value voutput, value vwidth, value vheight) \
+  {                                                                     \
+    CAMLparam3(voutput, vwidth, vheight);                               \
+    CAMLlocal1(vsurf);                                                  \
+    cairo_surface_t* surf;                                              \
+                                                                        \
+    surf = name(&caml_cairo_output_string, &voutput,                    \
+                Double_val(vwidth), Double_val(vheight));               \
+    caml_raise_Error(cairo_surface_status(surf));                       \
+    SURFACE_ASSIGN(vsurf, surf);                                        \
+    CAMLreturn(vsurf);                                                  \
+  }
+
+#define SURFACE_CREATE(name)                                            \
+  CAMLexport value caml_##name(value vfname, value vwidth, value vheight) \
+  {                                                                     \
+    CAMLparam3(vfname, vwidth, vheight);                                \
+    CAMLlocal1(vsurf);                                                  \
+    cairo_surface_t* surf;                                              \
+                                                                        \
+    surf = name(String_val(vfname), Double_val(vwidth), Double_val(vheight)); \
+    caml_raise_Error(cairo_surface_status(surf));                       \
+    SURFACE_ASSIGN(vsurf, surf);                                        \
+    CAMLreturn(vsurf);                                                  \
+  }
+
 
 #ifdef CAIRO_HAS_PDF_SURFACE
 
-CAMLexport value caml_cairo_pdf_surface_create_for_stream
-(value voutput, value vwidth, value vheight)
-{
-  CAMLparam3(voutput, vwidth, vheight);
-  CAMLlocal1(vsurf);
-  cairo_surface_t* surf;
-  
-  surf = cairo_pdf_surface_create_for_stream
-    (&caml_cairo_output_string, &voutput, Int_val(vwidth), Int_val(vheight));
-  caml_raise_Error(cairo_surface_status(surf));
-  SURFACE_ASSIGN(vsurf, surf);
-  CAMLreturn(vsurf);
-}
-
-CAMLexport value caml_cairo_pdf_surface_create
-(value vfname, value vwidth, value vheight)
-{
-  CAMLparam3(vfname, vwidth, vheight);
-  CAMLlocal1(vsurf);
-  cairo_surface_t* surf;
-  
-  surf = cairo_pdf_surface_create(String_val(vfname),
-                                  Int_val(vwidth), Int_val(vheight));
-  caml_raise_Error(cairo_surface_status(surf));
-  SURFACE_ASSIGN(vsurf, surf);
-  CAMLreturn(vsurf);
-}
-
-CAMLexport value caml_cairo_pdf_surface_set_size
-(value vsurf, value vwidth, value vheight)
-{
-  /* noalloc */
-  cairo_pdf_surface_set_size(SURFACE_VAL(vsurf),
-                             Int_val(vwidth), Int_val(vheight));
-  return(Val_unit);
-}
-
+SURFACE_CREATE_FROM_STREAM(cairo_pdf_surface_create_for_stream)
+SURFACE_CREATE(cairo_pdf_surface_create)
+DO2_SURFACE(cairo_pdf_surface_set_size, Double_val, Double_val)
 
 #else
 
@@ -1535,13 +1519,12 @@ CAMLexport value caml_cairo_surface_write_to_png_stream(value vsurf,
   CAMLreturn(Val_unit);
 }
 
-
-
 #else
 
 UNAVAILABLE1(cairo_image_surface_create_from_png)
 UNAVAILABLE1(cairo_image_surface_create_from_png_stream)
 UNAVAILABLE1(cairo_surface_write_to_png)
+UNAVAILABLE2(cairo_surface_write_to_png_stream)
 
 #endif /* CAIRO_HAS_PNG_FUNCTIONS */
 
@@ -1550,7 +1533,68 @@ UNAVAILABLE1(cairo_surface_write_to_png)
 
 #ifdef CAIRO_HAS_PS_SURFACE
 
+SURFACE_CREATE(cairo_ps_surface_create)
+SURFACE_CREATE_FROM_STREAM(cairo_ps_surface_create_for_stream)
+
+#define PS_LEVEL_VAL(v) ((cairo_ps_level_t) Int_val(v))
+#define VAL_PS_LEVEL(v) Val_int(v)
+
+DO1_SURFACE(cairo_ps_surface_restrict_to_level, PS_LEVEL_VAL)
+
+CAMLexport value caml_cairo_ps_get_levels(value unit)
+{
+  CAMLparam1(unit);
+  CAMLlocal2(vlevels, vcons);
+  cairo_ps_level_t const *levels;
+  int num_levels, i;
+  
+  cairo_ps_get_levels(&levels, &num_levels);
+  /* Create OCaml list */
+  vlevels = Val_int(0); /* [] */
+  for(i = 0; i < num_levels; i++) {
+    vcons = caml_alloc_tuple(2);
+    Store_field(vcons, 0, VAL_PS_LEVEL(levels[i]));
+    Store_field(vcons, 1, vlevels);
+    vlevels = vcons; /* new head */
+  }
+  CAMLreturn(vlevels);
+}
+
+CAMLexport value caml_cairo_ps_level_to_string(value vlevel)
+{
+  CAMLparam1(vlevel);
+  const char* s = cairo_ps_level_to_string(PS_LEVEL_VAL(vlevel));
+  CAMLreturn(caml_copy_string(s));
+}
+
+DO1_SURFACE(cairo_ps_surface_set_eps, Bool_val)
+
+CAMLexport value caml_cairo_ps_surface_get_eps(value vsurf)
+{
+  /* noalloc */
+  cairo_bool_t b = cairo_ps_surface_get_eps(SURFACE_VAL(vsurf));
+  return(Val_bool(b));
+}
+
+DO2_SURFACE(cairo_ps_surface_set_size, Double_val, Double_val)
+
+DO_SURFACE(cairo_ps_surface_dsc_begin_setup)
+DO_SURFACE(cairo_ps_surface_dsc_begin_page_setup)
+DO1_SURFACE(cairo_ps_surface_dsc_comment, String_val)
+
 #else
+
+UNAVAILABLE3(cairo_ps_surface_create)
+UNAVAILABLE3(cairo_ps_surface_create_for_stream)
+UNAVAILABLE2(cairo_ps_surface_restrict_to_level)
+UNAVAILABLE1(cairo_ps_get_levels)
+UNAVAILABLE1(cairo_ps_level_to_string)
+UNAVAILABLE2(cairo_ps_surface_set_eps)
+UNAVAILABLE1(cairo_ps_surface_get_eps)
+UNAVAILABLE3(cairo_ps_surface_set_size)
+UNAVAILABLE1(cairo_ps_surface_dsc_begin_setup)
+UNAVAILABLE1(cairo_ps_surface_dsc_begin_page_setup)
+UNAVAILABLE2(cairo_ps_surface_dsc_comment)
 
 #endif /* CAIRO_HAS_PS_SURFACE */
 

@@ -8,7 +8,7 @@ let x2 = 153.6 and y2 = 25.6
 let x3 = 230.4 and y3 = 128.0
 
 let () =
-  let cr = Cairo.create(Cairo.PDF.create "curve_to.pdf" 400 300) in
+  let cr = Cairo.create(Cairo.PDF.create "curve_to.pdf" 400. 300.) in
 
   move_to cr x y;
   curve_to cr x1 y1 x2 y2 x3 y3;

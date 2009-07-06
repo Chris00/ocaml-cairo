@@ -5,7 +5,7 @@ open Cairo
 let two_pi = 8. *. atan 1.
 
 let () =
-  let cr = Cairo.create(Cairo.PDF.create "gradient.pdf" 400 300) in
+  let cr = Cairo.create(Cairo.PDF.create "gradient.pdf" 400. 300.) in
 
   let pat = Pattern.create_linear 0.0 0.0  0.0 256.0 in
   Pattern.add_color_stop_rgba pat ~ofs:1. 0. 0. 0. 1.;

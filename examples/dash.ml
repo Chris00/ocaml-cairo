@@ -3,7 +3,7 @@
 open Cairo
 
 let () =
-  let cr = Cairo.create(Cairo.PDF.create "dash.pdf" 400 300) in
+  let cr = Cairo.create(Cairo.PDF.create "dash.pdf" 400. 300.) in
 
   let dashes = [| 50.0;  (* ink *)
                   10.0;  (* skip *)

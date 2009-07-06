@@ -3,7 +3,7 @@
 open Cairo
 
 let () =
-  let cr = Cairo.create(Cairo.PDF.create "fill_stroke.pdf" 400 300) in
+  let cr = Cairo.create(Cairo.PDF.create "fill_stroke.pdf" 400. 300.) in
 
   move_to cr 128.0 25.6;
   line_to cr 230.4 230.4;

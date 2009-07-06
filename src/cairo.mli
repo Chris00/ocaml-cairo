@@ -1152,7 +1152,7 @@ end
     files and is a multi-page vector surface backend. *)
 module PDF :
 sig
-  val create : fname:string -> width:int -> height:int -> Surface.t
+  val create : fname:string -> width:float -> height:float -> Surface.t
     (** Creates a PDF surface of the specified size in points to be
         written to [fname].
 
@@ -1161,7 +1161,7 @@ sig
     *)
 
   val create_for_stream : output:(string -> unit) ->
-    width:int -> height:int -> Surface.t
+    width:float -> height:float -> Surface.t
     (** Creates a PDF surface of the specified size in points to be
         written incrementally to the stream represented by [output].
         Any exception that [output] raises is considered as a write
@@ -1171,7 +1171,7 @@ sig
         @param height height of the surface, in points (1 point = 1/72.0 inch)
     *)
 
-  external set_size : Surface.t -> width:int -> height:int -> unit
+  external set_size : Surface.t -> width:float -> height:float -> unit
     = "caml_cairo_pdf_surface_set_size" "noalloc"
     (** Changes the size of a PDF surface for the current (and
         subsequent) pages.
@@ -1216,6 +1216,190 @@ end
     PostScript files and is a multi-page vector surface backend.  *)
 module PS :
 sig
+  external create : fname:string -> width:float -> height:float -> Surface.t
+    = "caml_cairo_ps_surface_create"
+    (** Creates a PostScript surface of the specified size in points
+        to be written to [fname].
+        @param width width of the surface, in points (1 point = 1/72.0 inch)
+        @param height height of the surface, in points (1 point = 1/72.0 inch)
+    *)
+
+  external create_for_stream : output:(string -> unit) ->
+    width:float -> height:float -> Surface.t
+    = "caml_cairo_ps_surface_create_for_stream"
+    (** Creates a PostScript surface of the specified size in points to be
+        written incrementally to the stream represented by [output].
+        Any exception that [output] raises is considered as a write
+        error.
+
+        @param width width of the surface, in points (1 point = 1/72.0 inch)
+        @param height height of the surface, in points (1 point = 1/72.0 inch)
+    *)
+
+  (** Describe the language level of the PostScript Language Reference
+      that a generated PostScript file will conform to. *)
+  type level = LEVEL_2 | LEVEL_3
+
+  external restrict_to_level : Surface.t -> level -> unit
+    = "caml_cairo_ps_surface_restrict_to_level"
+      (** [restrict_to_level level] restricts the generated PostSript
+          file to [level].  See {!Cairo.PS.get_levels} for a list of
+          available level values that can be used here.
+
+          This function should only be called before any drawing
+          operations have been performed on the given surface. The
+          simplest way to do this is to call this function immediately
+          after creating the surface.  *)
+
+  external get_levels : unit -> level list
+    = "caml_cairo_ps_get_levels"
+      (** Retrieves the list of supported levels. *)
+
+  external level_to_string : level -> string = "caml_cairo_ps_level_to_string"
+      (** [level_to_string level] return the string representation of
+          the given [level] id. *)
+
+  external set_eps : Surface.t -> eps:bool -> unit
+    = "caml_cairo_ps_surface_set_eps"
+      (** If [eps] is [true], the PostScript surface will output
+          Encapsulated PostScript.
+
+          This function should only be called before any drawing
+          operations have been performed on the current page. The
+          simplest way to do this is to call this function immediately
+          after creating the surface. An Encapsulated PostScript file
+          should never contain more than one page. *)
+
+  external get_eps : Surface.t -> bool = "caml_cairo_ps_surface_get_eps"
+      (** Check whether the PostScript surface will output
+          Encapsulated PostScript.  *)
+
+  external set_size : Surface.t -> width:float -> height:float -> unit
+    = "caml_cairo_ps_surface_set_size"
+      (** Changes the size of a PostScript surface for the current
+          (and subsequent) pages.
+
+          This function should only be called before any drawing
+          operations have been performed on the current page. The
+          simplest way to do this is to call this function immediately
+          after creating the surface or immediately after completing a
+          page with either {!Cairo.show_page} or {!Cairo.copy_page}. *)
+
+  (** PostScript comments. *)
+  module Dsc :
+  sig
+    external begin_setup : Surface.t -> unit
+      = "caml_cairo_ps_surface_dsc_begin_setup"
+      (** This function indicates that subsequent calls to
+          {!Cairo.PS.Dsc.comment} should direct comments to the Setup
+          section of the PostScript output.
+
+          This function should be called at most once per surface, and
+          must be called before any call to
+          {!Cairo.PS.Dsc.begin_page_setup} and before any drawing is
+          performed to the surface.
+
+          See {!Cairo.PS.Dsc.comment} for more details. *)
+
+    external begin_page_setup : Surface.t -> unit
+      = "caml_cairo_ps_surface_dsc_begin_page_setup"
+      (** This function indicates that subsequent calls to
+          {!Cairo.PS.Dsc.comment} should direct comments to the
+          PageSetup section of the PostScript output.
+
+          This function call is only needed for the first page of a
+          surface.  It should be called after any call to
+          {!Cairo.PS..Dsc.begin_setup} and before any drawing is
+          performed to the surface.
+
+          See {!Cairo.PS.Dsc.comment} for more details. *)
+
+    external comment : Surface.t -> string -> unit
+      = "caml_cairo_ps_surface_dsc_comment"
+      (** Emit a comment into the PostScript output for the given surface.
+
+          The comment is expected to conform to the PostScript
+          Language Document Structuring Conventions (DSC). Please see
+          that manual for details on the available comments and their
+          meanings. In particular, the [%IncludeFeature] comment allows
+          a device-independent means of controlling printer device
+          features. So the PostScript Printer Description Files
+          Specification will also be a useful reference.
+
+          The comment string must begin with a percent character (%)
+          and the total length of the string (including any initial
+          percent characters) must not exceed 255 characters.
+          Violating either of these conditions will raise en
+          exception.  But beyond these two conditions, this function
+          will not enforce conformance of the comment with any
+          particular specification.
+
+          The comment string should not have a trailing newline.
+
+          The DSC specifies different sections in which particular
+          comments can appear. This function provides for comments to
+          be emitted within three sections: the header, the Setup
+          section, and the PageSetup section. Comments appearing in
+          the first two sections apply to the entire document while
+          comments in the BeginPageSetup section apply only to a
+          single page.
+
+          For comments to appear in the header section, this function
+          should be called after the surface is created, but before a
+          call to {!Cairo.PS.Dsc.begin_setup}.
+
+          For comments to appear in the Setup section, this function
+          should be called after a call to {!Cairo.PS.Dsc.begin_setup}
+          but before a call to {!Cairo.PS.Dsc.begin_page_setup}.
+
+          For comments to appear in the PageSetup section, this
+          function should be called after a call to {!Cairo.PS.Dsc.page_setup}.
+
+          Note that it is only necessary to call
+          {!Cairo.PS.Dsc.begin_page_setup} for the first page of
+          any surface.  After a call to {!Cairo.show_page} or
+          {!Cairo.copy_page} comments are unambiguously directed to the
+          PageSetup section of the current page.  But it doesn't hurt
+          to call this function at the beginning of every page as that
+          consistency may make the calling code simpler.
+
+          As a final note, cairo automatically generates several
+          comments on its own.  As such, applications must not
+          manually generate any of the following comments:
+
+          - Header section: %!PS-Adobe-3.0, %Creator, %CreationDate, %Pages,
+            %BoundingBox, %DocumentData, %LanguageLevel, %EndComments.
+          - Setup section: %BeginSetup, %EndSetup
+          - PageSetup section: %BeginPageSetup, %PageBoundingBox,
+            %EndPageSetup.
+          - Other sections: %BeginProlog, %EndProlog, %Page, %Trailer, %EOF
+
+          Here is an example sequence showing how this function might
+          be used:
+          {[
+          let surface = Cairo.PS.create filename width height in
+          ...
+          Cairo.PS.Dsc.comment surface "%%Title: My excellent document";
+          Cairo.PS.Dsc.comment surface
+            "%%Copyright: Copyright (C) 2006 Cairo Lover";
+          ...
+          Cairo.PS.Dsc.begin_setup surface;
+          Cairo.PS.Dsc.comment surface "%%IncludeFeature: *MediaColor White";
+          ...
+          Cairo.PS.Dsc.begin_page_setup surface;
+          Cairo.PS.Dsc.comment surface "%%IncludeFeature: *PageSize A3";
+          Cairo.PS.Dsc.comment surface
+            "%%IncludeFeature: *InputSlot LargeCapacity";
+          Cairo.PS.Dsc.comment surface "%%IncludeFeature: *MediaType Glossy";
+          Cairo.PS.Dsc.comment surface "%%IncludeFeature: *MediaColor Blue";
+          ... (* draw to first page here *) ...
+          Cairo.show_page cr;
+          ...
+          Cairo.PS.Dsc.comment surface "%%IncludeFeature: *PageSize A5";
+          ...
+          ]}
+      *)
+  end
 end
 
 (** The SVG surface is used to render cairo graphics to SVG files and
