@@ -2,6 +2,26 @@ AC_INIT(cairo, 0.1, christophe.troestler@umons.ac.be)
 
 AC_MSG_RESULT([configuring $PACKAGE_STRING])
 
+# OCaml
+########################################################################
+
+AC_PROG_OCAML
+if test "$OCAMLC" = "no"; then
+  AC_MSG_ERROR([You must install the OCaml compiler])
+fi
+
+AC_PROG_FINDLIB
+if test "$OCAMLFIND" = "no"; then
+   OCAMLFIND=
+   LINKPKG=
+else
+   LINKPKG=-linkpkg
+   OCAMLC="$OCAMLFIND ocamlc"
+   OCAMLOPT="$OCAMLFIND ocamlopt"
+   OCAMLDEP="$OCAMLFIND ocamldep"
+   OCAMLDOC="$OCAMLFIND ocamldoc"
+fi
+
 # C & Cairo library
 ########################################################################
 
@@ -42,28 +62,26 @@ dnl 	 these cairo bindings or contact AC_PACKAGE_BUGREPORT
 dnl 	 to report the issue.])
 dnl 	 ])
 
+# Check for freetype
+PKG_CHECK_MODULES(freetype2, freetype2)
 
-# OCaml
-########################################################################
+# Optional GTK support (for the X11 backend)
+AC_ARG_WITH(gtk, 
+	    AS_HELP_STRING([--with-gtk],[Cairo/GTK+ integration via LablGTK]),
+	    use_gtk=$withval, use_gtk=yes)
+AC_ARG_VAR(LABLGTKDIR,[Location of the LablGTK library])
 
-AC_PROG_OCAML
-if test "$OCAMLC" = "no"; then
-  AC_MSG_ERROR([You must install the OCaml compiler])
+if test $use_gtk = yes ; then
+  # Check for LablGTK
+  AC_CHECK_OCAML_MODULE(lablgtk, LABLGTKDIR, Gobject, +lablgtk2 +lablgtk)
+
+  if test "$LABLGTKDIR" ; then
+    # Check for gdk-pixbuf
+    PKG_CHECK_MODULES(GDK, cairo gdk-2.0 gdk-pixbuf-2.0, :, use_gtk=no)
+  else
+    use_gtk=no
+  fi
 fi
-
-AC_PROG_FINDLIB
-if test "$OCAMLFIND" = "no"; then
-   OCAMLFIND=
-   LINKPKG=
-else
-   LINKPKG=-linkpkg
-   OCAMLC="$OCAMLFIND ocamlc"
-   OCAMLOPT="$OCAMLFIND ocamlopt"
-   OCAMLDEP="$OCAMLFIND ocamldep"
-   OCAMLDOC="$OCAMLFIND ocamldoc"
-fi
-
-AC_SUBST(LINKPKG)
 
 # substitutions to perform
 AC_SUBST(PACKAGE_NAME)
@@ -74,6 +92,7 @@ AC_SUBST(LIBS)
 AC_SUBST(OCAMLDEP)
 AC_SUBST(OCAMLMKLIB)
 AC_SUBST(OCAMLDOC)
+AC_SUBST(LINKPKG)
 
 # Finally create the Makefile and samples (read only to avoid changing
 # them by mistake)
