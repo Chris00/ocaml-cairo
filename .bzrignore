@@ -18,5 +18,6 @@ doc/html
 *.pdf
 *.ps
 *.png
+*.svg
 # Documentation
 doc/html
