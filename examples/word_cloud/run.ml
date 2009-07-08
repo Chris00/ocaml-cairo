@@ -3,7 +3,7 @@
 open Printf
 
 let l1 = 1.
-let l2 = 0.5
+let l2 = 0.7
 let words = [
   (l1, "Psychologie");
   (l1, "Sciences de l'éducation");
@@ -45,7 +45,7 @@ let () =
   try
     let canvas = { Cairo.x=20.; y=20.; w=600.; h=400. } in
 
-    let surface = Cairo.PDF.create "cloud.pdf" 640 440 in
+    let surface = Cairo.PDF.create "cloud.pdf" 640. 440. in
     let cr = Cairo.create surface in
     Random.self_init();
     Cairo.select_font_face cr font;

@@ -53,9 +53,9 @@ let make cr canvas ?(max_size=25.) ?rotate:(rotp=0.) words =
     let x, y = find_pos 2. vert word in
     printf "%-35s: x=%g y=%g %s\n" word x y (if vert then "(r)" else "");
     if freq > 0.5 then
-      set_source_rgb cr (0.4 +. Random.float 0.4) 0. (Random.float 0.5)
+      set_source_rgb cr (0.2 +. Random.float 0.8) 0. (Random.float 0.5)
     else
-      set_source_rgb cr (Random.float 0.5) 0. (0.2 +. Random.float 0.6);
+      set_source_rgb cr (Random.float 0.5) 0. (0.2 +. Random.float 0.8);
     if vert then (
       translate cr x y;
       move_to cr 0. 0.;

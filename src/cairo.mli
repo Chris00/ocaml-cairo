@@ -1309,7 +1309,7 @@ sig
 
           This function call is only needed for the first page of a
           surface.  It should be called after any call to
-          {!Cairo.PS..Dsc.begin_setup} and before any drawing is
+          {!Cairo.PS.Dsc.begin_setup} and before any drawing is
           performed to the surface.
 
           See {!Cairo.PS.Dsc.comment} for more details. *)
@@ -1353,7 +1353,8 @@ sig
           but before a call to {!Cairo.PS.Dsc.begin_page_setup}.
 
           For comments to appear in the PageSetup section, this
-          function should be called after a call to {!Cairo.PS.Dsc.page_setup}.
+          function should be called after a call to
+          {!Cairo.PS.Dsc.begin_page_setup}.
 
           Note that it is only necessary to call
           {!Cairo.PS.Dsc.begin_page_setup} for the first page of
@@ -2584,9 +2585,9 @@ external scale : context -> sx:float -> sy:float -> unit = "caml_cairo_scale"
 external rotate : context -> angle:float -> unit = "caml_cairo_rotate"
   (** Modifies the current transformation matrix (CTM) by rotating the
       user-space axes by [angle] radians.  The rotation of the axes
-      takes places after any existing transformation of user
-      space. The rotation direction for positive angles is from the
-      positive X axis toward the positive Y axis. *)
+      takes places after any existing transformation of user space.
+      The rotation direction for positive angles is from the positive
+      X axis toward the positive Y axis. *)
 
 external transform : context -> Matrix.t -> unit
   = "caml_cairo_transform" "noalloc"

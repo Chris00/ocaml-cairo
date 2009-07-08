@@ -15,8 +15,8 @@ let () =
   translate cr x0 y0;
   save cr;
   set_source_rgba cr 1. 0. 0. 0.5;
-  move_to cr 0. 0.;  line_to cr 300. 0.;  stroke cr;
-  move_to cr 0. 0.;  line_to cr 0. 300.;  stroke cr;
+  move_to cr (-150.) 0.;  line_to cr 300. 0.;  stroke cr;
+  move_to cr 0. (-150.);  line_to cr 0. 300.;  stroke cr;
   restore cr;
   let n = 12 in
   let da = two_pi /. float n in
@@ -24,8 +24,8 @@ let () =
     save cr;
     let angle = float i *. da in
     rotate cr angle;
-
     move_to cr 0. 0.;
+
     show_text cr (sprintf "angle %g" (360. *. float i /. float n));
     restore cr;
   done;
