@@ -15,11 +15,11 @@ if test "$OCAMLFIND" = "no"; then
    OCAMLFIND=
    LINKPKG=
 else
-   LINKPKG=-linkpkg
-   OCAMLC="$OCAMLFIND ocamlc"
-   OCAMLOPT="$OCAMLFIND ocamlopt"
-   OCAMLDEP="$OCAMLFIND ocamldep"
-   OCAMLDOC="$OCAMLFIND ocamldoc"
+   #LINKPKG=-linkpkg
+   OCAMLFIND_OCAMLC="$OCAMLFIND ocamlc"
+   OCAMLFIND_OCAMLOPT="$OCAMLFIND ocamlopt"
+   OCAMLFIND_OCAMLDEP="$OCAMLFIND ocamldep"
+   OCAMLFIND_OCAMLDOC="$OCAMLFIND ocamldoc"
 fi
 
 # C & Cairo library
@@ -33,7 +33,11 @@ CAIRO_INCS="/usr/include/cairo"
 AC_ARG_WITH(cairo,
     [  --with-cairo=INCLUDES (-I options to find cairo headers, default=/usr/include/cairo)],
     [CAIRO_INCS="$withval"], [])
-CPPFLAGS="$CPPFLAGS -I $CAIRO_INCS"
+if test "`echo \"$CAIRO_INCS\" |grep \" \" `" = ""; then
+  CPPFLAGS="$CPPFLAGS -I $CAIRO_INCS"
+else
+  CPPFLAGS="$CPPFLAGS -I '$CAIRO_INCS'"
+fi
 
 AC_CHECK_HEADERS([cairo.h], , [AC_MSG_ERROR(cairo.h missing)])
 

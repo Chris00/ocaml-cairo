@@ -51,6 +51,7 @@ sync-scm sync_scm:
 clean:
 	$(RM) $(wildcard *~ *.pdf *.ps *.png *.svg) cairo.godiva
 	$(MAKE) -C src $@
+	$(MAKE) -C examples $@
 
 dist-clean::
 	$(RM) -r aclocal.m4 autom4te.cache config.log config.status

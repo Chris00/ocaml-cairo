@@ -18,7 +18,8 @@ byte: cairo.cma
 native: cairo.cmxa
 
 cairo.cma cairo.cmxa: cairo.cmo cairo.cmx cairo_stubs.o
-	ocamlmklib -o cairo -oc cairo_stubs $(LIBS) $(CPPFLAGS) $^
+	ocamlmklib -o cairo -oc cairo_stubs -ocamlc $(OCAMLC) \
+	  -ocamlopt $(OCAMLOPT)  $(LIBS) $(CPPFLAGS) $^
 
 cairo_stubs.o: cairo_stubs.c  cairo_macros.c cairo_ocaml_types.c
 	$(OCAMLC) $(CPPFLAGS) -c $<

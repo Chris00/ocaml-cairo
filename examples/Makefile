@@ -1,7 +1,7 @@
 ROOT=..
 include $(ROOT)/Makefile.conf
 
-# Does not require that the library is installed to compile the examples:
+# Do not require that the library is installed to compile the examples:
 OCAMLINCLUDES = $(ROOT)/src
 LIBS_CMXA = bigarray.cmxa cairo.cmxa
 OCAMLOPT_FLAGS = -dtypes -inline 3 -g
@@ -22,3 +22,4 @@ include $(ROOT)/Makefile.ocaml
 
 clean::
 	$(RM) *.com *.exe
+	$(MAKE) -C word_cloud $@
