@@ -1,0 +1,391 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head>
+
+  
+  <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>Cairo OCaml Tutorial</title>
+  <link rel="stylesheet" href="tutorial.css" type="text/css" />
+  </head><body>
+<h1>Cairo OCaml Tutorial</h1>
+
+<p>
+This tutorial is derived from Michael
+Urman's <a href="http://www.tortall.net/mu/wiki/CairoTutorial">cairo
+tutorial for python programmers</a> and
+the <a href="http://cairographics.org/tutorial/">Cairo
+Tutorial</a>. The original code snippets have been translated to
+OCaml, the text has only been changed as much as necessary.<br>
+</p>
+<p>
+In order to follow along on your computer, you need the following
+things:</p>
+
+<ol>
+<li><a href="http://cairographics.org/">Cairo</a> itself. You will
+need both the library and the development files. See Download if you
+don't have it
+already.</li><li><a href="http://caml.inria.fr/">OCaml</a> to run the
+code snippets,
+and</li><li>The <a href="http://archimedes.forge.ocamlcore.org/">OCaml
+Cairo bindings</a> to join the previous two.</li>
+</ol>
+
+<p>If you want to see the code snippets included in this tutorial in
+action, you can try to click on some of the images. You will get a
+small OCaml program which includes the described drawing code.</p>
+
+
+<h2>Table of contents</h2>
+
+<ol>
+  <li><a href="#drawing_model">Cairo's Drawing Model</a>
+    <ul><li>
+	<a href="#nouns">Nouns</a>
+      (<a href="#Destination">Destination</a>,
+      <a href="#Source">Source</a>,  <a href="#Mask">Mask</a>,
+      <a href="#Path">Path</a>, <a href="#Context">Context</a>) </li>
+      <li><a href="#Verbs">Verbs</a>
+	(<a href="#Stroke">Stroke</a>,  <a href="#Fill">Fill</a>,
+	<a href="#Showtext">Show Text / Glyphs</a>,
+	<a href="#Paint">Paint</a>,
+	<a href="#Mask">Mask</a>)
+      </li>
+    </ul>
+</li><li><a href="#drawing_with_cairo">Drawing with Cairo</a>
+    <ul>
+      <li><a href="#preparesource">Preparing and Selecting a Source</a></li>
+      <li><a href="#createpath">Creating a Path</a></li>
+    </ul>
+</li>
+</ol>
+
+<h2><a id="drawing_model"></a>Cairo's Drawing Model</h2>
+
+<br>
+
+In order to explain the operations used by cairo, we first delve into a
+model of how cairo models drawing. There are only a few concepts
+involved, which are then applied over and over by the different
+methods. First I'll describe the <a href="#Nouns">nouns</a>: <a href="#Destination">destination</a>, <a href="#Source">source</a>, <a href="#Mask">mask</a>,
+<a href="#Path">path</a>, and <a href="#Context">context</a>. After that I'll describe the verbs which offer ways
+to manipulate the nouns and draw the graphics you wish to create.<br>
+<h3 id="Nouns">Nouns</h3>
+Cairo's nouns are somewhat abstract. To make them concrete I'm
+including diagrams that depict how they interact. The first three nouns
+are the three layers in the diagrams you see in this section. The
+fourth noun, the path, is drawn on the middle layer when it is
+relevant. The final noun, the context, isn't shown.<br>
+
+<h3 id="Destination">Destination</h3>
+<div class="tutright"><img src="destination.png" alt=""></div>
+&nbsp;The destination is the
+<a href="html/Cairo.html">surface</a> on which
+you're drawing. It may be tied to an array of pixels like in this
+tutorial, or it might be tied to a SVG or PDF file, or something else.
+This surface collects the elements of your graphic as you apply them,
+allowing you to build up a complex work as though painting on a canvas.<br>
+
+<h3 id="Source">Source</h3>
+
+<p>
+<div class="tutright"><img src="source.png" alt=""></div> The source
+is the "paint" you're about to work with. I show this as it
+is&#8212;plain black for several examples&#8212;but translucent to
+show lower layers.  Unlike real paint, it doesn't have to be a single
+color; it can be a <a href="html/Cairo.Pattern.html">pattern</a>
+or even a previously created
+destination <a href="html/Cairo.html">surface</a>. Also unlike
+real paint it can contain transparency information&#8212;the Alpha
+channel.</p>
+
+<h3 id="Mask">Mask</h3>
+
+<div class="tutright"><img src="the-mask.png" alt=""></div>
+<p>The mask is the most important piece: it controls where you apply
+the source to the destination. I will show it as a yellow layer with holes
+where it lets the source through. When you apply a drawing verb, it's like you
+stamp the source to the destination. Anywhere the mask allows, the source is
+copied. Anywhere the mask disallows, nothing happens.</p>
+
+<h3 id="Path">Path</h3>
+
+<p>The path is somewhere between part of the mask and part of the
+context. I will show it as thin green lines on the mask layer. It is
+manipulated by path verbs, then used by drawing verbs.</p>
+
+<h3><a id="Context"></a>Context</h3>
+
+<p>The context keeps track of everything that verbs affect.  It tracks
+one source, one destination, and one mask.  It also tracks several
+helper variables like your line width and style, your font face and
+size, and more. Most importantly it tracks the path, which is turned
+into a mask by drawing verbs.</p>
+
+<p>Before you can start to draw something with cairo, you need to create
+the context. The context is stored in cairo's central data type, called
+<code><a href="html/Cairo.html#TYPEcontext">Cairo.context</a></code>. When
+you create a cairo context, it must be tied to a specific surface-for
+example, an image surface if you want to create a PNG file.  There is
+also a data type for the surface, called
+<code><a href="html/Cairo.Surface.html#TYPEt">Cairo.Surface.t</a></code>. 
+You can initialize your cairo context like this:</p>
+
+<pre><code>let surface = <a href="html/Cairo.Image.html#VALcreate">Cairo.Image.create</a> Cairo.Image.ARGB32 120 120
+let cr = <a href="html/Cairo.html#VALcreate">Cairo.create</a> surface
+</code></pre>
+
+<p>The cairo context in this example is tied to an image surface of
+dimension 120&nbsp;x&nbsp;120 and 32 bits per pixel to store RGB and
+Alpha information. Surfaces can be created specific to most cairo
+backends, see the <a href="html/Cairo.html">manual</a> for details.</p>
+
+<h2 id="Verbs">Verbs</h2>
+
+<p>The reason you are using cairo in a program is to draw. Cairo
+internally draws with one fundamental drawing operation: the source
+and mask are freely placed somewhere over the destination. Then the
+layers are all pressed together and the paint from the source is
+transferred to the destination wherever the mask allows it. To that
+extent the following five drawing verbs, or operations, are all
+similar. They differ by how they construct the mask.</p>
+
+<h3 id="Stroke">Stroke</h3>
+
+<div class="tutright">
+  <a href="../examples/stroke.ml"><img src="stroke.png" alt=""></a></div>
+
+<p>The
+<a href="html/Cairo.html#VALstroke"><code>Cairo.stroke</code></a>
+operation takes a virtual pen along the path. It allows the source to
+transfer through the mask in a thin (or thick) line around the path,
+according to the pen's
+<a href="html/Cairo.html#VALset_line_width">line width</a>,
+<a href="html/Cairo.html#VALset_dash">dash style</a>,
+and <a href="html/Cairo.html#VALset_line_cap">line caps</a>.</p>
+
+<pre><code>Cairo.set_line_width cr 0.1;
+Cairo.set_source_rgb cr 0. 0. 0.;
+Cairo.rectangle cr 0.25 0.25 0.5 0.5;
+Cairo.stroke cr;
+</code></pre>
+
+
+<h3 id="Fill">Fill</h3>
+
+<div class="tutright"><a href=".../examples/fill.ml"><img src="fill.png"
+alt=""></a></div>
+
+<p>The
+<a href="html/Cairo.html#VALfill"><code>Cairo.fill</code></a> operation
+instead uses the path like the lines of a coloring book, and allows
+the source through the mask within the hole whose boundaries are the
+path. For complex paths (paths with multiple closed sub-paths-like a
+donut-or paths that self-intersect) this is influenced by the
+<a href="html/Cairo.html#VALset_fill_rule">fill rule</a>.  Note that while
+stroking the path transfers the source for half of the line width on
+each side of the path, filling a path fills directly up to the edge of
+the path and no further.</p>
+
+<pre><code>Cairo.set_source_rgb cr 0. 0. 0.;
+Cairo.rectangle cr 0.25 0.25 0.5 0.5;
+Cairo.fill cr;
+</code></pre>
+
+
+<h3 id="Showtext">Show Text / Glyphs</h3>
+
+<div class="tutright"><a href="../examples/showtext.ml"><img src="showtext.png"
+alt=""></a></div>
+
+<p>The
+<a href="html/Cairo.html#VALshow_text"><code>Cairo.show_text</code></a>
+operation forms the mask from text. It may be easier to think of
+<code>Cairo.show_text</code> as a shortcut for creating a path with
+<a href="html/Cairo.Path.html#VALtext"><code>Cairo.Path.text</code></a>
+and then using
+<a href="html/Cairo.html#VALfill"><code>Cairo.fill</code></a> to transfer
+it.  Be aware <code>Cairo.show_text</code> caches glyphs so is much
+more efficient if you work with a lot of text.</p>
+
+<pre><code>Cairo.set_source_rgb cr 0.0 0.0 0.0;
+<a href="html/Cairo.html#VALselect_font_face">Cairo.select_font_face</a> cr "Georgia" ~weight:Cairo.Bold;
+Cairo.set_font_size cr 1.2;
+let te = <a href="html/Cairo.html#VALtext_extents">Cairo.text_extents</a> cr "a" in
+Cairo.move_to cr (0.5 -. te.width /. 2. -. te.x_bearing)
+    (0.5 -. te.height /. 2. -. te.y_bearing);
+Cairo.show_text cr "a";
+</code></pre>
+
+<h3 id="Paint">Paint</h3>
+
+<div class="tutright"><a href="../examples/paint.ml"><img src="paint.png"
+alt=""></a></div>
+
+<p>The
+<a href="html/Cairo.html#VALpaint"><code>Cairo.paint</code></a>
+operation uses a mask that transfers the entire source to the
+destination. Some people consider this an infinitely large mask, and
+others consider it no mask; the result is the same. The related
+operation
+<a href="html/Cairo.html#VALpaint"><code>Cairo.paint ~alpha:true</code></a>
+similarly allows transfer of the full source to destination, but it
+transfers only the provided percentage of the color.</p>
+
+<pre><code>Cairo.set_source_rgb cr 0.0 0.0 0.0;
+Cairo.paint cr ~alpha:0.5;
+</code></pre>
+
+<h3 id="Mask">Mask</h3>
+
+<div class="tutright"><a href="../examples/mask.ml"><img src="mask.png"
+alt=""></a></div>
+
+<p>The
+<a href="html/Cairo.html#VALmask"><code>Cairo.mask</code></a>
+and
+<a href="html/Cairo.html#VALmask_surface"><code>Cairo.mask_surface</code></a>
+operations allow transfer according to the transparency/opacity of a
+second source pattern or surface. Where the pattern or surface is
+opaque, the current source is transferred to the destination.  Where
+the pattern or surface is transparent, nothing is transferred.</p>
+
+<pre><code>let linpat = Cairo.Pattern.create_linear 0. 0. 1. 1. in
+Cairo.Pattern.add_color_stop_rgb linpat 0. 0.3 0.8;
+Cairo.Pattern.add_color_stop_rgb linpat ~ofs:1. 0. 0.8 0.3;
+
+let radpat = Cairo.Pattern.create_radial 0.5 0.5 0.25 0.5 0.5 0.75 in
+Cairo.Pattern.add_color_stop_rgba radpat 0. 0. 0. 1.;
+Cairo.Pattern.add_color_stop_rgba radpat ~ofs:0.5 0. 0. 0. 0.;
+
+Cairo.set_source cr linpat;
+Cairo.mask cr radpat;
+</code></pre>
+
+
+
+<h1 id="drawing_with_cairo">Drawing with Cairo</h1>
+
+<p>In order to create an image you desire, you have to prepare the
+<a href="html/Cairo.html#TYPEcontext">context</a> for each of the drawing
+verbs.  To use
+<a href="html/Cairo.html#VALstroke"><code>Cairo.stroke</code></a> or
+<a href="html/Cairo.html#VALfill"><code>Cairo.fill</code></a>
+you first need a path.  To use
+<a href="html/Cairo.html#VALshow_text"><code>Cairo.show_text</code></a>
+you must position your text by its insertion point. To use
+<a href="html/Cairo.html#VALmask"><code>Cairo.mask</code></a>
+you need a second source
+<a href="html/Cairo.Pattern.html">pattern</a> or
+<a href="html/Cairo.Surface.html">surface</a>.
+And to use any of the operations, including
+<a href="html/Cairo.html#VALpaint"><code>Cairo.paint</code></a>,
+you need a primary source.</p>
+
+<h2 id="preparesource">Preparing and Selecting a Source</h2>
+
+<p>There are three main kinds of sources in cairo: colors, gradients,
+and images. Colors are the simplest; they use a uniform hue and
+opacity for the entire source. You can select these without any
+preparation with
+<a href="html/Cairo.html#VALset_source_rgb"><code>Cairo.set_source_rgb</code></a>
+and
+<a href="html/Cairo.html#VALset_source_rgba"><code>Cairo.set_source_rgba</code></a>.
+Using <code>Cairo.set_source_rgb cr r g b</code> is equivalent to
+using
+<code>Cairo.set_source_rgba cr r g b 1.0</code>, and it sets your source
+color to use full opacity.</p>
+
+<div class="tutright"><a href="../examples/setsourcergba.ml"
+><img src="setsourcergba.png" alt=""></a></div>
+
+<pre><code>Cairo.set_source_rgb cr 0. 0. 0.;
+Cairo.move_to cr 0. 0.;
+Cairo.line_to cr 1. 1.;
+Cairo.move_to cr 1. 0.;
+Cairo.line_to cr 0. 1.;
+Cairo.set_line_width cr 0.2;
+Cairo.stroke cr;
+
+Cairo.rectangle cr 0. 0. 0.5 0.5;
+Cairo.set_source_rgba cr 1. 0. 0. 0.80;
+Cairo.fill cr;
+
+Cairo.rectangle cr 0. 0.5 0.5 0.5;
+Cairo.set_source_rgba cr 0. 1. 0. 0.60;
+Cairo.fill cr;
+
+Cairo.rectangle cr 0.5 0. 0.5 0.5;
+Cairo.set_source_rgba cr 0. 0. 1. 0.40;
+Cairo.fill cr;
+</code></pre>
+
+<p>Gradients describe a progression of colors by setting a start and
+stop reference location and a series of "stops" along the
+way. <a href="html/Cairo.Pattern.html#VALcreate_linear">Linear
+gradients</a> are built from two points which pass through parallel
+lines to define the start and stop
+locations. <a href="html/Cairo.Pattern.html#VALcreate_radial">Radial
+gradients</a> are also built from two points, but each has an
+associated radius of the circle on which to define the start and stop
+locations. Stops are added to the gradient with
+<a href="html/Cairo.Pattern.html#VALadd_color_stop_rgb"
+><code>Cairo.Pattern.add_color_stop_rgb</code></a> and
+<a href="html/Cairo.Pattern.html#VALadd_color_stop_rgba"
+><code>Cairo.Pattern.add_color_stop_rgba</code></a> which take a
+color like <code>Cairo.set_source_rgb*</code>, as well as an offset
+to indicate where it lies between the reference locations. The colors
+between adjacent stops are averaged over space to form a smooth blend.
+Finally, the behavior beyond the reference locations can be controlled
+with
+<a href="html/Cairo.Pattern.html#VALset_extend"
+><code>Cairo.Pattern.set_extend</code></a>.</p>
+
+<div class="tutright"><a href="../examples/setsourcegradient.ml"
+><img src="setsourcegradient.png" alt=""></a></div>
+
+<pre><code>let radpat = Cairo.Pattern.create_radial 0.25 0.25 0.1  0.5 0.5 0.5 in
+Cairo.Pattern.add_color_stop_rgb radpat  1.0 0.8 0.8;
+Cairo.Pattern.add_color_stop_rgb radpat ~ofs:1.  0.9 0.0 0.0;
+
+for i=1 to 9 do
+  for j=1 to 9 do
+    Cairo.rectangle cr (float i /. 10. -. 0.04) (float j /. 10. -. 0.04) 0.08 0.08;
+  done
+done;
+Cairo.set_source cr radpat;
+Cairo.fill cr;
+
+let linpat = Cairo.Pattern.create_linear 0.25 0.35 0.75 0.65 in
+Cairo.Pattern.add_color_stop_rgba linpat ~ofs:0.00  1. 1. 1. 0.0;
+Cairo.Pattern.add_color_stop_rgba linpat ~ofs:0.25  0. 1. 0. 0.5;
+Cairo.Pattern.add_color_stop_rgba linpat ~ofs:0.50  1. 1. 1. 0.0;
+Cairo.Pattern.add_color_stop_rgba linpat ~ofs:0.75  0. 0. 1. 0.5;
+Cairo.Pattern.add_color_stop_rgba linpat ~ofs:1.00  1. 1. 1. 0.0;
+
+Cairo.rectangle cr 0.0 0.0 1. 1.;
+Cairo.set_source cr linpat;
+Cairo.fill cr;
+</code></pre>
+
+<p>Images include both surfaces loaded from existing files with
+<a href="html/Cairo.PNG.html#VALcreate"
+><code>Cairo.PNG.create</code></a> and surfaces created
+from within cairo as an earlier destination. As of cairo 1.2, the
+easiest way to make and use an earlier destination as a source is with
+<a href="html/Cairo.Group.html#VALpush"><code>Cairo.Group.push</code></a>
+and either
+<a href="html/Cairo.Group.html#VALpop"><code>Cairo.Group.pop</code></a>
+or
+<a href="html/Cairo.Group.html#VALpop_to_source"
+><code>Cairo.Group.pop_to_source</code></a>.
+Use <code>Cairo.Group.pop_to_source</code> to use it just until you
+select a new source, and <code>Cairo.Group.pop</code> when you want
+to save it so you can select it over and over again with
+<a href="html/Cairo.html#VALset_source"
+><code>Cairo.set_source</code></a>.</p>
+
+
+<h2 id="createpath">Creating a Path</h2>
+
+
+
+</body></html>

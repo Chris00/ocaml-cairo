@@ -1,0 +1,37 @@
+body {
+    margin-left: 4%;
+    margin-right: 4%;
+    color: black;
+    background-color: white;
+}
+
+h1, .header, #footer, #title {
+    clear: both;
+}
+
+
+
+
+div.tutright {
+	float:right;
+	background-color: #eee;
+	border: solid 1px #888;
+	padding: 0.5em;
+	margin-left: 1em;
+}
+
+div.tutright img {
+	margin: 0px;
+}
+div.clear {
+	clear: both;
+}
+
+pre {
+    font-family: mono;
+    margin-left: 10%;
+    margin-right: 10%;
+    border: 1px solid #c5c5f6;
+    background-color: #dbdbf7;
+    padding: .5em;
+}

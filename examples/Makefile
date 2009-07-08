@@ -10,6 +10,10 @@ SOURCES = arcs.ml clip.ml curve_to.ml dash.ml fill_stroke.ml \
   fill_style.ml gradient.ml set_line_cap.ml set_line_join.ml \
   text.ml text_align_center.ml text_extents.ml text_rotate.ml
 
+# Tutorial:
+SOURCES += stroke.ml fill.ml showtext.ml paint.ml mask.ml \
+  setsourcergba.ml setsourcegradient.ml
+
 default: $(SOURCES:.ml=.com)
 	$(MAKE) -C word_cloud
 
