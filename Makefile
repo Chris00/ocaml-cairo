@@ -32,6 +32,16 @@ tar:
 .PHONY: web
 web: doc
 	cd doc/html && scp *.html *.css $(FORGE_DOC)/cairo
+	cd doc && \
+	sed -e 's/html\///' tutorial.html | sed -e 's/\.\.\/examples\///' \
+	> index.html && \
+	scp index.html *.css $(FORGE_DOC)/cairo && \
+	$(RM) index.html
+	cd doc && \
+	FILES=`grep "../examples/" tutorial.html | \
+	sed  -e "s/.*\(\.\.\/examples\/.*\.ml\).*/\1/"` && \
+	scp $$FILES $(FORGE_DOC)/cairo
+	cd doc && scp *.png $(FORGE_DOC)/cairo
 
 .PHONY: sync-scm sync_scm
 sync-scm sync_scm:
