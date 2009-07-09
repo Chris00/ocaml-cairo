@@ -29,8 +29,10 @@ tar:
 	bzr export /tmp/$(TARBALL) -r "tag:$(VERSION)"
 	@echo "Created tarball '/tmp/$(TARBALL)'."
 
-.PHONY: web web-html
-web web-html: doc examples
+.PHONY: web web-html tutorial
+web-html: doc
+	$(MAKE) -C doc $@
+web tutorial: doc examples
 	$(MAKE) -C doc $@
 
 

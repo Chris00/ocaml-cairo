@@ -3,7 +3,7 @@ include $(ROOT)/Makefile.conf
 
 IMAGES=$(shell grep .png tutorial.html | sed "s/.*\"\(.*\.png\).*/\1/")
 
-.PHONY: web  web-html
+.PHONY: web  web-html tutorial
 web-html:
 	cd html/ && scp *.html *.css $(FORGE_DOC)/cairo
 # Tutorial
@@ -19,6 +19,9 @@ web: $(IMAGES) web-html
 	scp $$FILES $(FORGE_DOC)/cairo
 # Images
 	scp *.png $(FORGE_DOC)/cairo
+
+tutorial: $(IMAGES)
+# Just generate the images (the .html file is ok)
 
 $(IMAGES):
 	for f in $(TUTORIAL_SOURCES:.ml=.com); do \
