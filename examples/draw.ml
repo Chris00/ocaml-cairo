@@ -127,29 +127,28 @@ let path_diagram cr =
   Cairo.set_source_rgb cr 0. 0.6 0.;
   Cairo.stroke cr;
 
-  if Array.length path > 1 then (
-    (* Draw markers at the first and the last point of the path, but
-       only if the path is not closed.
+  (* Draw markers at the first and the last point of the path, but
+     only if the path is not closed.
 
-       If the last path manipulation was a Cairo.Path.close, then we
-       can detect this at the end of the path array.  The [CLOSE_PATH]
-       element will be followed by a [MOVE_TO] element (since cairo
-       1.2.4), so we need to check position [Array.length path - 2].
-       See the module [Path] for further explanations. *)
-    if path.(Array.length path - 2) <> Cairo.CLOSE_PATH then (
-      (* Get the first point in the path *)
-      let x, y = get_point path.(0) in
-      let px, py = Cairo.device_to_user_distance cr 5. 5. in
-      let px = max px py in
-      Cairo.arc cr x y px 0. two_pi;
-      Cairo.set_source_rgba cr 0.0 0.6 0.0 0.5;
-      Cairo.fill cr;
+     If the last path manipulation was a Cairo.Path.close, then we
+     can detect this at the end of the path array.  The [CLOSE_PATH]
+     element will be followed by a [MOVE_TO] element (since cairo
+     1.2.4), so we need to check position [Array.length path - 2].
+     See the module [Path] for further explanations. *)
+  let len = Array.length path in
+  if len <= 1 || path.(len - 2) <> Cairo.CLOSE_PATH then (
+    (* Get the first point in the path *)
+    let x, y = get_point path.(0) in
+    let px, py = Cairo.device_to_user_distance cr 5. 5. in
+    let px = max px py in
+    Cairo.arc cr x y px 0. two_pi;
+    Cairo.set_source_rgba cr 0.0 0.6 0.0 0.5;
+    Cairo.fill cr;
 
-      let x, y = get_point path.(Array.length path - 1) in
-      Cairo.arc cr x y px 0. two_pi;
-      Cairo.set_source_rgba cr 0.0 0.0 0.75 0.5;
-      Cairo.fill cr;
-    )
+    let x, y = get_point path.(len - 1) in
+    Cairo.arc cr x y px 0. two_pi;
+    Cairo.set_source_rgba cr 0.0 0.0 0.75 0.5;
+    Cairo.fill cr;
   )
 ;;
 

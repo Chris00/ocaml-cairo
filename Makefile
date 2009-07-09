@@ -29,19 +29,10 @@ tar:
 	bzr export /tmp/$(TARBALL) -r "tag:$(VERSION)"
 	@echo "Created tarball '/tmp/$(TARBALL)'."
 
-.PHONY: web
-web: doc
-	cd doc/html && scp *.html *.css $(FORGE_DOC)/cairo
-	cd doc && \
-	sed -e 's/html\///' tutorial.html | sed -e 's/\.\.\/examples\///' \
-	> index.html && \
-	scp index.html *.css $(FORGE_DOC)/cairo && \
-	$(RM) index.html
-	cd doc && \
-	FILES=`grep "../examples/" tutorial.html | \
-	sed  -e "s/.*\(\.\.\/examples\/.*\.ml\).*/\1/"` && \
-	scp $$FILES $(FORGE_DOC)/cairo
-	cd doc && scp *.png $(FORGE_DOC)/cairo
+.PHONY: web web-html
+web web-html: doc examples
+	$(MAKE) -C doc $@
+
 
 .PHONY: sync-scm sync_scm
 sync-scm sync_scm:
@@ -52,6 +43,7 @@ clean:
 	$(RM) $(wildcard *~ *.pdf *.ps *.png *.svg) cairo.godiva
 	$(MAKE) -C src $@
 	$(MAKE) -C examples $@
+	$(MAKE) -C doc $@
 
 dist-clean::
 	$(RM) -r aclocal.m4 autom4te.cache config.log config.status
