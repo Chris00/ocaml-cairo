@@ -740,7 +740,7 @@ Cairo.stroke cr;
 you have to decide how you want to center it. For example the
 following code will actually center letters individually, leading to
 poor results when your letters are of different sizes. (Unlike most
-examples, here I assume a 26&nbsp;x&nbsp;1 workspace.)</p>
+examples, here I assume a 26&nbsp;&times;&nbsp;1 workspace.)</p>
 
 <div class="tutright"><a href="../examples/tips_letter.ml"
 ><img src="tips_letter.png" alt=""></a></div>
@@ -750,10 +750,10 @@ examples, here I assume a 26&nbsp;x&nbsp;1 workspace.)</p>
 <pre><code>let alphabet = "AbCdEfGhIjKlMnOpQrStUvWxYz" in
 
 for i = 0 to String.length alphabet - 1 do
-  let letter = alphabet.[i] in
+  let letter = String.make 1 (alphabet.[i]) in
   let te = Cairo.text_extents cr letter in
   Cairo.move_to cr (float i +. 0.5 -. te.x_bearing - te.width /. 2.)
-    (0.5 -. te.y_bearing -. te.height /. 2.);
+                   (0.5 -. te.y_bearing -. te.height /. 2.);
   Cairo.show_text cr letter;
 done;
 </code></pre>
@@ -775,7 +775,7 @@ for i = 0 to String.length alphabet - 1 do
   let letter = String.make 1 (alphabet.[i]) in
   let te = Cairo.text_extents cr letter in
   Cairo.move_to cr (float i +. 0.5 -. te.x_bearing -. te.width /. 2.)
-    (0.5 -. fe.descent +. fe.baseline /. 2.);
+                   (0.5 -. fe.descent +. fe.baseline /. 2.);
   Cairo.show_text cr letter;
 done;
 </code></pre>
