@@ -500,17 +500,17 @@ struct
     cluster array -> cluster_flags -> unit = "caml_cairo_show_text_glyphs"
 end
 
+type font_extents = {
+  ascent : float;
+  descent : float;
+  baseline : float;
+  max_x_advance : float;
+  max_y_advance : float;
+}
+
 module Scaled_font =
 struct
   type 'a t
-
-  type font_extents = {
-    ascent : float;
-    descent : float;
-    height : float;
-    max_x_advance : float;
-    max_y_advance : float;
-  }
 
   external set : context -> _ t -> unit = "caml_cairo_set_scaled_font"
   external get : context -> _ t = "caml_cairo_get_scaled_font"
@@ -561,7 +561,7 @@ external get_font_matrix : context -> Matrix.t = "caml_cairo_get_font_matrix"
 
 external show_text : context -> string -> unit = "caml_cairo_show_text"
 
-external font_extents : context -> Scaled_font.font_extents
+external font_extents : context -> font_extents
   = "caml_cairo_font_extents"
 
 external text_extents : context -> string -> text_extents
