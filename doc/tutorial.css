@@ -3,12 +3,44 @@ body {
     margin-right: 4%;
     color: black;
     background-color: white;
+  font-family: verdana,arial,helvetica,sans-serif;
+}
+
+img {
+	border: none;
 }
 
 h1, .header, #footer, #title {
     clear: both;
 }
 
+h1,h2,h3,h4,h5,h6, .header, #title {
+  font-family: verdana,arial,helvetica,sans-serif;
+  clear: both;
+  color: #01004e;
+}
+
+h1, #title {
+    font-weight: bold;
+    font-size: 170%;
+}
+
+h2 {
+    margin-left: 0%;
+    margin-right: 2%;
+    font-size: 150%;  
+}
+
+h3,h4,h5,h6 {
+    margin-left: 2%;
+    margin-right: 2%;
+    font-size: 125%;
+}
+
+p, ol, ul, hr, table {
+    margin-left: 2%;
+    margin-right: 4%;
+}
 
 
 
@@ -35,3 +67,8 @@ pre {
     background-color: #dbdbf7;
     padding: .5em;
 }
+
+a:link { text-decoration:none }
+a:visited { text-decoration:none }
+a:active { text-decoration:none }
+a:hover { text-decoration:underline; color:red }

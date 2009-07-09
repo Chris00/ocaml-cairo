@@ -80,32 +80,36 @@ small OCaml program which includes the described drawing code.</p>
 
 <h2><a id="drawing_model"></a>Cairo's Drawing Model</h2>
 
-In order to explain the operations used by cairo, we first delve into a
+<p>In order to explain the operations used by cairo, we first delve into a
 model of how cairo models drawing. There are only a few concepts
 involved, which are then applied over and over by the different
 methods. First I'll describe the <a href="#Nouns">nouns</a>: <a href="#Destination">destination</a>, <a href="#Source">source</a>, <a href="#Mask">mask</a>,
 <a href="#Path">path</a>, and <a href="#Context">context</a>. After that I'll describe the verbs which offer ways
 to manipulate the nouns and draw the graphics you wish to create.<br>
+
 <h3 id="Nouns">Nouns</h3>
-Cairo's nouns are somewhat abstract. To make them concrete I'm
+
+<p>Cairo's nouns are somewhat abstract. To make them concrete I'm
 including diagrams that depict how they interact. The first three nouns
 are the three layers in the diagrams you see in this section. The
 fourth noun, the path, is drawn on the middle layer when it is
-relevant. The final noun, the context, isn't shown.<br>
+relevant. The final noun, the context, isn't shown.</p>
 
 <h3 id="Destination">Destination</h3>
 <div class="tutright"><img src="destination.png" alt=""></div>
-&nbsp;The destination is the
+
+<p>The destination is the
 <a href="html/Cairo.html">surface</a> on which
 you're drawing. It may be tied to an array of pixels like in this
 tutorial, or it might be tied to a SVG or PDF file, or something else.
 This surface collects the elements of your graphic as you apply them,
-allowing you to build up a complex work as though painting on a canvas.<br>
+allowing you to build up a complex work as though painting on a canvas.</p>
 
 <h3 id="Source">Source</h3>
 
-<p>
-<div class="tutright"><img src="source.png" alt=""></div> The source
+<div class="tutright"><img src="source.png" alt=""></div> 
+
+<p>The source
 is the "paint" you're about to work with. I show this as it
 is&#8212;plain black for several examples&#8212;but translucent to
 show lower layers.  Unlike real paint, it doesn't have to be a single
