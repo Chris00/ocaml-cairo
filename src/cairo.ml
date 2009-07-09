@@ -302,25 +302,25 @@ struct
 
   let init_identity () = { xx=1.; yx=0.; xy=0.; yy=1.; x0=0.; y0=0. }
 
-  let init_translate ~tx ~ty =
-    { xx=1.; yx=0.; xy=0.; yy=1.;  x0=tx;  y0=ty }
+  let init_translate ~x ~y =
+    { xx=1.; yx=0.; xy=0.; yy=1.;  x0=x;  y0=y }
 
-  let init_scale ~sx ~sy =
-    { xx=sx; yx=0.; xy=0.; yy=sy;  x0=0.;  y0=0. }
+  let init_scale ~x ~y =
+    { xx=x; yx=0.; xy=0.; yy=y;  x0=0.;  y0=0. }
 
   let init_rotate ~angle =
     { xx=cos(angle);    yx=sin(angle);
       xy= -. sin(angle); yy=cos(angle);  x0=0.;  y0=0. }
 
-  let translate m ~tx ~ty =
-    m.x0 <- m.x0 +. m.xx *. tx +. m.xy *. ty;
-    m.y0 <- m.y0 +. m.yx *. tx +. m.yy *. ty
+  let translate m ~x ~y =
+    m.x0 <- m.x0 +. m.xx *. x +. m.xy *. y;
+    m.y0 <- m.y0 +. m.yx *. x +. m.yy *. y
 
-  let scale m ~sx ~sy =
-    m.xx <- m.xx *. sx;
-    m.yx <- m.yx *. sx;
-    m.xy <- m.xy *. sy;
-    m.yy <- m.yy *. sy
+  let scale m ~x ~y =
+    m.xx <- m.xx *. x;
+    m.yx <- m.yx *. x;
+    m.xy <- m.xy *. y;
+    m.yy <- m.yy *. y
 
   let rotate m ~angle =
     let cosa = cos angle and sina = sin angle in
@@ -907,9 +907,9 @@ end
 (* ---------------------------------------------------------------------- *)
 (* Transformations - Manipulating the current transformation matrix  *)
 
-external translate : context -> tx:float -> ty:float -> unit
+external translate : context -> x:float -> y:float -> unit
   = "caml_cairo_translate"
-external scale : context -> sx:float -> sy:float -> unit = "caml_cairo_scale"
+external scale : context -> x:float -> y:float -> unit = "caml_cairo_scale"
 external rotate : context -> angle:float -> unit = "caml_cairo_rotate"
 
 external transform : context -> Matrix.t -> unit

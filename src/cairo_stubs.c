@@ -296,8 +296,7 @@ CAMLexport value caml_cairo_copy_path(value vcr)
 {
   CAMLparam1(vcr);
   CAMLlocal1(vpath);
-  cairo_t* cr = CAIRO_VAL(vcr);
-  cairo_path_t* path = cairo_copy_path(cr);
+  cairo_path_t* path = cairo_copy_path(CAIRO_VAL(vcr));
   caml_raise_Error(path->status);
   PATH_ASSIGN(vpath, path);
   CAMLreturn(vpath);
@@ -307,8 +306,7 @@ CAMLexport value caml_cairo_copy_path_flat(value vcr)
 {
   CAMLparam1(vcr);
   CAMLlocal1(vpath);
-  cairo_t* cr = CAIRO_VAL(vcr);
-  cairo_path_t* path = cairo_copy_path_flat(cr);
+  cairo_path_t* path = cairo_copy_path_flat(CAIRO_VAL(vcr));
   caml_raise_Error(path->status);
   PATH_ASSIGN(vpath, path);
   CAMLreturn(vpath);
@@ -393,13 +391,20 @@ CAMLexport value caml_cairo_path_to_array(value vpath)
   CAMLlocal2(varray, vdata);
   cairo_path_t * path = PATH_VAL(vpath);
   cairo_path_data_t *data;
-  int i;
+  int i, el;
 
-  varray = caml_alloc_tuple(path->num_data);
+  /* Determine the number of elements in the path. */
+  el = 0;
+  for(i = 0; i < path->num_data; i += path->data[i].header.length)
+    el++;
+  varray = caml_alloc_tuple(el);
+  /* Assign each element of the array. */
+  el = 0;
   for(i = 0; i < path->num_data; i += path->data[i].header.length) {
     data = &path->data[i];
     PATH_DATA_ASSIGN(vdata, data);
-    Store_field(varray, i, vdata);
+    Store_field(varray, el, vdata);
+    el++;
   }
   CAMLreturn(varray);
 }

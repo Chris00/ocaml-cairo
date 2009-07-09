@@ -45,6 +45,11 @@
     - {!Win32}: Win32 Surfaces -- Microsoft Windows surface support.
     - {!Quartz}: Quartz Surfaces -- Rendering to Quartz surfaces.
 
+
+    In order to get acquainted with Cairo's concepts we recommend that
+    you read the {{:http://archimedes.forge.ocamlcore.org/cairo/}
+    Cairo OCaml tutorial}.
+
     @author Christophe Troestler
 *)
 
@@ -122,11 +127,11 @@ sig
   val init_identity : unit -> t
     (** [init_identity()] returns the identity transformation. *)
 
-  val init_translate : tx:float -> ty:float -> t
+  val init_translate : x:float -> y:float -> t
     (** [init_translate tx ty] return a transformation that translates
         by [tx] and [ty] in the X and Y dimensions, respectively. *)
 
-  val init_scale : sx:float -> sy:float -> t
+  val init_scale : x:float -> y:float -> t
     (** [init_scale sx sy] return a transformation that scales by [sx]
         and [sy] in the X and Y dimensions, respectively. *)
 
@@ -134,14 +139,14 @@ sig
     (** [init_rotate radians] returns a a transformation that rotates
         by [radians]. *)
 
-  val translate : t -> tx:float -> ty:float -> unit
-    (** [translate matrix rx ty] applies a translation by [tx], [ty]
+  val translate : t -> x:float -> y:float -> unit
+    (** [translate matrix tx ty] applies a translation by [tx], [ty]
         to the transformation in [matrix].  The effect of the new
         transformation is to first translate the coordinates by [tx]
         and [ty], then apply the original transformation to the
         coordinates. *)
 
-  val scale : t -> sx:float -> sy:float -> unit
+  val scale : t -> x:float -> y:float -> unit
     (** [scale matrix sx sy] applies scaling by [sx], [sy] to the
         transformation in [matrix].  The effect of the new
         transformation is to first scale the coordinates by [sx] and [sy],
@@ -201,12 +206,12 @@ end
     unchanged. *)
 type text_extents = {
   x_bearing : float;
-  (** The horizontal distance from the origin to the leftmost part of
-      the glyphs as drawn. Positive if the glyphs
+  (** The horizontal distance from the origin of the text to the
+      leftmost part of the glyphs as drawn.  Positive if the glyphs
       lie entirely to the right of the origin. *)
   y_bearing : float;
   (** The vertical distance from the origin to the topmost part of the
-      glyphs as drawn. Positive only if the glyphs lie completely below
+      glyphs as drawn.  Positive only if the glyphs lie completely below
       the origin; will usually be negative.  *)
   width : float; (** width of the glyphs as drawn *)
   height : float; (** height of the glyphs as drawn *)
@@ -607,11 +612,11 @@ end
     transformation matrix), but otherwise will remain unchanged. *)
 type font_extents = {
   ascent : float;
-  (** the distance that the font extends above the baseline. Note
-      that this is not always exactly equal to the maximum of the
-      extents of all the glyphs in the font, but rather is picked to
-      express the font designer's intent as to how the font should align
-      with elements above it.  *)
+  (** the distance that the font extends above the baseline. Note that
+      this is not always exactly equal to the maximum of the extents
+      of all the glyphs in the font, but rather is picked to express
+      the font designer's intent as to how the font should align with
+      elements above it.  *)
   descent : float;
   (** the distance that the font extends below the baseline. This
       value is positive for typical fonts that include portions
@@ -2568,20 +2573,20 @@ external rel_move_to : context -> x:float -> y:float -> unit
     See also {!Cairo.Matrix}. *)
 
 
-external translate : context -> tx:float -> ty:float -> unit
+external translate : context -> x:float -> y:float -> unit
   = "caml_cairo_translate"
-  (** Modifies the current transformation matrix (CTM) by translating
-      the user-space origin by ([tx], [ty]).  This offset is
-      interpreted as a user-space coordinate according to the CTM in
-      place before the new call to [translate].  In other words, the
-      translation of the user-space origin takes place after any
-      existing transformation. *)
+  (** [translate cr tx ty] modifies the current transformation matrix
+      (CTM) by translating the user-space origin by ([tx], [ty]).
+      This offset is interpreted as a user-space coordinate according
+      to the CTM in place before the new call to [translate].  In
+      other words, the translation of the user-space origin takes
+      place after any existing transformation. *)
 
-external scale : context -> sx:float -> sy:float -> unit = "caml_cairo_scale"
-  (** Modifies the current transformation matrix (CTM) by scaling the
-      X and Y user-space axes by [sx] and [sy] respectively.  The
-      scaling of the axes takes place after any existing
-      transformation of user space. *)
+external scale : context -> x:float -> y:float -> unit = "caml_cairo_scale"
+  (** [scale sx sy] modifies the current transformation matrix (CTM)
+      by scaling the X and Y user-space axes by [sx] and [sy]
+      respectively.  The scaling of the axes takes place after any
+      existing transformation of user space. *)
 
 external rotate : context -> angle:float -> unit = "caml_cairo_rotate"
   (** Modifies the current transformation matrix (CTM) by rotating the
@@ -2638,6 +2643,4 @@ external device_to_user_distance :
       from device space to user space.  This function is similar to
       {!Cairo.device_to_user} except that the translation components
       of the inverse CTM will be ignored when transforming ([dx],[dy]). *)
-
-
 
