@@ -7,6 +7,8 @@
   </head><body>
 <h1>Cairo OCaml Tutorial</h1>
 
+<div id="content">
+
 <p>
 This tutorial is derived from Michael
 Urman's <a href="http://www.tortall.net/mu/wiki/CairoTutorial">cairo
@@ -53,7 +55,23 @@ small OCaml program which includes the described drawing code.</p>
 </li><li><a href="#drawing_with_cairo">Drawing with Cairo</a>
     <ul>
       <li><a href="#preparesource">Preparing and Selecting a Source</a></li>
-      <li><a href="#createpath">Creating a Path</a></li>
+      <li><a href="#createpath">Creating a Path</a>
+	(<a href="#Moving">Moving</a>,
+	<a href="#Lines">Straight Lines</a>,
+	<a href="#Arcs">Arcs</a>,
+	<a href="#Curves">Curves</a>,
+	<a href="#Closepath">Close the path</a>,
+	<a href="#Text">Text</a>)
+      </li>
+    </ul>
+</li>
+<li><a href="#Understandingtext">Understanding Text</a></li>
+<li><a href="#Transforms">Working with Transforms</a></li>
+<li><a href="#Gonext">Where to Go Next</a></li>
+<li><a href="#Tips">Tips and Tricks</a>
+    <ul>
+      <li><a href="#linewidth">Line Width</a></li>
+      <li><a href="#textalign">Text Alignment</a></li>
     </ul>
 </li>
 <li><a href="html/Cairo.html">OCaml Cairo API</a>
@@ -348,7 +366,8 @@ Cairo.Pattern.add_color_stop_rgb radpat ~ofs:1.  0.9 0.0 0.0;
 
 for i=1 to 9 do
   for j=1 to 9 do
-    Cairo.rectangle cr (float i /. 10. -. 0.04) (float j /. 10. -. 0.04) 0.08 0.08;
+    Cairo.rectangle cr (float i /. 10. -. 0.04)
+                       (float j /. 10. -. 0.04) 0.08 0.08;
   done
 done;
 Cairo.set_source cr radpat;
@@ -386,6 +405,383 @@ to save it so you can select it over and over again with
 
 <h2 id="createpath">Creating a Path</h2>
 
+<p>Cairo always has an active path. If you
+call <a href="#Stroke"><code>Cairo.stroke</code></a> it will draw
+the path with your line settings.  If you
+call <a href="#Fill"><code>Cairo.fill</code></a> it will fill the
+inside of the path.  But as often as not, the path is empty, and both
+calls will result in no change to your destination. Why is it empty so
+often? For one, it starts that way; but more importantly after each
+<a href="#Stroke"><code>Cairo.stroke</code></a>
+or <a href="#Fill"><code>Cairo.fill</code></a> it is emptied again to
+let you start building your next path.</p>
+
+<p>What if you want to do multiple things with the same path? For
+instance to draw a red rectangle with a black border, you would want
+to fill the rectangle path with a red source, then stroke the same
+path with a black source. A rectangle path is easy to create multiple
+times, but a lot of paths are more complex.</p>
+
+<p>Cairo supports easily reusing paths by having alternate versions of
+its operations. Both draw the same thing, but the alternate doesn't
+reset the path.  For stroking, alongside
+<a href="html/Cairo.html#VALstroke"><code>Cairo.stroke()</code></a>
+there is
+<a href="html/Cairo.html#VALstroke"><code>Cairo.stroke
+~preserve:true</code></a>; for filling,
+<a href="html/Cairo.html#VALfill"><code>Cairo.fill
+~preserve:true</code></a> joins
+<a href="html/Cairo.html#VALfill"><code>Cairo.fill</code></a>.
+Even setting the clip has a preserve option.  Apart from choosing when
+to preserve your path, there are only a couple common operations.</p>
+
+<h3 id="Moving">Moving</h3>
+
+<div class="tutright"><img src="path-moveto.png" alt=""></div>
+
+<p>Cairo uses a connect-the-dots style system when creating paths.  Start
+at 1, draw a line to 2, then 3, and so forth. When you start a path, or
+when you need to start a new sub-path, you want it to be like point 1:
+it has nothing connecting to it. For this, use
+<a href="html/Cairo.html#VALmove_to"><code>Cairo.move_to</code></a>.
+This sets the current reference point without making the path connect
+the previous point to it. There is also a relative coordinate variant,
+<a href="html/Cairo.html#VALrel_move_to"><code>Cairo.rel_move_to</code></a>,
+which sets the new reference a specified distance away from the
+current reference instead. After setting your first reference point,
+use the other path operations which both update the reference point
+and connect to it in some way.</p>
+
+<pre><code>Cairo.move_to cr 0.25 0.25;
+</code></pre>
+
+<h3 id="Lines">Straight Lines</h3>
+
+<div class="tutright"><img src="path-lineto.png" alt=""></div>
+
+<p>Whether with absolute coordinates
+<a href="html/Cairo.html#VALline_to"><code>Cairo.line_to</code></a>
+(extend the path from the reference to this point), or relative
+coordinates
+<a href="html/Cairo.html#VALrel_line_to"
+><code>Cairo.rel_line_to</code></a> (extend the path from the
+reference this far in this direction), the path connection will be a
+straight line. The new reference point will be at the other end of the
+line.</p>
+
+<pre><code>Cairo.line_to cr 0.5 0.375;
+Cairo.rel_line_to cr 0.25 (-0.125);
+</code></pre>
+
+<h3 id="Arcs">Arcs</h3>
+
+<div class="tutright"><img src="path-arcto.png" alt=""></div>
+
+<p>Arcs are parts of the outside of a circle. Unlike straight lines,
+the point you directly specify is not on the path. Instead it is the
+center of the circle that makes up the addition to the path. Both a
+starting and ending point on the circle must be specified, and these
+points are connected either clockwise by
+<a href="html/Cairo.html#VALarc"><code>Cairo.arc</code></a>
+or counter-clockwise by
+<a href="html/Cairo.html#VALarc_negative"><code>Cairo.arc_negative</code></a>.
+If the previous reference point is not on this new curve, a straight
+line is added from it to where the arc begins. The reference point is
+then updated to where the arc ends. There are only absolute
+versions.</p>
+
+<pre><code>let pi_4 = atan 1. in
+Cairo.arc cr 0.5 0.5 (0.25 *. sqrt 2) (-. pi_4) pi_4;
+</code></pre>
+
+<h3 id="Curves">Curves</h3>
+
+<div class="tutright"><img src="path-curveto.png" alt=""></div>
+
+<p>Curves in cairo are cubic Bézier splines. They start at the current
+reference point and smoothly follow the direction of two other points
+(without going through them) to get to a third specified point. Like
+lines, there are both absolute
+(<a href="html/Cairo.html#VALcurve_to"><code>Cairo.curve_to</code></a>)
+and relative (<a href="html/Cairo.html#VALrel_curve_to"
+><code>Cairo.rel_curve_to</code></a>) versions.  Note that the
+relative variant specifies all points relative to the previous
+reference point, rather than each relative to the preceding control
+point of the curve.</p>
+
+<pre><code>Cairo.rel_curve_to cr (-0.25) (-0.125) (-0.25) 0.125 (-0.5) 0.;
+</code></pre>
+
+<h3 id="Closepath">Close the path</h3>
+
+<div class="tutright"><a href="../examples/path_close.ml"
+><img src="path_close.png" alt=""></a></div>
+
+<p>Cairo can also close the path by drawing a straight line to the
+beginning of the current sub-path. This straight line can be useful
+for the last edge of a polygon, but is not directly useful for
+curve-based shapes. A closed path is fundamentally different from an
+open path: it's one continuous path and has no start or end. A closed
+path has no line caps for there is no place to put them.</p>
+
+<pre><code>Cairo.Path.close cr;
+</code></pre>
+
+<h3 id="Text">Text</h3>
+
+<p>Finally text can be turned into a path with
+<a href="html/Cairo.Path.html#VALtext"><code>Cairo.Path.text</code></a>.
+Paths created from text are like any other path, supporting stroke or
+fill operations. This path is placed anchored to the current reference
+point, so <a href="#Moving"><code>Cairo.move_to</code></a> your
+desired location before turning text into a path.  However there are
+performance concerns to doing this if you are working with a lot of
+text; when possible you should prefer using the
+verb <a href="#Showtext"><code>Cairo.show_text</code></a>
+over <code>Cairo.Path.text</code>
+and <a href="#Fill"><code>Cairo.fill</code></a>.</p>
+
+
+<h1 id="Understandingtext">Understanding Text</h1>
+
+<div class="tutright"><a href="../examples/textextents.ml"
+><img src="textextents.png" alt=""></a></div>
+
+<p>To use text effectively you need to know where it will go. The methods
+<a href="html/Cairo.html#VALfont_extents"><code>Cairo.font_extents</code></a>
+and
+<a href="html/Cairo.html#VALtext_extents"><code>Cairo.text_extents</code></a>
+get you this information. Since this diagram is hard to see so small,
+I suggest running the <a href="../examples/textextents.ml">source</a>
+and looking at its output.  It shows the relation between the
+reference point (red dot); suggested next reference point (blue dot);
+bounding box (dashed blue lines); bearing displacement (solid blue
+line); and height, ascent, baseline, and descent lines (dashed
+green).</p>
+
+<p>The reference point is always on the baseline.  The descent line is
+below that, and reflects a rough bounding box for all characters in
+the font. However it is an artistic choice intended to indicate
+alignment rather than a true bounding box. The same is true for the
+ascent line above. Next above that is the height line, the
+artist-recommended spacing between subsequent baselines. All three of
+these are reported as distances from the baseline, and expected to be
+positive despite their differing directions.</p>
+
+<p>The bearing is the displacement from the reference point to the
+upper-left corner of the bounding box. It is often zero or a small
+positive value for x displacement, but can be negative x for
+characters like j as shown; it's almost always a negative value for y
+displacement. The width and height then describe the size of the
+bounding box. The advance takes you to the suggested reference point
+for the next letter. Note that bounding boxes for subsequent blocks of
+text can overlap if the bearing is negative, or the advance is smaller
+than the width would suggest.</p>
+
+<p>In addition to placement, you also need to specify a face, style,
+and size.  Set the face and style together with
+<a href="html/Cairo.html#VALselect_font_face"
+><code>Cairo.select_font_face</code></a>, and the size with
+<a href="html/Cairo.html#VALset_font_size"
+><code>Cairo.set_font_size</code></a>.  If you need even finer
+control, try getting a
+<a href="html/Cairo.Font_options.html#TYPEfont_options"
+><code>Cairo.Font_options.t</code></a> with
+<a href="html/Cairo.Font_options.html#VALget"
+><code>Cairo.Font_options.get</code></a>,
+tweaking it, and setting it with
+<a href="html/Cairo.Font_options.html#VALset"
+><code>Cairo.Font_options.set</code></a>.</p>
+
+
+<h1 id="Transforms">Working with Transforms</h1>
+
+<p>Transforms have three major uses. First they allow you to set up a
+coordinate system that's easy to think in and work in, yet have the
+output be of any size.  Second they allow you to make helper functions
+that work at or around a (0, 0) but can be applied anywhere in the
+output image. Thirdly they let you deform the image, turning a
+circular arc into an elliptical arc, etc.  Transforms are a way of
+setting up a relation between two coordinate systems. The device-space
+coordinate system is tied to the surface, and cannot change. The
+user-space coordinate system matches that space by default, but can be
+changed for the above reasons. The helper functions
+<a href="html/Cairo.html#VALuser_to_device"
+><code>Cairo.user_to_device</code></a>
+and
+<a href="html/Cairo.html#VALuser_to_device_distance"
+><code>Cairo.user_to_device_distance</code></a> tell you what the
+device-coordinates are for a user-coordinates position or distance.
+Correspondingly
+<a href="html/Cairo.html#VALdevice_to_user"
+><code>Cairo.device_to_user</code></a>
+and
+<a href="html/Cairo.html#VALdevice_to_user_distance"
+><code>Cairo.device_to_user_distance</code></a> tell you
+user-coordinates for a device-coordinates position or distance.
+Remember to send positions through the non-distance variant, and
+relative moves or other distances through the distance variant.</p>
+
+<p>I leverage all of these reasons to draw the diagrams in this
+document.  Whether I'm drawing 120&nbsp;&times;&nbsp;120 or
+600&nbsp;&times;&nbsp;600, I use
+<a href="html/Cairo.html#VALscale"><code>Cairo.scale</code></a> to
+give me a 1.0&nbsp;&times;&nbsp;1.0 workspace. To place the results
+along the right column, such as in the discussion
+of <a href="#drawing_model">cairo's drawing model</a>, I use
+<a href="html/Cairo.html#VALtranslate"><code>Cairo.translate</code></a>.
+And to add the perspective view for the overlapping layers, I set up
+an arbitrary deformation with
+<a href="html/Cairo.html#VALtransform"><code>Cairo.transform</code></a>
+on a
+<a href="html/Cairo.Matrix.html#TYPEt"><code>Cairo.Matrix.t</code></a>.</p>
+
+<p>To understand your transforms, read them bottom to top, applying
+them to the point you're drawing. To figure out which transforms to
+create, think through this process in reverse. For example if I want
+my 1.0&nbsp;&times;&nbsp;1.0 workspace to be 100&nbsp;&times;&nbsp;100
+pixels in the middle of a 120&nbsp;&times;&nbsp;120 pixel surface, I can set
+it up one of three ways:</p>
+
+<ol>
+<li><code>Cairo.translate cr 10. 10.; Cairo.scale cr 100. 100.;</code></li>
+<li><code>Cairo.scale cr 100. 100.; Cairo.translate cr 0.1 0.1;</code></li>
+<li><code>Cairo.transform cr { Cairo.xx = 100.; yx=0.; xy=0.; yy=100.; x0=10.; y0=10. };</code></li>
+</ol>
+
+<p>Use the first when relevant because it is often the most readable; use the
+third when necessary to access additional control not available with the
+primary functions.</p>
+
+<p>Be careful when trying to draw lines while under transform. Even if you
+
+set your line width while the scale factor was 1, the line width setting
+is always in user-coordinates and isn't modified by setting the scale.
+While you're operating under a scale, the width of your line is
+multiplied by that scale. To specify a width of a line in pixels, use
+<a href="html/Cairo.html#VALdevice_to_user_distance"
+><code>Cairo.device_to_user_distance</code></a> to turn
+a <code>(1,1)</code> device-space distance into, for example,
+a <code>(0.01, 0.01)</code> user-space distance. Note that if your
+transform deforms the image there isn't necessarily a way to specify a
+line with a uniform width.</p>
+
+
+<h1 id="Gonext">Where to Go Next</h1>
+
+<p>This wraps up the tutorial. It doesn't cover all functions in
+cairo, so for some "advanced" lesser-used features, you'll need to
+look elsewhere.  The code behind the examples
+(<a href="../examples/diagram.ml">layer diagrams</a>,
+<a href="../examples/draw.ml">drawing illustrations</a>) uses a
+handful of techniques that aren't described within, so analyzing them
+may be a good first step.
+Other <a href="http://cairographics.org/examples/">examples</a> on
+cairographics.org
+(<a href="http://forge.ocamlcore.org/plugins/scmsvn/viewcvs.php/cairo/examples/?root=archimedes">translated
+to OCaml</a>) lead in different directions. As with everything,
+there's a large gap between knowing the rules of the tool, and being
+able to use it well. The final section of this document provides some
+ideas to help you traverse parts of the gap.</p>
+
+
+<h1 id="Tips">Tips and Tricks</h1>
+
+<p>In the previous sections you should have built up a firm grasp of
+the operations cairo uses to create images. In this section I've put
+together a small handful of snippets I've found particularly useful or
+non-obvious. I'm still new to cairo myself, so there may be other
+better ways to do these things. If you find a better way, or find a
+cool way to do something else, let me know and perhaps I can
+incorporate it into these tips.</p>
+
+<h2 id="linewidth">Line Width</h2>
+
+<p>When you're working under a uniform scaling transform, you can't
+just use pixels for the width of your line. However it's easy to
+translate it with the help
+of <code>Cairo.device_to_user_distance</code> (assuming that the pixel
+width is <code>1</code>):</p>
+
+<pre><code>let ux, uy = Cairo.device_to_user_distance cr 1. 1. in
+Cairo.set_line_width cr (max ux uy);
+</code></pre>
+
+<p>When you're working under a deforming scale, you may wish to still
+have line widths that are uniform in device space. For this you should
+return to a uniform scale before you stroke the path. In the image,
+the arc on the left is stroked under a deformation, while the arc on
+the right is stroked under a uniform scale.</p>
+
+<div class="tutright"><a href="../examples/tips_ellipse.ml"
+><img src="tips_ellipse.png" alt=""></a></div>
+
+<pre><code>Cairo.set_line_width cr 0.1;
+
+Cairo.save cr;
+Cairo.scale cr 0.5 1.;
+Cairo.arc cr 0.5 0.5 0.40 0. two_pi;
+Cairo.stroke cr;
+
+Cairo.translate cr 1. 0.;
+Cairo.arc cr 0.5 0.5 0.40 0. two_pi;
+Cairo.restore cr;
+Cairo.stroke cr;
+</code></pre>
+
+
+<h2 id="textalign">Text Alignment</h2>
+
+<p>When you try to center text letter by letter at various locations,
+you have to decide how you want to center it. For example the
+following code will actually center letters individually, leading to
+poor results when your letters are of different sizes. (Unlike most
+examples, here I assume a 26&nbsp;x&nbsp;1 workspace.)</p>
+
+<div class="tutright"><a href="../examples/tips_letter.ml"
+><img src="tips_letter.png" alt=""></a></div>
+
+<div class="clear"></div>
+
+<pre><code>let alphabet = "AbCdEfGhIjKlMnOpQrStUvWxYz" in
+
+for i = 0 to String.length alphabet - 1 do
+  let letter = alphabet.[i] in
+  let te = Cairo.text_extents cr letter in
+  Cairo.move_to cr (float i +. 0.5 -. te.x_bearing - te.width /. 2.)
+    (0.5 -. te.y_bearing -. te.height /. 2.);
+  Cairo.show_text cr letter;
+done;
+</code></pre>
+
+<p>Instead the vertical centering must be based on the general size of
+the font, thus keeping your baseline steady. Note that the exact
+positioning now depends on the metrics provided by the font itself, so
+the results are not necessarily the same from font to font.</p>
+
+<div class="tutright"><a href="../examples/tips_font.ml"
+  ><img src="tips_font.png" alt=""></a></div>
+
+<div class="clear"></div>
+
+<pre><code>let alphabet = "AbCdEfGhIjKlMnOpQrStUvWxYz" in
+
+let fe = Cairo.font_extents cr in
+for i = 0 to String.length alphabet - 1 do
+  let letter = String.make 1 (alphabet.[i]) in
+  let te = Cairo.text_extents cr letter in
+  Cairo.move_to cr (float i +. 0.5 -. te.x_bearing -. te.width /. 2.)
+    (0.5 -. fe.descent +. fe.baseline /. 2.);
+  Cairo.show_text cr letter;
+done;
+</code></pre>
+
+<hr />
+
+<p>Copyright © 2005&ndash;2007 Michael Urman<br />
+Translated to OCaml by Christophe Troestler</p>
+
+</div> <!-- content -->
 
 
 
