@@ -420,7 +420,6 @@ CAMLexport value caml_cairo_path_of_array(value varray)
 
   SET_MALLOC(path, sizeof(cairo_path_t));
   path->status = CAIRO_STATUS_SUCCESS;
-  path->num_data = num_data;
   /* Compute the total length */
   num_data = 0;
 #define ADD1 num_data += 1
@@ -430,6 +429,7 @@ CAMLexport value caml_cairo_path_of_array(value varray)
     vdata = Field(varray, i);
     SWITCH_PATH_DATA(vdata, ADD2, ADD2, ADD4, ADD1);
   }
+  path->num_data = num_data;
 
 #define MOVE(x1,y1)                             \
   data->header.type = CAIRO_PATH_MOVE_TO;       \
