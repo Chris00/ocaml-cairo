@@ -40,7 +40,7 @@ else
 fi
 
 AC_CHECK_HEADERS([cairo.h], ,
-  [AC_MSG_ERROR(cairo.h missing, try to use --with-cairo)])
+  [AC_MSG_ERROR([cairo.h missing, try to use --with-cairo])])
 
 # Require cairo >= 1.6 for extend to be fully implemented
 AC_TRY_RUN([#include <cairo.h>
@@ -82,7 +82,9 @@ if test $use_gtk = yes ; then
 
   if test "$LABLGTKDIR" ; then
     # Check for gdk-pixbuf
-    PKG_CHECK_MODULES(GDK, cairo gdk-2.0 gdk-pixbuf-2.0, :, use_gtk=no)
+#    PKG_CHECK_MODULES(GDK, cairo gdk-2.0 gdk-pixbuf-2.0, :, use_gtk=no)
+     AC_CHECK_HEADERS([gdk.h], ,
+       [AC_MSG_ERROR([gdk.h missing, try to use --with-gdk])])
   else
     use_gtk=no
   fi
