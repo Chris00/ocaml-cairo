@@ -49,8 +49,8 @@ CAMLexport value caml_cairo_create(value vsurf)
   CAMLreturn(vcontext);
 }
 
-DO_FUNCTION(cairo_save)
-DO_FUNCTION(cairo_restore)
+DO_CONTEXT(cairo_save)
+DO_CONTEXT(cairo_restore)
 
 CAMLexport value caml_cairo_get_target(value vcr)
 {
@@ -63,7 +63,7 @@ CAMLexport value caml_cairo_get_target(value vcr)
   CAMLreturn(vsurf);
 }
 
-DO_FUNCTION(cairo_push_group)
+DO_CONTEXT(cairo_push_group)
 
 CAMLexport value caml_cairo_push_group_with_content(value vcr, value vcontent)
 {
@@ -87,7 +87,7 @@ CAMLexport value caml_cairo_pop_group(value vcr)
   CAMLreturn(vpat);
 }
 
-DO_FUNCTION(cairo_pop_group_to_source)
+DO_CONTEXT(cairo_pop_group_to_source)
 
 CAMLexport value caml_cairo_get_group_target(value vcr)
 {
@@ -100,14 +100,14 @@ CAMLexport value caml_cairo_get_group_target(value vcr)
   CAMLreturn(vsurf);
 }
 
-DO3_FUNCTION(cairo_set_source_rgb, Double_val, Double_val, Double_val)
+DO3_CONTEXT(cairo_set_source_rgb, Double_val, Double_val, Double_val)
 
-DO4_FUNCTION(cairo_set_source_rgba, Double_val, Double_val,
+DO4_CONTEXT(cairo_set_source_rgba, Double_val, Double_val,
              Double_val, Double_val)
 
-DO3_FUNCTION(cairo_set_source_surface, SURFACE_VAL, Double_val, Double_val)
+DO3_CONTEXT(cairo_set_source_surface, SURFACE_VAL, Double_val, Double_val)
 
-DO1_FUNCTION(cairo_set_source, PATTERN_VAL)
+DO1_CONTEXT(cairo_set_source, PATTERN_VAL)
 
 
 
@@ -126,8 +126,8 @@ CAMLexport value caml_cairo_get_source(value vcr)
 #define ANTIALIAS_VAL(v) Int_val(v)
 #define VAL_ANTIALIAS(v) Val_int(v)
 
-DO1_FUNCTION(cairo_set_antialias, ANTIALIAS_VAL)
-GET_FUNCTION(cairo_get_antialias, VAL_ANTIALIAS, cairo_antialias_t)
+DO1_CONTEXT(cairo_set_antialias, ANTIALIAS_VAL)
+GET_CONTEXT(cairo_get_antialias, VAL_ANTIALIAS, cairo_antialias_t)
 
 CAMLexport value caml_cairo_set_dash(value vcr, value vdashes, value voffset)
 {
@@ -175,40 +175,40 @@ CAMLexport value caml_cairo_get_dash(value vcr)
 #define FILL_RULE_VAL(v) Int_val(v)
 #define VAL_FILL_RULE(v) Val_int(v)
 
-DO1_FUNCTION(cairo_set_fill_rule, FILL_RULE_VAL)
-GET_FUNCTION(cairo_get_fill_rule, VAL_FILL_RULE, cairo_fill_rule_t)
+DO1_CONTEXT(cairo_set_fill_rule, FILL_RULE_VAL)
+GET_CONTEXT(cairo_get_fill_rule, VAL_FILL_RULE, cairo_fill_rule_t)
 
 #define LINE_CAP_VAL(v) Int_val(v)
 #define VAL_LINE_CAP(v) Val_int(v)
 
-DO1_FUNCTION(cairo_set_line_cap, FILL_RULE_VAL)
-GET_FUNCTION(cairo_get_line_cap, VAL_LINE_CAP, cairo_line_cap_t)
+DO1_CONTEXT(cairo_set_line_cap, FILL_RULE_VAL)
+GET_CONTEXT(cairo_get_line_cap, VAL_LINE_CAP, cairo_line_cap_t)
 
 #define LINE_JOIN_VAL(v) Int_val(v)
 #define VAL_LINE_JOIN(v) Val_int(v)
 
-DO1_FUNCTION(cairo_set_line_join, LINE_JOIN_VAL)
-GET_FUNCTION(cairo_get_line_join, VAL_LINE_JOIN, cairo_line_join_t)
+DO1_CONTEXT(cairo_set_line_join, LINE_JOIN_VAL)
+GET_CONTEXT(cairo_get_line_join, VAL_LINE_JOIN, cairo_line_join_t)
 
-DO1_FUNCTION(cairo_set_line_width, Double_val)
-GET_FUNCTION(cairo_get_line_width, caml_copy_double, double)
+DO1_CONTEXT(cairo_set_line_width, Double_val)
+GET_CONTEXT(cairo_get_line_width, caml_copy_double, double)
 
-DO1_FUNCTION(cairo_set_miter_limit, Double_val)
-GET_FUNCTION(cairo_get_miter_limit, caml_copy_double, double)
+DO1_CONTEXT(cairo_set_miter_limit, Double_val)
+GET_CONTEXT(cairo_get_miter_limit, caml_copy_double, double)
 
 #define OPERATOR_VAL(v) Int_val(v)
 #define VAL_OPERATOR(v) Val_int(v)
 
-DO1_FUNCTION(cairo_set_operator, OPERATOR_VAL)
-GET_FUNCTION(cairo_get_operator, VAL_OPERATOR, cairo_operator_t)
+DO1_CONTEXT(cairo_set_operator, OPERATOR_VAL)
+GET_CONTEXT(cairo_get_operator, VAL_OPERATOR, cairo_operator_t)
 
-DO1_FUNCTION(cairo_set_tolerance, Double_val)
-GET_FUNCTION(cairo_get_tolerance, caml_copy_double, double)
+DO1_CONTEXT(cairo_set_tolerance, Double_val)
+GET_CONTEXT(cairo_get_tolerance, caml_copy_double, double)
 
-DO_FUNCTION(cairo_clip)
-DO_FUNCTION(cairo_clip_preserve)
+DO_CONTEXT(cairo_clip)
+DO_CONTEXT(cairo_clip_preserve)
 GET_EXTENTS(cairo_clip_extents)
-DO_FUNCTION(cairo_reset_clip)
+DO_CONTEXT(cairo_reset_clip)
 
 CAMLexport value caml_cairo_copy_clip_rectangle_list(value vcr)
 {
@@ -239,8 +239,8 @@ CAMLexport value caml_cairo_copy_clip_rectangle_list(value vcr)
 }
 
 
-DO_FUNCTION(cairo_fill)
-DO_FUNCTION(cairo_fill_preserve)
+DO_CONTEXT(cairo_fill)
+DO_CONTEXT(cairo_fill_preserve)
 
 GET_EXTENTS(cairo_fill_extents)
 
@@ -254,7 +254,7 @@ CAMLexport value caml_cairo_in_fill(value vcr, value vx, value vy)
   CAMLreturn(Val_int(b));
 }
 
-DO1_FUNCTION(cairo_mask, PATTERN_VAL)
+DO1_CONTEXT(cairo_mask, PATTERN_VAL)
 
 CAMLexport value caml_cairo_mask_surface(value vcr, value vsurf,
                                          value vx, value vy)
@@ -266,11 +266,11 @@ CAMLexport value caml_cairo_mask_surface(value vcr, value vsurf,
   CAMLreturn(Val_unit);
 }
 
-DO_FUNCTION(cairo_paint)
-DO1_FUNCTION(cairo_paint_with_alpha, Double_val)
+DO_CONTEXT(cairo_paint)
+DO1_CONTEXT(cairo_paint_with_alpha, Double_val)
 
-DO_FUNCTION(cairo_stroke)
-DO_FUNCTION(cairo_stroke_preserve)
+DO_CONTEXT(cairo_stroke)
+DO_CONTEXT(cairo_stroke_preserve)
 
 GET_EXTENTS(cairo_stroke_extents)
 
@@ -284,8 +284,8 @@ CAMLexport value caml_cairo_in_stroke(value vcr, value vx, value vy)
   CAMLreturn(Val_int(b));
 }
 
-DO_FUNCTION(cairo_copy_page)
-DO_FUNCTION(cairo_show_page)
+DO_CONTEXT(cairo_copy_page)
+DO_CONTEXT(cairo_show_page)
 
 /* TODO: cairo_set_user_data, cairo_get_user_data */
 
@@ -312,7 +312,7 @@ CAMLexport value caml_cairo_copy_path_flat(value vcr)
   CAMLreturn(vpath);
 }
 
-DO1_FUNCTION(cairo_append_path, PATH_VAL)
+DO1_CONTEXT(cairo_append_path, PATH_VAL)
 
 CAMLexport value caml_cairo_get_current_point(value vcr)
 {
@@ -329,9 +329,9 @@ CAMLexport value caml_cairo_get_current_point(value vcr)
   CAMLreturn(vcouple);
 }
 
-DO_FUNCTION(cairo_new_path)
-DO_FUNCTION(cairo_new_sub_path)
-DO_FUNCTION(cairo_close_path)
+DO_CONTEXT(cairo_new_path)
+DO_CONTEXT(cairo_new_sub_path)
+DO_CONTEXT(cairo_close_path)
 
 CAMLexport value caml_cairo_glyph_path(value vcr, value vglyphs)
 {
@@ -347,23 +347,23 @@ CAMLexport value caml_cairo_glyph_path(value vcr, value vglyphs)
   CAMLreturn(Val_unit);
 }
 
-DO1_FUNCTION(cairo_text_path, String_val)
+DO1_CONTEXT(cairo_text_path, String_val)
 GET_EXTENTS(cairo_path_extents)
 
-DO5_FUNCTION(cairo_arc, Double_val, Double_val, Double_val, Double_val,
+DO5_CONTEXT(cairo_arc, Double_val, Double_val, Double_val, Double_val,
              Double_val)
-DO5_FUNCTION(cairo_arc_negative, Double_val, Double_val, Double_val,
+DO5_CONTEXT(cairo_arc_negative, Double_val, Double_val, Double_val,
              Double_val, Double_val)
-DO6_FUNCTION(cairo_curve_to, Double_val, Double_val, Double_val,
+DO6_CONTEXT(cairo_curve_to, Double_val, Double_val, Double_val,
              Double_val, Double_val, Double_val)
-DO2_FUNCTION(cairo_line_to, Double_val, Double_val)
-DO2_FUNCTION(cairo_move_to, Double_val, Double_val)
-DO4_FUNCTION(cairo_rectangle, Double_val, Double_val, Double_val, Double_val)
+DO2_CONTEXT(cairo_line_to, Double_val, Double_val)
+DO2_CONTEXT(cairo_move_to, Double_val, Double_val)
+DO4_CONTEXT(cairo_rectangle, Double_val, Double_val, Double_val, Double_val)
 
-DO6_FUNCTION(cairo_rel_curve_to, Double_val, Double_val, Double_val,
+DO6_CONTEXT(cairo_rel_curve_to, Double_val, Double_val, Double_val,
              Double_val, Double_val, Double_val)
-DO2_FUNCTION(cairo_rel_line_to, Double_val, Double_val)
-DO2_FUNCTION(cairo_rel_move_to, Double_val, Double_val)
+DO2_CONTEXT(cairo_rel_line_to, Double_val, Double_val)
+DO2_CONTEXT(cairo_rel_move_to, Double_val, Double_val)
 
 
 /* Interacting with the paths content from OCaml. */
@@ -711,9 +711,9 @@ CAMLexport value caml_cairo_pattern_get_matrix(value vpat)
 /* Transformations - Manipulating the current transformation matrix
 ***********************************************************************/
 
-DO2_FUNCTION(cairo_translate, Double_val, Double_val)
-DO2_FUNCTION(cairo_scale, Double_val, Double_val)
-DO1_FUNCTION(cairo_rotate, Double_val)
+DO2_CONTEXT(cairo_translate, Double_val, Double_val)
+DO2_CONTEXT(cairo_scale, Double_val, Double_val)
+DO1_CONTEXT(cairo_rotate, Double_val)
 
 CAMLexport value caml_cairo_transform(value vcr, value vmat)
 {
@@ -743,7 +743,7 @@ CAMLexport value caml_cairo_get_matrix(value vcr)
   CAMLreturn(vmat);
 }
 
-DO_FUNCTION(cairo_identity_matrix)
+DO_CONTEXT(cairo_identity_matrix)
 
 #define COORD_TRANSFORM(name)                                 \
   CAMLexport value caml_##name(value vcr, value vx, value vy) \
@@ -769,7 +769,7 @@ COORD_TRANSFORM(cairo_device_to_user_distance)
 /* Font options
 ***********************************************************************/
 
-DO1_FUNCTION(cairo_set_font_options, FONT_OPTIONS_VAL)
+DO1_CONTEXT(cairo_set_font_options, FONT_OPTIONS_VAL)
 
 CAMLexport value caml_cairo_get_font_options(value vcr)
 {
@@ -855,7 +855,7 @@ CAMLexport value caml_cairo_font_face_get_type(value vff)
 }
 
 
-DO1_FUNCTION(cairo_set_font_face, FONT_FACE_VAL)
+DO1_CONTEXT(cairo_set_font_face, FONT_FACE_VAL)
 
 CAMLexport value caml_cairo_get_font_face(value vcr)
 {
@@ -913,7 +913,7 @@ CAMLexport value caml_cairo_toy_font_face_get_weight(value vff)
 /* Scaled font
 ***********************************************************************/
 
-DO1_FUNCTION(cairo_set_scaled_font, SCALED_FONT_VAL)
+DO1_CONTEXT(cairo_set_scaled_font, SCALED_FONT_VAL)
 
 CAMLexport value caml_cairo_get_scaled_font(value vcr)
 {
@@ -1141,7 +1141,7 @@ CAMLexport value caml_cairo_select_font_face
   CAMLreturn(Val_unit);
 }
 
-DO1_FUNCTION(cairo_set_font_size, Double_val)
+DO1_CONTEXT(cairo_set_font_size, Double_val)
 
 CAMLexport value caml_cairo_set_font_matrix(value vcr, value vmatrix)
 {
@@ -1165,7 +1165,7 @@ CAMLexport value caml_cairo_get_font_matrix(value vcr)
   CAMLreturn(vmatrix);
 }
 
-DO1_FUNCTION(cairo_show_text, String_val)
+DO1_CONTEXT(cairo_show_text, String_val)
 
 CAMLexport value caml_cairo_font_extents(value vcr)
 {

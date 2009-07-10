@@ -11,7 +11,7 @@
 #define FREE_FLOAT_ARRAY(p) free(p)
 
 
-#define DO_FUNCTION(name)                       \
+#define DO_CONTEXT(name)                       \
   CAMLexport value caml_##name(value vcr)       \
   {                                             \
     CAMLparam1(vcr);                            \
@@ -21,7 +21,7 @@
     CAMLreturn(Val_unit);                       \
   }
 
-#define DO1_FUNCTION(name, of_value)                 \
+#define DO1_CONTEXT(name, of_value)                 \
   CAMLexport value caml_##name(value vcr, value v)   \
   {                                                  \
     CAMLparam2(vcr, v);                              \
@@ -31,7 +31,7 @@
     CAMLreturn(Val_unit);                            \
   }
 
-#define DO2_FUNCTION(name, of_val1, of_val2)                            \
+#define DO2_CONTEXT(name, of_val1, of_val2)                            \
   CAMLexport value caml_##name(value vcr, value v1, value v2)           \
   {                                                                     \
     CAMLparam3(vcr, v1, v2);                                            \
@@ -41,7 +41,7 @@
     CAMLreturn(Val_unit);                                               \
   }
 
-#define DO3_FUNCTION(name, of_val1, of_val2, of_val3)                   \
+#define DO3_CONTEXT(name, of_val1, of_val2, of_val3)                   \
   CAMLexport value caml_##name(value vcr, value v1, value v2, value v3) \
   {                                                                     \
     CAMLparam4(vcr, v1, v2, v3);                                        \
@@ -51,7 +51,7 @@
     CAMLreturn(Val_unit);                                               \
   }
 
-#define DO4_FUNCTION(name, of_val1, of_val2, of_val3, of_val4)          \
+#define DO4_CONTEXT(name, of_val1, of_val2, of_val3, of_val4)          \
   CAMLexport value caml_##name(value vcr, value v1, value v2, value v3, \
                                value v4)                                \
   {                                                                     \
@@ -62,7 +62,7 @@
     CAMLreturn(Val_unit);                                               \
   }
 
-#define DO5_FUNCTION(name, of_val1, of_val2, of_val3, of_val4, of_val5) \
+#define DO5_CONTEXT(name, of_val1, of_val2, of_val3, of_val4, of_val5) \
   CAMLexport value caml_##name(value vcr, value v1, value v2, value v3, \
                                value v4, value v5)                      \
   {                                                                     \
@@ -81,7 +81,7 @@
                        argv[5]);                                        \
   }
 
-#define DO6_FUNCTION(name, of_val1, of_val2, of_val3, of_val4, of_val5, \
+#define DO6_CONTEXT(name, of_val1, of_val2, of_val3, of_val4, of_val5, \
                      of_val6)                                           \
   CAMLexport value caml_##name(value vcr, value v1, value v2, value v3, \
                                value v4, value v5, value v6)            \
@@ -103,7 +103,7 @@
 
 
 /* The return value should not require special alloc. */
-#define GET_FUNCTION(name, value_of, ty)                        \
+#define GET_CONTEXT(name, value_of, ty)                        \
   CAMLexport value caml_##name(value vcr)                       \
   {                                                             \
     CAMLparam1(vcr);                                            \
