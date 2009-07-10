@@ -182,7 +182,7 @@ GET_CONTEXT(cairo_get_fill_rule, VAL_FILL_RULE, cairo_fill_rule_t)
 #define LINE_CAP_VAL(v) ((cairo_line_cap_t) Int_val(v))
 #define VAL_LINE_CAP(v) Val_int(v)
 
-DO1_CONTEXT(cairo_set_line_cap, FILL_RULE_VAL)
+DO1_CONTEXT(cairo_set_line_cap, LINE_CAP_VAL)
 GET_CONTEXT(cairo_get_line_cap, VAL_LINE_CAP, cairo_line_cap_t)
 
 #define LINE_JOIN_VAL(v) ((cairo_line_join_t) Int_val(v))
