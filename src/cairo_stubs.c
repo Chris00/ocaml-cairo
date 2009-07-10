@@ -16,6 +16,7 @@
    LICENSE for more details. */
 
 #include <string.h>
+#include <stdio.h>
 #include <cairo.h>
 #include <cairo-pdf.h>
 #include <cairo-ps.h>
@@ -136,7 +137,7 @@ CAMLexport value caml_cairo_set_dash(value vcr, value vdashes, value voffset)
   double *dashes;
   const int num_dashes = FLOAT_ARRAY_LENGTH(vdashes);
   int i;
-  
+
   SET_FLOAT_ARRAY(dashes, vdashes, num_dashes);
   cairo_set_dash(cr, dashes, num_dashes, Double_val(voffset));
   FREE_FLOAT_ARRAY(dashes);
@@ -1165,7 +1166,19 @@ CAMLexport value caml_cairo_get_font_matrix(value vcr)
   CAMLreturn(vmatrix);
 }
 
-DO1_CONTEXT(cairo_show_text, String_val)
+/* DO1_CONTEXT(cairo_show_text, String_val) */
+CAMLexport value caml_cairo_show_text(value vcr, value v)
+  {
+    CAMLparam2(vcr, v);
+    cairo_t* cr = CAIRO_VAL(vcr);
+    char *s = String_val(v);
+    printf("*** STRING: %s\n", s); fflush(stdout);
+    cairo_show_text(cr, s);
+    printf("*** STATUS: %s\n", cairo_status_to_string(cairo_status(cr))); fflush(stdout);
+    caml_check_status(cr);
+    CAMLreturn(Val_unit);
+  }
+
 
 CAMLexport value caml_cairo_font_extents(value vcr)
 {
@@ -1468,7 +1481,7 @@ static cairo_status_t caml_cairo_input_string
      there is no way to preallocate a single OCaml string for all read
      operations. */
   s = caml_alloc_string(length);
-  
+
   r = caml_callback2_exn(* ((value *) fn), s, Val_int(length));
   if (Is_exception_result(r)) return(CAIRO_STATUS_READ_ERROR);
   else {
@@ -1484,7 +1497,7 @@ CAMLexport value caml_cairo_image_surface_create_from_png(value fname)
   CAMLparam1(fname);
   CAMLlocal1(vsurf);
   cairo_surface_t* surf;
-  
+
   surf = cairo_image_surface_create_from_png(String_val(fname));
   caml_raise_Error(cairo_surface_status(surf));
   SURFACE_ASSIGN(vsurf, surf);
@@ -1502,14 +1515,14 @@ CAMLexport value caml_cairo_image_surface_create_from_png_stream(value vinput)
   if (surf == NULL) caml_raise_Error(CAIRO_STATUS_READ_ERROR);
   caml_raise_Error(cairo_surface_status(surf));
   SURFACE_ASSIGN(vsurf, surf);
-  CAMLreturn(vsurf);    
+  CAMLreturn(vsurf);
 }
 
 CAMLexport value caml_cairo_surface_write_to_png(value vsurf, value vfname)
 {
   /* noalloc */
   cairo_status_t status;
-  
+
   status = cairo_surface_write_to_png(SURFACE_VAL(vsurf), String_val(vfname));
   caml_raise_Error(status);
   return(Val_unit);
