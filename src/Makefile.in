@@ -26,7 +26,7 @@ cairo.cma cairo.cmxa: cairo.cmo cairo.cmx cairo_stubs.o
 # does, fall back on the C compiler.
 cairo_stubs.o: cairo_stubs.c  cairo_macros.c cairo_ocaml_types.c
 	$(OCAMLC) $(CPPFLAGS) -c $< \
-	|| "$CC" -I"$(OCAMLLIB)" $(CPPFLAGS) -c $<
+	|| "$(CC)" -I"$(OCAMLLIB)" $(CPPFLAGS) -c $<
 
 
 .PHONY: doc
