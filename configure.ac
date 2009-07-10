@@ -39,7 +39,8 @@ else
   CPPFLAGS="$CPPFLAGS -I '$CAIRO_INCS'"
 fi
 
-AC_CHECK_HEADERS([cairo.h], , [AC_MSG_ERROR(cairo.h missing)])
+AC_CHECK_HEADERS([cairo.h], ,
+  [AC_MSG_ERROR(cairo.h missing, try to use --with-cairo)])
 
 # Require cairo >= 1.6 for extend to be fully implemented
 AC_TRY_RUN([#include <cairo.h>
@@ -67,7 +68,7 @@ dnl 	 to report the issue.])
 dnl 	 ])
 
 # Check for freetype
-PKG_CHECK_MODULES(freetype2, freetype2)
+#PKG_CHECK_MODULES(freetype2, freetype2)
 
 # Optional GTK support (for the X11 backend)
 AC_ARG_WITH(gtk, 
