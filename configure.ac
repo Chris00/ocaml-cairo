@@ -40,7 +40,7 @@ else
 fi
 
 AC_CHECK_HEADERS([cairo.h], ,
-  [AC_MSG_ERROR([cairo.h missing, try to use --with-cairo])])
+  [AC_MSG_ERROR([cairo.h missing, try to use --with-cairo=/include/path/])])
 
 # Require cairo >= 1.6 for extend to be fully implemented
 AC_TRY_RUN([#include <cairo.h>
@@ -96,9 +96,6 @@ AC_SUBST(PACKAGE_VERSION)
 AC_SUBST(CPPFLAGS)
 AC_SUBST(LIBS)
 
-AC_SUBST(OCAMLDEP)
-AC_SUBST(OCAMLMKLIB)
-AC_SUBST(OCAMLDOC)
 AC_SUBST(LINKPKG)
 
 # Finally create the Makefile and samples (read only to avoid changing
