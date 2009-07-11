@@ -45,6 +45,9 @@ CAMLexport value caml_cairo_create(value vsurf)
 
   cr = cairo_create(SURFACE_VAL(vsurf));
   caml_check_status(cr);
+  /* Express the dependency of [vcr] on [vsurf] by increasing its
+     ref. count.  It will be released by the finalizer of [vcr].  */
+  cairo_surface_reference(SURFACE_VAL(vsurf));
   CAIRO_ASSIGN(vcontext, cr);
   CAMLreturn(vcontext);
 }
@@ -287,7 +290,6 @@ CAMLexport value caml_cairo_in_stroke(value vcr, value vx, value vy)
 DO_CONTEXT(cairo_copy_page)
 DO_CONTEXT(cairo_show_page)
 
-/* TODO: cairo_set_user_data, cairo_get_user_data */
 
 /* Paths -- Creating paths and manipulating path data
 ***********************************************************************/
@@ -1317,9 +1319,49 @@ CAMLexport value caml_cairo_format_stride_for_width(value vformat, value vw)
 }
 
 
-/* FIXME: cairo_surface_destroy does not seem to clear the data
-   (confirm), thus one only has to "attach" the bigarray to the
-   surface to avoid it to be destroyed earlier. */
+static cairo_user_data_key_t image_from_bigarray_key;
+
+static void caml_cairo_image_bigarray_finalize(void *data)
+{
+#define proxy ((struct caml_ba_proxy *) data)
+  /* Adapted from caml_ba_finalize in the OCaml library sources. */
+  if (-- proxy->refcount == 0) {
+    free(proxy->data);
+    caml_stat_free(proxy);
+  }
+#undef proxy
+}
+
+/* Attach a proxy the the bigarray (no need to create another bigarray
+   refering to the same proxy as for sub-arrays).  This proxy is
+   finalized when the surface is destroyed. */
+static void caml_cairo_image_bigarray_attach_proxy
+(cairo_surface_t* surf, struct caml_ba_array * b)
+{
+  cairo_status_t status;
+  struct caml_ba_proxy * proxy;
+
+  if ((b->flags & CAML_BA_MANAGED_MASK) == CAML_BA_EXTERNAL) return;
+  if (b->proxy != NULL) {
+    /* If b is already a proxy for a larger array, increment refcount of
+       proxy */
+    ++ b->proxy->refcount;
+  }
+  else {
+    /* Otherwise, create proxy and attach it to b.  (Adapted from
+       caml_ba_update_proxy in the OCaml std lib.) */
+    proxy = caml_stat_alloc(sizeof(struct caml_ba_proxy));
+    proxy->refcount = 2;      /* original array + surface */
+    proxy->data = b->data;
+    proxy->size = 0; /* CAML_BA_MANAGED_MASK excluded by the calling fun */
+    b->proxy = proxy;
+  }
+  status = cairo_surface_set_user_data(surf, &image_from_bigarray_key,
+                                       b->proxy,
+                                       caml_cairo_image_bigarray_finalize);
+  caml_raise_Error(status);
+}
+
 #define SURFACE_CREATE_DATA(name)                                       \
   CAMLexport value caml_cairo_image_surface_create_for_##name           \
   (value vb, value vformat, value vwidth, value vheight, value vstride) \
@@ -1337,6 +1379,7 @@ CAMLexport value caml_cairo_format_stride_for_width(value vformat, value vw)
       (b->data, FORMAT_VAL(vformat),                                    \
        width, Int_val(vheight), Int_val(vstride));                      \
     caml_raise_Error(cairo_surface_status(surf));                       \
+    caml_cairo_image_bigarray_attach_proxy(surf, b);                    \
     SURFACE_ASSIGN(vsurf, surf);                                        \
     CAMLreturn(vsurf);                                                  \
   }

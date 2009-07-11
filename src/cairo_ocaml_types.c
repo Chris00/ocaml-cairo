@@ -14,13 +14,7 @@ static long caml_cairo_hash_pointer(value v)
   return((long) (* (void **) Data_custom_val(v)));
 }
 
-#define DEFINE_CUSTOM_OPERATIONS(name, destroy, val)                    \
-  static void caml_cairo_##name##_finalize(value v)                     \
-  {                                                                     \
-    /* [cairo_*_reference] not used, the first [destroy] frees it. */   \
-    destroy(val(v));                                                    \
-  }                                                                     \
-                                                                        \
+#define CUSTOM_OPERATIONS(name)                                         \
   static struct custom_operations caml_##name##_ops = {                 \
     #name "_t", /* identifier for serialization and deserialization */  \
     &caml_cairo_##name##_finalize,                                      \
@@ -28,6 +22,14 @@ static long caml_cairo_hash_pointer(value v)
     &caml_cairo_hash_pointer,                                           \
     custom_serialize_default,                                           \
     custom_deserialize_default };
+
+#define DEFINE_CUSTOM_OPERATIONS(name, destroy, val)                    \
+  static void caml_cairo_##name##_finalize(value v)                     \
+  {                                                                     \
+    fprintf(stderr, "DESTROY %s\n", #name);  fflush(stderr);            \
+    destroy(val(v));                                                    \
+  }                                                                     \
+  CUSTOM_OPERATIONS(name)
 
 #define ALLOC(name) alloc_custom(&caml_##name##_ops, sizeof(void*), 1, 50)
 
@@ -37,7 +39,20 @@ static long caml_cairo_hash_pointer(value v)
 #define CAIRO_VAL(v) (* (cairo_t **) Data_custom_val(v))
 #define CAIRO_ASSIGN(v, x) v = ALLOC(cairo); CAIRO_VAL(v) = x
 
-DEFINE_CUSTOM_OPERATIONS(cairo, cairo_destroy, CAIRO_VAL)
+/* The only way to create a context is from a surface.  To express the
+  dependency of the context on the surface (and avoid the context to
+  be in bad shape if the surface is garbage collected -- thus
+  destroyed by the finalizer), the ref count of the surface will be
+  increased.  This however requires that the context finalizer
+  decreases it. */
+static void caml_cairo_cairo_finalize(value v)
+{
+  cairo_surface_t *surface = cairo_get_target(CAIRO_VAL(v));
+  fprintf(stderr, "DESTROY cairo\n");  fflush(stderr);
+  cairo_destroy(CAIRO_VAL(v));
+  cairo_surface_destroy(surface);
+}
+CUSTOM_OPERATIONS(cairo)
 
 /* raise [Error] if the status indicates a failure. */
 static void caml_raise_Error(cairo_status_t status)
@@ -95,7 +110,6 @@ DEFINE_CUSTOM_OPERATIONS(pattern, cairo_pattern_destroy, PATTERN_VAL)
 #define SURFACE_ASSIGN(v, x) v = ALLOC(surface); SURFACE_VAL(v) = x
 
 DEFINE_CUSTOM_OPERATIONS(surface, cairo_surface_destroy, SURFACE_VAL)
-
 
 /* Type cairo_content_t */
 

@@ -66,6 +66,11 @@ type 'a pattern
 type any_pattern = [`Solid | `Surface | `Gradient | `Linear | `Radial] pattern
 type glyph = { index: int;  x: float;  y: float }
 
+(* [hold_value v] just keep [v] in its closure but do nothing with it.
+   This serves to avoid that dependencies are grabage collected before
+   the value that needs them. *)
+let hold_value _v _ = ()
+
 external create : surface -> context = "caml_cairo_create"
 external save : context -> unit = "caml_cairo_save"
 external restore : context -> unit = "caml_cairo_restore"
@@ -640,9 +645,6 @@ struct
   external get_height : Surface.t -> int = "caml_cairo_image_surface_get_height"
   external get_stride : Surface.t -> int = "caml_cairo_image_surface_get_stride"
 
-  (* [hold_value v] just keep [v] in its closure but do nothing with it. *)
-  let hold_value _v _ = ()
-
   external stride_for_width : format -> width:int -> int
     = "caml_cairo_format_stride_for_width" "noalloc"
 
@@ -666,16 +668,12 @@ struct
     if abs(stride * height) > Array1.dim data then
       failwith(Printf.sprintf "Cairo.Image.create_for_data8: bigarray too \
 	small for the required stride=%i and height=%i" stride height);
-    let surf = create_for_data8 data format width height stride in
-    Gc.finalise (hold_value data) surf;
-    surf
+    create_for_data8 data format width height stride
 
   let create_for_data32 ~data ?(width=Array2.dim1 data)
       ?(height=Array2.dim2 data) ~alpha =
     let format = if alpha then ARGB32 else RGB24 in
-    let surf = create_for_data32 data format width height (Array2.dim1 data) in
-    Gc.finalise (hold_value data) surf;
-    surf
+    create_for_data32 data format width height (Array2.dim1 data)
 
   external get_data8 : Surface.t -> (int, int8_unsigned_elt, c_layout) Array1.t
     = "caml_cairo_image_surface_get_UINT8"
