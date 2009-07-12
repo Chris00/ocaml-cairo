@@ -1105,21 +1105,24 @@ sig
       (int32, Bigarray.int32_elt, Bigarray.c_layout) Bigarray.Array2.t
         (** Images represented as an array of 32 bytes (RGB or RGBA) values. *)
 
-  val create_for_data8 : data:data8 ->
-    format -> width:int -> ?stride:int -> height:int -> Surface.t
-    (** Creates an image surface for the provided pixel data.  The
-        initial contents of buffer will be used as the initial image
-        contents; you must explicitly clear the buffer, using, for
-        example, {!Cairo.rectangle} and {!Cairo.fill} if you want it
+  val create_for_data8 : data8 ->
+    format -> ?stride:int -> int -> int -> Surface.t
+    (** [create_for_data8 data format ?stride width height] creates an
+        image surface for the provided pixel data.  The initial
+        contents of buffer will be used as the initial image contents;
+        you must explicitly clear the buffer, using, for example,
+        {!Cairo.rectangle} and {!Cairo.fill} if you want it
         cleared. *)
 
-  val create_for_data32 : data:data32 ->
-    ?width:int -> ?height:int -> alpha:bool -> Surface.t
-    (** Same as {!Cairo.Image.create_for_data8} except that the stride
-        will necessarily be the bigarray 1st dimension and the [width]
+  val create_for_data32 : ?width:int -> ?height:int -> ?alpha:bool ->
+    data32 -> Surface.t
+    (** [create_for_data32 ?width ?height ?alpha data] same as
+        {!Cairo.Image.create_for_data8} except that the stride will
+        necessarily be according to the bigarray 1st dimension (so
+        that matrix coordinates correspond to pixels) and the [width]
         and [height] will be by default taken from the bigarray 1st
-        and 2nd dimensions respectively.  If [alpha] is true, then the
-        [ARGB32] format is selected, otherwise [RGB24] is used. *)
+        and 2nd dimensions respectively.  If [alpha] is true (default),
+        the [ARGB32] format is selected, otherwise [RGB24] is used. *)
 
   val get_data8 : Surface.t -> data8
     (** Get the data of the image surface (shared), for direct

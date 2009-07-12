@@ -14,13 +14,12 @@ let () =
   rectangle cr 0. 0. 300. 300.;
   fill cr;
 
-  Gc.compact();
-  Gc.compact();
+  Gc.compact();  Gc.compact();
   set_source_rgb cr 1. 0. 0.;
   move_to cr 10. 150.;
   set_font_size cr 100.;
   show_text cr "Hello";
-  Gc.compact();
+  Gc.compact();  Gc.compact();
 
   PNG.write (get_target cr) "test_image.png";
   Surface.finish (get_target cr)

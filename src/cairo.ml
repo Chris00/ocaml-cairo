@@ -654,38 +654,48 @@ struct
   type data32 =
       (int32, Bigarray.int32_elt, Bigarray.c_layout) Bigarray.Array2.t
 
-  external create_for_data8 : data:data8 ->
+  (* These direct bindings assume that the bigarray is large enough *)
+  external create_for_data8_unsafe : data:data8 ->
     format -> width:int -> height:int -> stride:int -> Surface.t
     = "caml_cairo_image_surface_create_for_data8"
-  external create_for_data32 : data:data32 ->
+  external create_for_data32_unsafe : data:data32 ->
     format -> width:int -> height:int -> stride:int -> Surface.t
     = "caml_cairo_image_surface_create_for_data32"
 
-  let create_for_data8 ~data format ~width ?stride ~height =
+  let create_for_data8 data format ?stride width height =
+    if width <= 0 then invalid_arg "Cairo.Image.create_for_data8: width <= 0";
+    if height <= 0 then invalid_arg "Cairo.Image.create_for_data8: height <= 0";
     let stride = match stride with
       | None -> stride_for_width format width
-      | Some s -> s (* check provided by Cairo code *) in
-    if abs(stride * height) > Array1.dim data then
-      failwith(Printf.sprintf "Cairo.Image.create_for_data8: bigarray too \
+      | Some s ->
+          if s < width (* thus if s <= 0 *) then raise(Error INVALID_STRIDE);
+          s in
+    if stride * height > Array1.dim data then
+      invalid_arg(Printf.sprintf "Cairo.Image.create_for_data8: bigarray too \
 	small for the required stride=%i and height=%i" stride height);
-    create_for_data8 data format width height stride
+    create_for_data8_unsafe data format width height stride
 
-  let create_for_data32 ~data ?(width=Array2.dim1 data)
-      ?(height=Array2.dim2 data) ~alpha =
+  let create_for_data32 ?width ?height ?(alpha=true) data =
+    let width = match width with
+      | None -> Array2.dim1 data
+      | Some w ->
+          if w > Array2.dim1 data then
+            invalid_arg "Cairo.Image.create_for_data32: given width too large";
+          w in
+    let height = match height with
+      | None -> Array2.dim2 data
+      | Some h ->
+          if h > Array2.dim2 data then
+            invalid_arg "Cairo.Image.create_for_data32: given height too large";
+          h in
     let format = if alpha then ARGB32 else RGB24 in
-    create_for_data32 data format width height (Array2.dim1 data)
+    (* Both format use 32 bits = 4 bytes *)
+    create_for_data32_unsafe data format width height (4 * Array2.dim1 data)
 
   external get_data8 : Surface.t -> (int, int8_unsigned_elt, c_layout) Array1.t
     = "caml_cairo_image_surface_get_UINT8"
   external get_data32 : Surface.t -> (int32, int32_elt, c_layout) Array2.t
     = "caml_cairo_image_surface_get_INT32"
-
-  let get_data8 surface =
-    let data = get_data8 surface in
-    (* Keep the surface in the finalizer of this bigarray so it is
-       considered reachable at least as long as [data] is. *)
-    Gc.finalise (hold_value surface) data;
-    data
 
   let get_data32 surface =
     let format = get_format surface in
@@ -694,9 +704,7 @@ struct
 		   ARGB32 or RGB24";
     if get_width surface <> get_stride surface then
       invalid_arg "Cairo.Image.get_data32: width <> stride";
-    let data = get_data32 surface in
-    Gc.finalise (hold_value surface) data;
-    data
+    get_data32 surface
 
 
   let output_ppm fh ?width ?height (data: data32) =
