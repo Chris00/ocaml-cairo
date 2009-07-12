@@ -26,7 +26,7 @@ static long caml_cairo_hash_pointer(value v)
 #define DEFINE_CUSTOM_OPERATIONS(name, destroy, val)                    \
   static void caml_cairo_##name##_finalize(value v)                     \
   {                                                                     \
-    /* fprintf(stderr, "DESTROY %s\n", #name);  fflush(stderr); */      \
+    fprintf(stderr, "DESTROY %s\n", #name);  fflush(stderr);       \
     destroy(val(v));                                                    \
   }                                                                     \
   CUSTOM_OPERATIONS(name)

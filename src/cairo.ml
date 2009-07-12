@@ -569,9 +569,6 @@ module Surface =
 struct
   type t = surface
 
-  (* external finish : t -> unit = "caml_cairo_surface_finish" *)
-  (* Useful? *)
-
   external create_similar : t -> content -> width:int -> height:int -> t
     = "caml_cairo_surface_create_similar"
   external finish : t -> unit = "caml_cairo_surface_finish"

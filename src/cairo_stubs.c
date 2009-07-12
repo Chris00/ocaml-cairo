@@ -1193,6 +1193,9 @@ CAMLexport value caml_cairo_text_extents(value vcr, value vutf8)
 /* Surface
 ***********************************************************************/
 
+static cairo_user_data_key_t image_bigarray_key;
+/* See the Image surfaces below */
+
 CAMLexport value caml_cairo_surface_create_similar
 (value vother, value vcontent, value vwidth, value vheight)
 {
@@ -1209,7 +1212,22 @@ CAMLexport value caml_cairo_surface_create_similar
   CAMLreturn(vsurf);
 }
 
-DO_SURFACE(cairo_surface_finish)
+CAMLexport value caml_cairo_surface_finish(value vsurf)
+{
+  /* noalloc */
+  cairo_surface_t *surface = SURFACE_VAL(vsurf);
+  struct caml_ba_proxy * proxy = (struct caml_ba_proxy *)
+    cairo_surface_get_user_data(SURFACE_VAL(vsurf), &image_bigarray_key);
+
+  cairo_surface_finish(surface);
+  /* Remove the user data with the bigarray key.  That will cause the
+     finalizer to be executed (and release the proxy) and the
+     finalizing function not to be called again when the value is
+     garbage collected. */
+  cairo_surface_set_user_data(surface, &image_bigarray_key, NULL, NULL);
+  return(Val_unit);
+}
+
 DO_SURFACE(cairo_surface_flush)
 
 CAMLexport value caml_cairo_surface_get_font_options(value vsurf)
@@ -1305,7 +1323,6 @@ CAMLexport value caml_cairo_surface_has_show_text_glyphs(value vsurf)
    and bigarrays, we will see an image surface as a kind of bigarray:
    it will hold a bigarray proxy that will be referenced by all
    bigarrays and surfaces created from them (and ref count the data).  */
-static cairo_user_data_key_t image_bigarray_key;
 
 /* Finalize the proxy attached to the image surface. */
 static void caml_cairo_image_bigarray_finalize(void *data)
