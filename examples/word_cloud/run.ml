@@ -51,11 +51,10 @@ let () =
     Random.self_init();
     Cairo.select_font_face cr font;
 
-    let size0 = 620. in
+    let size0 = 80. in
     let size fq word =
-      (* Based on "real estate" (area) of the words. *)
       let te = text_extents cr word in
-      size0 /. te.width  /. (1.4 -. fq) in
+      size0 /. sqrt te.width  /. (1.4 -. fq) in
     let color fq _ = Palette.random Palette.rainbow  in
 
     (* Show canvas *)
@@ -69,5 +68,5 @@ let () =
 
     Cairo.Surface.finish (get_target cr)
   with Cairo.Error st as e ->
-    printf "Error: %s\n" (Cairo.status_to_string st);
+    printf "Fatal error: %s\n" (Cairo.status_to_string st);
     raise e

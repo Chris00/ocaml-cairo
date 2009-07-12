@@ -19,4 +19,6 @@ sig
   val blue_green : t
   val brown : t
   val rainbow : t
+  val gray : t
+  val light_gray : t
 end
