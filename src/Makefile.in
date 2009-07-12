@@ -1,8 +1,8 @@
 ROOT=..
 include $(ROOT)/Makefile.conf
 
-CC = @CC@
 CPPFLAGS = @CPPFLAGS@
+LD_PATH = $(addprefix -L, @LD_PATH@)
 LIBS = @LIBS@
 
 DOC_FILES = cairo.mli
@@ -20,14 +20,10 @@ native: cairo.cmxa
 
 cairo.cma cairo.cmxa: cairo.cmo cairo.cmx cairo_stubs.o
 	$(OCAMLMKLIB) -o cairo -oc cairo_stubs -ocamlc $(OCAMLC) \
-	  -ocamlopt $(OCAMLOPT)  $(LIBS) $(CPPFLAGS) $^
+	  -ocamlopt $(OCAMLOPT) $(LD_PATH) $(LIBS) $(CPPFLAGS) $^
 
-# Under Cygwin, ocamlc may fail due to gcc be a symbolic link; if it
-# does, fall back on the C compiler.
 cairo_stubs.o: cairo_stubs.c  cairo_macros.c cairo_ocaml_types.c
-	$(OCAMLC) $(CPPFLAGS) -c $< \
-	|| "$(CC)" -mno-cygwin -O -mms-bitfields -Wall -Wno-unused \
-	   -I"$(OCAMLLIB)" $(CPPFLAGS) -c $<
+	$(OCAMLC) $(CPPFLAGS) -c $<
 
 
 .PHONY: doc

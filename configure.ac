@@ -27,11 +27,22 @@ fi
 
 AC_PROG_CC()
 
-AC_SEARCH_LIBS([cairo_create], [cairo], [CAIROLIB="$withval"])
+AC_ARG_WITH(cairo-lib,
+    [  --with-cairo-lib=DIR (-L options to find cairo lib)],
+    [LD_PATH="$withval"], [])
+AC_SUBST(LD_PATH)
+
+AC_SEARCH_LIBS([cairo_create], [cairo], [],
+  [if test "$LD_PATH" = ""; then
+     AC_MSG_ERROR([lib cairo missing, use --with-cairo-lib])
+   else
+     LIBS="-lcairo $LIBS"
+   fi])
+
 
 CAIRO_INCS="/usr/include/cairo"
-AC_ARG_WITH(cairo,
-    [  --with-cairo=INCLUDES (-I options to find cairo headers, default=/usr/include/cairo)],
+AC_ARG_WITH(cairo-inc,
+    [  --with-cairo-inc=DIR (-I options to find cairo headers, default=/usr/include/cairo)],
     [CAIRO_INCS="$withval"], [])
 if test "`echo \"$CAIRO_INCS\" |grep \" \" `" = ""; then
   CPPFLAGS="$CPPFLAGS -I $CAIRO_INCS"
@@ -40,7 +51,7 @@ else
 fi
 
 AC_CHECK_HEADERS([cairo.h], ,
-  [AC_MSG_ERROR([cairo.h missing, try to use --with-cairo=/include/path/])])
+  [AC_MSG_ERROR([cairo.h missing, use --with-cairo-inc])])
 
 # Require cairo >= 1.6 for extend to be fully implemented
 AC_TRY_RUN([#include <cairo.h>
@@ -89,6 +100,18 @@ if test $use_gtk = yes ; then
     use_gtk=no
   fi
 fi
+
+
+# Under Cygwin, ocamlc may fail due to gcc being a symbolic link...
+AC_CHECK_PROGS([READLINK], [readlink], [no])
+if test "$READLINK" != "no"  -a  -d /cygdrive ; then
+  PATH_CC=`which "$CC"`
+  TARGET_CC=`$READLINK -f "$PATH_CC"`
+  if test "$TARGET_CC" != "$PATH_CC"; then
+    echo CYGWIN SYMLINK ISSUE: rename $TARGET_CC into $PATH_CC
+  fi
+fi
+
 
 # substitutions to perform
 AC_SUBST(PACKAGE_NAME)
