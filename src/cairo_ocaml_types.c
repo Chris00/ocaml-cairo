@@ -84,7 +84,7 @@ static void caml_check_status(cairo_t *cr)
 CAMLexport value caml_cairo_status_to_string(value vstatus)
 {
   CAMLparam1(vstatus);
-  cairo_status_t status = Int_val(vstatus) + 2;
+  cairo_status_t status = (cairo_status_t) (Int_val(vstatus) + 2);
   const char* msg = cairo_status_to_string(status);
   CAMLreturn(caml_copy_string(msg));
 }
@@ -97,10 +97,10 @@ CAMLexport value caml_cairo_status_to_string(value vstatus)
 
 DEFINE_CUSTOM_OPERATIONS(pattern, cairo_pattern_destroy, PATTERN_VAL)
 
-#define EXTEND_VAL(v) Int_val(v)
+#define EXTEND_VAL(v) ((cairo_extend_t) Int_val(v))
 #define VAL_EXTEND(v) Val_int(v)
 
-#define FILTER_VAL(v) Int_val(v)
+#define FILTER_VAL(v) ((cairo_filter_t) Int_val(v))
 #define VAL_FILTER(v) Val_int(v)
 
 /* Type cairo_surface_t
@@ -223,7 +223,7 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
 
 #define ARRAY_GLYPH_VAL(glyphs, p, vglyphs, num_glyphs)         \
   num_glyphs = Wosize_val(vglyphs);                             \
-  SET_MALLOC(glyphs, num_glyphs * sizeof(cairo_glyph_t));       \
+  SET_MALLOC(glyphs, num_glyphs, cairo_glyph_t);                \
   for(i=0, p = glyphs; i < num_glyphs; i++, p++) {              \
     SET_GLYPH_VAL(p, Field(vglyphs, i));                        \
   }
@@ -240,7 +240,7 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
 
 #define ARRAY_CLUSTER_VAL(clusters, q, vglyphs, num_glyphs)             \
   num_clusters = Wosize_val(vclusters);                                 \
-  SET_MALLOC(clusters, num_clusters * sizeof(cairo_text_cluster_t));    \
+  SET_MALLOC(clusters, num_clusters, cairo_text_cluster_t);             \
   for(i=0, q = clusters; i < num_clusters; i++, q++) {                  \
     SET_CLUSTER_VAL(q, Field(vclusters, i));                            \
   }
@@ -251,7 +251,7 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
   Store_field(v, 0, Val_int(cluster.num_bytes));        \
   Store_field(v, 1, Val_int(cluster.num_glyphs))
 
-#define CLUSTER_FLAGS_VAL(v) Int_val(v)
+#define CLUSTER_FLAGS_VAL(v) ((cairo_text_cluster_flags_t) Int_val(v))
 #define VAL_CLUSTER_FLAGS(v) Val_int(v)
 
 /* Type cairo_matrix_t
@@ -357,9 +357,9 @@ DEFINE_CUSTOM_OPERATIONS(scaled_font,
   Store_double_field(vte, 4, te.x_advance);                     \
   Store_double_field(vte, 5, te.y_advance)
 
-#define SLANT_VAL(v) Int_val(v)
+#define SLANT_VAL(v) ((cairo_font_slant_t) Int_val(v))
 #define VAL_SLANT(v) Val_int(v)
-#define WEIGHT_VAL(v) Int_val(v)
+#define WEIGHT_VAL(v) ((cairo_font_weight_t) Int_val(v))
 #define VAL_WEIGHT(v) Val_int(v)
 
 

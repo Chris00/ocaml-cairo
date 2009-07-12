@@ -39,7 +39,8 @@ else
   CPPFLAGS="$CPPFLAGS -I '$CAIRO_INCS'"
 fi
 
-AC_CHECK_HEADERS([cairo.h], , [AC_MSG_ERROR(cairo.h missing)])
+AC_CHECK_HEADERS([cairo.h], ,
+  [AC_MSG_ERROR([cairo.h missing, try to use --with-cairo=/include/path/])])
 
 # Require cairo >= 1.6 for extend to be fully implemented
 AC_TRY_RUN([#include <cairo.h>
@@ -67,7 +68,7 @@ dnl 	 to report the issue.])
 dnl 	 ])
 
 # Check for freetype
-PKG_CHECK_MODULES(freetype2, freetype2)
+#PKG_CHECK_MODULES(freetype2, freetype2)
 
 # Optional GTK support (for the X11 backend)
 AC_ARG_WITH(gtk, 
@@ -81,7 +82,9 @@ if test $use_gtk = yes ; then
 
   if test "$LABLGTKDIR" ; then
     # Check for gdk-pixbuf
-    PKG_CHECK_MODULES(GDK, cairo gdk-2.0 gdk-pixbuf-2.0, :, use_gtk=no)
+#    PKG_CHECK_MODULES(GDK, cairo gdk-2.0 gdk-pixbuf-2.0, :, use_gtk=no)
+     AC_CHECK_HEADERS([gdk.h], ,
+       [AC_MSG_ERROR([gdk.h missing, try to use --with-gdk])])
   else
     use_gtk=no
   fi
@@ -93,9 +96,6 @@ AC_SUBST(PACKAGE_VERSION)
 AC_SUBST(CPPFLAGS)
 AC_SUBST(LIBS)
 
-AC_SUBST(OCAMLDEP)
-AC_SUBST(OCAMLMKLIB)
-AC_SUBST(OCAMLDOC)
 AC_SUBST(LINKPKG)
 
 # Finally create the Makefile and samples (read only to avoid changing

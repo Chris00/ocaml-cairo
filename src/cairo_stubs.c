@@ -126,7 +126,7 @@ CAMLexport value caml_cairo_get_source(value vcr)
 }
 
 
-#define ANTIALIAS_VAL(v) Int_val(v)
+#define ANTIALIAS_VAL(v) ((cairo_antialias_t) Int_val(v))
 #define VAL_ANTIALIAS(v) Val_int(v)
 
 DO1_CONTEXT(cairo_set_antialias, ANTIALIAS_VAL)
@@ -139,7 +139,7 @@ CAMLexport value caml_cairo_set_dash(value vcr, value vdashes, value voffset)
   double *dashes;
   const int num_dashes = FLOAT_ARRAY_LENGTH(vdashes);
   int i;
-  
+
   SET_FLOAT_ARRAY(dashes, vdashes, num_dashes);
   cairo_set_dash(cr, dashes, num_dashes, Double_val(voffset));
   FREE_FLOAT_ARRAY(dashes);
@@ -163,7 +163,7 @@ CAMLexport value caml_cairo_get_dash(value vcr)
     Store_field(couple, 1, caml_copy_double(0.0));
   }
   else {
-    SET_MALLOC(dashes, num_dashes * sizeof(double));
+    SET_MALLOC(dashes, num_dashes, double);
     cairo_get_dash(cr, dashes, &offset);
     vdashes = caml_alloc(num_dashes * Double_wosize, Double_array_tag);
     for(i = 0; i < num_dashes; i++)
@@ -175,19 +175,19 @@ CAMLexport value caml_cairo_get_dash(value vcr)
   CAMLreturn(couple);
 }
 
-#define FILL_RULE_VAL(v) Int_val(v)
+#define FILL_RULE_VAL(v) ((cairo_fill_rule_t) Int_val(v))
 #define VAL_FILL_RULE(v) Val_int(v)
 
 DO1_CONTEXT(cairo_set_fill_rule, FILL_RULE_VAL)
 GET_CONTEXT(cairo_get_fill_rule, VAL_FILL_RULE, cairo_fill_rule_t)
 
-#define LINE_CAP_VAL(v) Int_val(v)
+#define LINE_CAP_VAL(v) ((cairo_line_cap_t) Int_val(v))
 #define VAL_LINE_CAP(v) Val_int(v)
 
-DO1_CONTEXT(cairo_set_line_cap, FILL_RULE_VAL)
+DO1_CONTEXT(cairo_set_line_cap, LINE_CAP_VAL)
 GET_CONTEXT(cairo_get_line_cap, VAL_LINE_CAP, cairo_line_cap_t)
 
-#define LINE_JOIN_VAL(v) Int_val(v)
+#define LINE_JOIN_VAL(v) ((cairo_line_join_t) Int_val(v))
 #define VAL_LINE_JOIN(v) Val_int(v)
 
 DO1_CONTEXT(cairo_set_line_join, LINE_JOIN_VAL)
@@ -199,7 +199,7 @@ GET_CONTEXT(cairo_get_line_width, caml_copy_double, double)
 DO1_CONTEXT(cairo_set_miter_limit, Double_val)
 GET_CONTEXT(cairo_get_miter_limit, caml_copy_double, double)
 
-#define OPERATOR_VAL(v) Int_val(v)
+#define OPERATOR_VAL(v) ((cairo_operator_t) Int_val(v))
 #define VAL_OPERATOR(v) Val_int(v)
 
 DO1_CONTEXT(cairo_set_operator, OPERATOR_VAL)
@@ -420,7 +420,7 @@ CAMLexport value caml_cairo_path_of_array(value varray)
   cairo_path_data_t *data;
   int i, num_data;
 
-  SET_MALLOC(path, sizeof(cairo_path_t));
+  SET_MALLOC(path, 1, cairo_path_t);
   path->status = CAIRO_STATUS_SUCCESS;
   /* Compute the total length */
   num_data = 0;
@@ -456,7 +456,7 @@ CAMLexport value caml_cairo_path_of_array(value varray)
   data->header.type = CAIRO_PATH_CLOSE_PATH;    \
   data->header.length = 1;
 
-  path->data = malloc(num_data * sizeof(cairo_path_data_t));
+  SET_MALLOC(path->data, num_data, cairo_path_data_t);
   if (path->data == NULL) {
     free(path); /* free previously allocated memory */
     caml_raise_out_of_memory();
@@ -825,21 +825,21 @@ SET_FONT_OPTIONS(cairo_font_options_set_antialias, ANTIALIAS_VAL)
 GET_FONT_OPTIONS(cairo_font_options_get_antialias,
                  VAL_ANTIALIAS, cairo_antialias_t)
 
-#define SUBPIXEL_ORDER_VAL(v) Int_val(v)
+#define SUBPIXEL_ORDER_VAL(v) ((cairo_subpixel_order_t) Int_val(v))
 #define VAL_SUBPIXEL_ORDER(v) Val_int(v)
 
 SET_FONT_OPTIONS(cairo_font_options_set_subpixel_order, SUBPIXEL_ORDER_VAL)
 GET_FONT_OPTIONS(cairo_font_options_get_subpixel_order,
                  VAL_SUBPIXEL_ORDER, cairo_subpixel_order_t)
 
-#define HINT_STYLE_VAL(v) Int_val(v)
+#define HINT_STYLE_VAL(v) ((cairo_hint_style_t) Int_val(v))
 #define VAL_HINT_STYLE(v) Val_int(v)
 
 SET_FONT_OPTIONS(cairo_font_options_set_hint_style, HINT_STYLE_VAL)
 GET_FONT_OPTIONS(cairo_font_options_get_hint_style,
                  VAL_HINT_STYLE, cairo_hint_style_t)
 
-#define HINT_METRICS_VAL(v) Int_val(v)
+#define HINT_METRICS_VAL(v) ((cairo_hint_metrics_t) Int_val(v))
 #define VAL_HINT_METRICS(v) Val_int(v)
 
 SET_FONT_OPTIONS(cairo_font_options_set_hint_metrics, HINT_METRICS_VAL)
@@ -1294,7 +1294,7 @@ CAMLexport value caml_cairo_surface_has_show_text_glyphs(value vsurf)
 /* Image surfaces
 ***********************************************************************/
 
-#define FORMAT_VAL(x) Int_val(x)
+#define FORMAT_VAL(x) ((cairo_format_t) Int_val(x))
 #define VAL_FORMAT(x) Val_int(x)
 
 #ifdef CAIRO_HAS_IMAGE_SURFACE
@@ -1330,7 +1330,7 @@ CAMLexport value caml_cairo_image_surface_create(value vformat,
   cairo_surface_t *surf;
   struct caml_ba_proxy *proxy;
   cairo_status_t status;
-  
+
   vsurf = ALLOC(surface); /* alloc this first in case it raises an exn */
   data = malloc(stride * Int_val(vheight));
   if (data == NULL) caml_raise_out_of_memory();
@@ -1415,7 +1415,7 @@ static cairo_status_t caml_cairo_image_bigarray_attach_proxy
                             ": cannot use a memory mapped file.");      \
     vsurf = ALLOC(surface); /* alloc this first in case it raises an exn */ \
     surf = cairo_image_surface_create_for_data                          \
-      (b->data, FORMAT_VAL(vformat),                                    \
+      ((unsigned char *) b->data, FORMAT_VAL(vformat),                  \
        width, Int_val(vheight), Int_val(vstride));                      \
     caml_raise_Error(cairo_surface_status(surf));                       \
     status = caml_cairo_image_bigarray_attach_proxy(surf, b);           \
@@ -1561,7 +1561,7 @@ static cairo_status_t caml_cairo_input_string
      there is no way to preallocate a single OCaml string for all read
      operations. */
   s = caml_alloc_string(length);
-  
+
   r = caml_callback2_exn(* ((value *) fn), s, Val_int(length));
   if (Is_exception_result(r)) return(CAIRO_STATUS_READ_ERROR);
   else {
@@ -1577,7 +1577,7 @@ CAMLexport value caml_cairo_image_surface_create_from_png(value fname)
   CAMLparam1(fname);
   CAMLlocal1(vsurf);
   cairo_surface_t* surf;
-  
+
   surf = cairo_image_surface_create_from_png(String_val(fname));
   caml_raise_Error(cairo_surface_status(surf));
   SURFACE_ASSIGN(vsurf, surf);
@@ -1595,14 +1595,14 @@ CAMLexport value caml_cairo_image_surface_create_from_png_stream(value vinput)
   if (surf == NULL) caml_raise_Error(CAIRO_STATUS_READ_ERROR);
   caml_raise_Error(cairo_surface_status(surf));
   SURFACE_ASSIGN(vsurf, surf);
-  CAMLreturn(vsurf);    
+  CAMLreturn(vsurf);
 }
 
 CAMLexport value caml_cairo_surface_write_to_png(value vsurf, value vfname)
 {
   /* noalloc */
   cairo_status_t status;
-  
+
   status = cairo_surface_write_to_png(SURFACE_VAL(vsurf), String_val(vfname));
   caml_raise_Error(status);
   return(Val_unit);
