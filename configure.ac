@@ -1,4 +1,4 @@
-AC_INIT(cairo, 0.1, christophe.troestler@umons.ac.be)
+AC_INIT(cairo, 0.2, christophe.troestler@umons.ac.be)
 
 AC_MSG_RESULT([configuring $PACKAGE_STRING])
 
@@ -27,18 +27,18 @@ fi
 
 AC_PROG_CC()
 
+CAIRO_LIB="/usr/lib"
 AC_ARG_WITH(cairo-lib,
-    [  --with-cairo-lib=DIR (-L options to find cairo lib)],
-    [LD_PATH="$withval"], [])
-AC_SUBST(LD_PATH)
+    [  --with-cairo-lib=DIR (-L options to find cairo lib, default=/usr/lib)],
+    [CAIRO_LIB="$withval"], [])
+if test "`echo \"$CAIRO_LIB\" |grep \" \" `" = ""; then
+  LDFLAGS="$LDFLAGS -L$CAIRO_LIB"
+else
+  LDFLAGS="$LDFLAGS -L\"$CAIRO_LIB\""
+fi
 
-AC_SEARCH_LIBS([cairo_create], [cairo], [],
-  [if test "$LD_PATH" = ""; then
-     AC_MSG_ERROR([lib cairo missing, use --with-cairo-lib])
-   else
-     LIBS="-lcairo $LIBS"
-   fi])
-
+AC_SEARCH_LIBS([cairo_create], [cairo-2 cairo], [],
+  [AC_MSG_ERROR([lib cairo missing, use --with-cairo-lib])])
 
 CAIRO_INCS="/usr/include/cairo"
 AC_ARG_WITH(cairo-inc,
@@ -47,7 +47,7 @@ AC_ARG_WITH(cairo-inc,
 if test "`echo \"$CAIRO_INCS\" |grep \" \" `" = ""; then
   CPPFLAGS="$CPPFLAGS -I $CAIRO_INCS"
 else
-  CPPFLAGS="$CPPFLAGS -I '$CAIRO_INCS'"
+  CPPFLAGS="$CPPFLAGS -I\"$CAIRO_INCS\""
 fi
 
 AC_CHECK_HEADERS([cairo.h], ,

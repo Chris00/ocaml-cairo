@@ -2,7 +2,7 @@ ROOT=..
 include $(ROOT)/Makefile.conf
 
 CPPFLAGS = @CPPFLAGS@
-LD_PATH = $(addprefix -L, @LD_PATH@)
+LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 
 DOC_FILES = cairo.mli
@@ -20,7 +20,7 @@ native: cairo.cmxa
 
 cairo.cma cairo.cmxa: cairo.cmo cairo.cmx cairo_stubs.o
 	$(OCAMLMKLIB) -o cairo -oc cairo_stubs -ocamlc $(OCAMLC) \
-	  -ocamlopt $(OCAMLOPT) $(LD_PATH) $(LIBS) $(CPPFLAGS) $^
+	  -ocamlopt $(OCAMLOPT) $(LDFLAGS) $(LIBS) $(CPPFLAGS) $^
 
 cairo_stubs.o: cairo_stubs.c  cairo_macros.c cairo_ocaml_types.c
 	$(OCAMLC) $(CPPFLAGS) -c $<
