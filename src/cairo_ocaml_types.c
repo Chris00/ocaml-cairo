@@ -26,7 +26,7 @@ static long caml_cairo_hash_pointer(value v)
 #define DEFINE_CUSTOM_OPERATIONS(name, destroy, val)                    \
   static void caml_cairo_##name##_finalize(value v)                     \
   {                                                                     \
-    fprintf(stderr, "DESTROY %s\n", #name);  fflush(stderr);            \
+    /* fprintf(stderr, "DESTROY %s\n", #name);  fflush(stderr); */      \
     destroy(val(v));                                                    \
   }                                                                     \
   CUSTOM_OPERATIONS(name)
@@ -48,7 +48,7 @@ static long caml_cairo_hash_pointer(value v)
 static void caml_cairo_cairo_finalize(value v)
 {
   cairo_surface_t *surface = cairo_get_target(CAIRO_VAL(v));
-  fprintf(stderr, "DESTROY cairo\n");  fflush(stderr);
+  /* fprintf(stderr, "DESTROY cairo\n");  fflush(stderr); */
   cairo_destroy(CAIRO_VAL(v));
   cairo_surface_destroy(surface);
 }
