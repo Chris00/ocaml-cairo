@@ -2548,7 +2548,7 @@ external rectangle : context ->
       rel_line_to cr width 0;
       rel_line_to cr 0 height;
       rel_line_to cr (-. width) 0;
-      close_path cr;
+      Path.close cr;
       ]}
   *)
 

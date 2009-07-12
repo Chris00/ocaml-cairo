@@ -2,7 +2,6 @@
 open Cairo
 
 val make : context -> rectangle -> ?rotate:float ->
-  size:('a -> string -> float) -> ('a * string) list -> unit
-
-
-val area : float -> string -> float
+  size:('a -> string -> float) ->
+  color:('a -> string -> float * float * float * float) ->
+  ('a * string) list -> unit

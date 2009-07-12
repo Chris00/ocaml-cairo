@@ -16,52 +16,51 @@ let rec intersect_region r region = match region with
   | [] -> false
   | r' :: tl -> intersect r r' || intersect_region r tl
 
+let outside r canvas =
+  r.x < canvas.x || r.y < canvas.y
+  || r.x +. r.w > canvas.x +. canvas.w || r.y +. r.h > canvas.y +. canvas.h
+
 (* Return a random number between [-0.5 *. x] and [0.5 *. x]. *)
 let rand x = Random.float x -. 0.5 *. x
 
 
 (* Inspired by ideas of Jim Lund, jiml at uky dot edu,
    http://elegans.uky.edu/blog/?p=103 *)
-let make cr canvas ?(max_size=25.) ?rotate:(rotp=0.) words =
+let make cr canvas ?rotate:(rotp=0.) ~size ~color words =
   let region = ref [] in
 
-  let rec find_pos target vert word =
-    let w = text_extents cr word in
-    let width, height = (if vert then w.height, w.width
-                         else w.width, w.height) in
+  let rec find_pos target col word =
+    let vert = Random.float 1. < rotp in
+    let te = text_extents cr word in
+    let width, height = (if vert then te.height, te.width
+                         else te.width, te.height) in
     let dx = canvas.w -. width
     and dy = canvas.h -. height in
     let x = canvas.x +. 0.5 *. dx +. rand(dx /. target)
     and y = canvas.y +. 0.5 *. dy +. rand(dy /. target) in
-    let r = (if vert then { x=x;  y = y;  w=width; h= height }
-             else { x=x;  y= y +. w.y_bearing;  w=w.x_advance; h = height }) in
-    if intersect_region r !region then
-      find_pos (0.9995 *. target) vert word
+    let r = { x = x;  y = y; w = width;  h = height } in
+    if intersect_region r !region || outside r canvas  then
+      find_pos (0.9995 *. target) col word
     else (
       region := r :: !region;
-(*       set_source_rgba cr 0. 0. 0. 0.2; *)
-(*       rectangle cr r.x r.y r.w r.h;  stroke cr; *)
-      if vert then (x -. w.y_bearing, y +. height) else (x, y)
+      set_source_rgba cr 0. 0. 0. 0.2;
+      (* rectangle cr r.x r.y r.w r.h;  stroke cr; *)
+      (let r, g, b, a = col in set_source_rgba cr r g b a);
+
+      if vert then (
+        translate cr (r.x -. te.y_bearing) (r.y +. height +. te.x_bearing);
+        rotate cr neg_half_pi;
+      )
+      else
+        move_to cr (r.x -. te.x_bearing) (r.y -. te.y_bearing);
+      show_text cr word;
+      stroke cr;
     )
   in
 
-  List.iter begin fun (freq, word) ->
+  List.iter begin fun (fq, word) ->
     save cr;
-    let vert = Random.float 1. < rotp in
-    set_font_size cr (freq *. max_size);
-
-    let x, y = find_pos 2. vert word in
-    printf "%-35s: x=%g y=%g %s\n" word x y (if vert then "(r)" else "");
-    if freq > 0.5 then
-      set_source_rgb cr (0.2 +. Random.float 0.8) 0. (Random.float 0.5)
-    else
-      set_source_rgb cr (Random.float 0.5) 0. (0.2 +. Random.float 0.8);
-    if vert then (
-      translate cr x y;
-      move_to cr 0. 0.;
-      rotate cr neg_half_pi;
-    )
-    else move_to cr x y;
-    show_text cr word;
+    set_font_size cr (size fq word);
+    find_pos 2. (color fq word) word;
     restore cr
   end words;
