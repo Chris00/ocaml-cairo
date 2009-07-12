@@ -21,5 +21,8 @@ let () =
   show_text cr "Hello";
   Gc.compact();  Gc.compact();
 
+  eprintf "Write image\n%!";
   PNG.write (get_target cr) "test_image.png";
-  Surface.finish (get_target cr)
+  eprintf "Finish surface\n%!";
+  Surface.finish (get_target cr);
+  Gc.compact();

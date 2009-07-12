@@ -60,9 +60,13 @@ CAMLexport value caml_cairo_get_target(value vcr)
   CAMLparam1(vcr);
   CAMLlocal1(vsurf);
   cairo_t *cr = CAIRO_VAL(vcr);
-  cairo_surface_t* s = cairo_get_target(cr);
-  SURFACE_ASSIGN(vsurf, s);
+  cairo_surface_t* surf = cairo_get_target(cr);
   caml_check_status(cr);
+  /* This returns a surface value [vsurf] which will be GC.  In order
+     to avoid that GC [vsurf] destroy the underlying surface too soon,
+     one must increase its ref count. */
+  cairo_surface_reference(surf);
+  SURFACE_ASSIGN(vsurf, surf);
   CAMLreturn(vsurf);
 }
 
@@ -97,9 +101,12 @@ CAMLexport value caml_cairo_get_group_target(value vcr)
   CAMLparam1(vcr);
   CAMLlocal1(vsurf);
   cairo_t* cr = CAIRO_VAL(vcr);
-  cairo_surface_t* s = cairo_get_group_target(cr);
+  cairo_surface_t* surf = cairo_get_group_target(cr);
   caml_check_status(cr);
-  SURFACE_ASSIGN(vsurf, s);
+  /* New GC value [vsurf] depending on a (shared) surface => incr ref
+     count (see caml_cairo_get_target).  */
+  cairo_surface_reference(surf);
+  SURFACE_ASSIGN(vsurf, surf);
   CAMLreturn(vsurf);
 }
 
@@ -113,7 +120,6 @@ DO3_CONTEXT(cairo_set_source_surface, SURFACE_VAL, Double_val, Double_val)
 DO1_CONTEXT(cairo_set_source, PATTERN_VAL)
 
 
-
 CAMLexport value caml_cairo_get_source(value vcr)
 {
   CAMLparam1(vcr);
@@ -121,6 +127,8 @@ CAMLexport value caml_cairo_get_source(value vcr)
   cairo_t* cr = CAIRO_VAL(vcr);
   cairo_pattern_t* pat = cairo_get_source(cr);
   caml_check_status(cr);
+  /* New value [vpat] sharing the pattern => incr ref count. */
+  cairo_pattern_reference(pat);
   PATTERN_ASSIGN(vpat, pat);
   CAMLreturn(vpat);
 }
@@ -163,9 +171,10 @@ CAMLexport value caml_cairo_get_dash(value vcr)
     Store_field(couple, 1, caml_copy_double(0.0));
   }
   else {
+    /* Alloc the Caml value first in case it raises an exn */
+    vdashes = caml_alloc(num_dashes * Double_wosize, Double_array_tag);
     SET_MALLOC(dashes, num_dashes, double);
     cairo_get_dash(cr, dashes, &offset);
-    vdashes = caml_alloc(num_dashes * Double_wosize, Double_array_tag);
     for(i = 0; i < num_dashes; i++)
       Store_double_field(vdashes, i, dashes[i]);
     Store_field(couple, 0, vdashes);
@@ -592,6 +601,8 @@ CAMLexport value caml_cairo_pattern_get_surface(value vpat)
   cairo_status_t st = cairo_pattern_get_surface(PATTERN_VAL(vpat),
                                                 &surface);
   caml_raise_Error(st);
+  /* The surface is shared with the pattern => incr ref count. */
+  cairo_surface_reference(surface);
   SURFACE_ASSIGN(vsurf, surface);
   CAMLreturn(vsurf);
 }
@@ -1216,9 +1227,7 @@ CAMLexport value caml_cairo_surface_finish(value vsurf)
 {
   /* noalloc */
   cairo_surface_t *surface = SURFACE_VAL(vsurf);
-  struct caml_ba_proxy * proxy = (struct caml_ba_proxy *)
-    cairo_surface_get_user_data(SURFACE_VAL(vsurf), &image_bigarray_key);
-
+  
   cairo_surface_finish(surface);
   /* Remove the user data with the bigarray key.  That will cause the
      finalizer to be executed (and release the proxy) and the
