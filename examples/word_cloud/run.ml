@@ -2,6 +2,7 @@
 
 open Printf
 open Cairo
+module Palette = Cloud.Palette
 
 let l1 = 1.
 let l2 = 0.7
@@ -41,21 +42,6 @@ let words = [
   l2, "Formation permanente";
 ]
 
-let color (r, g, b) =
-  (float r /. 255., float g /. 255., float b /. 255., 1.)
-
-let palette = Array.map color [|
-  (167, 70, 97); (189, 117, 137); (212, 163, 177);
-  (233, 209, 215); (142, 60, 82); (125, 53, 73);
-  (84, 35, 49); (42, 18, 24); (17, 7, 10) |]
-
-let palette = Array.map color [|
-  (0, 17, 0); (0, 102, 221); (10, 204, 221); (119, 170, 119) |]
-
-let palette = Array.map color [|
-  (51, 68, 51); (51, 102, 170); (102, 153, 170); (170, 187, 187);
-  (119, 136, 119) |]
-
 let () =
   let font = try Sys.argv.(1) with _ -> "Sans" in
   try
@@ -70,8 +56,7 @@ let () =
       (* Based on "real estate" (area) of the words. *)
       let te = text_extents cr word in
       size0 /. te.width  /. (1.4 -. fq) in
-    let color fq _ =
-      palette.(Random.int (Array.length palette)) in
+    let color fq _ = Palette.random Palette.rainbow  in
 
     (* Show canvas *)
     save cr;
