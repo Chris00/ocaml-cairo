@@ -124,6 +124,6 @@ AC_SUBST(LINKPKG)
 # Finally create the Makefile and samples (read only to avoid changing
 # them by mistake)
 AC_CONFIG_FILES([Makefile.ocaml],[chmod a-w Makefile.ocaml])
-#AC_CONFIG_FILES([src/META],[chmod a-w src/META])
+AC_CONFIG_FILES([src/META],[chmod a-w src/META])
 AC_CONFIG_FILES([src/Makefile], [chmod a-w src/Makefile])
 AC_OUTPUT

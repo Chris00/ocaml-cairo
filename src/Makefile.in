@@ -32,9 +32,6 @@ doc:
 	if [ ! -d "$(DOC_DIR)" ]; then mkdir -p $(DOC_DIR); fi
 	$(OCAMLDOC) -html -d $(DOC_DIR) $(OCAMLDOC_FLAGS) $(DOC_FILES)
 
-META: META.in cairo.mli
-	sed -e "s/@PACKAGE_VERSION@/$(VERSION)/" $< > $@
-
 .PHONY: install uninstall
 # TODO: copy HTML doc
 install: META $(INSTALL_FILES)

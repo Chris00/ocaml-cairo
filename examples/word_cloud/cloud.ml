@@ -87,6 +87,15 @@ let make cr canvas ?rotate:(rotp=0.) ?(padding=0.02) ~size ~color words =
   end words;
 
 
+(* References to check:
+  http://www.cs.cmu.edu/~sleator/papers/2d-bin-packing.htm
+   http://www.mat.ucsb.edu/projects/TagRiver/browser/src/algorithms2/PackingAlgorithm3.java
+   http://github.com/ninajansen/cloud/blob/6bda2f886ec34643294de636d87a48a59a71b171/lib/cloud/cloud.rb
+
+  See also http://www.bewitched.com/research.html for interesting
+  visualization algorithms.
+*)
+
 
 
 module Palette =

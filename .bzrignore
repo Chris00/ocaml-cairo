@@ -13,6 +13,7 @@ config.log
 config.status
 Makefile.ocaml
 src/Makefile
+src/META
 doc/html
 # Examples output
 *.pdf
