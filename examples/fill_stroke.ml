@@ -19,7 +19,7 @@ let () =
 
   set_line_width cr 10.0;
   set_source_rgb cr 0. 0. 1.;
-  fill cr ~preserve:true;
+  fill_preserve cr;
   set_source_rgb cr 0. 0. 0.;
   stroke cr;
 

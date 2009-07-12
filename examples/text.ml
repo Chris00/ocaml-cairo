@@ -18,7 +18,7 @@ let () =
   move_to cr 70. 165.;
   Path.text cr "void";
   set_source_rgb cr 0.5 0.5 1.;
-  fill cr ~preserve:true;
+  fill_preserve cr;
   set_source_rgb cr 0. 0. 0.;
   set_line_width cr 2.56;
   stroke cr;

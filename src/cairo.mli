@@ -2092,18 +2092,37 @@ type rectangle = {
   h:float;   (** height of the rectangle  *)
 }
 
-val clip : ?preserve:bool -> context -> unit
+external clip : context -> unit = "caml_cairo_clip"
   (** Establishes a new clip region by intersecting the current clip
       region with the current path as it would be filled by
       {!Cairo.fill} and according to the current fill rule (see
       {!Cairo.set_fill_rule}).
 
       After [clip], the current path will be cleared from the cairo
-      context unless [preserve] is [true] (default: [false]).
+      context.
 
-      Use {!Cairo.save} and {!Cairo.restore} around [clip] is a robust
-      means of temporarily restricting the clip region.
-  *)
+      Calling {!Cairo.clip} can only make the clip region smaller,
+      never larger.  But the current clip is part of the graphics
+      state, so a temporary restriction of the clip region can be
+      achieved by calling {!Cairo.clip} within a {!Cairo.save} /
+      {!Cairo.restore} pair. The only other means of increasing the
+      size of the clip region is {!Cairo.clip_reset}.  *)
+
+external clip_preserve : context -> unit = "caml_cairo_clip_preserve"
+  (** Establishes a new clip region by intersecting the current clip
+      region with the current path as it would be filled by
+      {!Cairo.fill} and according to the current fill rule (see
+      {!Cairo.set_fill_rule}).
+
+      Unlike {!Cairo.clip}, preserves the path within the cairo context.
+
+      Calling {!Cairo.clip_preserve} can only make the clip region
+      smaller, never larger.  But the current clip is part of the
+      graphics state, so a temporary restriction of the clip region
+      can be achieved by calling {!Cairo.clip_preserve} within a
+      {!Cairo.save} / {!Cairo.restore} pair. The only other means of
+      increasing the size of the clip region is
+      {!Cairo.clip_reset}.  *)
 
 external clip_extents : context -> rectangle = "caml_cairo_clip_extents"
   (** Computes a bounding box in user coordinates covering the area
@@ -2131,11 +2150,19 @@ external clip_rectangle_list : context -> rectangle list
       region cannot be represented as a list of user-space rectangles.  *)
 
 
-val fill : ?preserve:bool -> context -> unit
+external fill : context -> unit = "caml_cairo_fill"
   (** A drawing operator that fills the current path according to the
       current fill rule, (each sub-path is implicitly closed before
       being filled).  After [fill], the current path will be cleared
-      from the cairo context unless [preserve] is [true] (default: [false]).
+      from the cairo context.
+
+      See also {!Cairo.set_fill_rule}. *)
+
+external fill_preserve : context -> unit = "caml_cairo_fill_preserve"
+  (** A drawing operator that fills the current path according to
+      the current fill rule, (each sub-path is implicitly closed
+      before being filled).  Unlike {!Cairo.fill}, [fill_preserve]
+      preserves the path within the cairo context.
 
       See also {!Cairo.set_fill_rule}. *)
 
@@ -2188,12 +2215,11 @@ val paint : ?alpha:float -> context -> unit
 
       @param alpha  alpha value, between 0 (transparent) and 1 (opaque).  *)
 
-val stroke : ?preserve:bool -> context -> unit
+external stroke : context -> unit = "caml_cairo_stroke"
   (** A drawing operator that strokes the current path according to
       the current line width, line join, line cap, and dash settings.
       After [stroke], the current path will be cleared from the cairo
-      context unless [preserve] is [true] (default: [false]).  See
-      {!Cairo.set_line_width}, {!Cairo.set_line_join},
+      context.  See {!Cairo.set_line_width}, {!Cairo.set_line_join},
       {!Cairo.set_line_cap}, and {!Cairo.set_dash}.
 
       Note: Degenerate segments and sub-paths are treated specially
@@ -2216,6 +2242,10 @@ val stroke : ?preserve:bool -> context -> unit
 
       In no case will a cap style of [BUTT] cause anything to be drawn
       in the case of either degenerate segments or sub-paths. *)
+
+external stroke_preserve : context -> unit = "caml_cairo_stroke_preserve"
+  (** Like {!Cairo.stroke} except that it preserves the path within
+      the cairo context. *)
 
 val stroke_extents : context -> rectangle
   (** Computes a bounding box in user coordinates covering the area

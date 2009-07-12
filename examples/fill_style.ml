@@ -14,7 +14,7 @@ let () =
     Path.sub cr;  arc cr 64. 64. 40. 0. two_pi;
     Path.sub cr;  arc_negative cr 192. 64. 40.  0. (-. two_pi);
     set_fill_rule cr fill_style;
-    set_source_rgb cr r g b;     fill cr ~preserve:true;
+    set_source_rgb cr r g b;     fill_preserve cr;
     set_source_rgb cr 0. 0. 0.;  stroke cr
   in
 

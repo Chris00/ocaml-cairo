@@ -224,7 +224,7 @@ let diagram fname alpha0 alpha1 alpha2 =
   let ux, uy = Cairo.device_to_user_distance cr 2. 2. in
   Cairo.set_line_width cr (max ux uy);
   Cairo.rectangle cr 0. 0. 1. 3.;
-  Cairo.clip cr ~preserve:true;
+  Cairo.clip_preserve cr;
   Cairo.stroke cr;
   Cairo.rectangle cr 0. 1. 1. 1.;
   Cairo.stroke cr;

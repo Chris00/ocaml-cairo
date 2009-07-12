@@ -179,11 +179,8 @@ external get_operator : context -> operator = "caml_cairo_get_operator"
 external set_tolerance : context -> float -> unit = "caml_cairo_set_tolerance"
 external get_tolerance : context -> float = "caml_cairo_get_tolerance"
 
-external clip_stub : context -> unit = "caml_cairo_clip"
+external clip : context -> unit = "caml_cairo_clip"
 external clip_preserve : context -> unit = "caml_cairo_clip_preserve"
-
-let clip ?(preserve=false) cr =
-  if preserve then clip_preserve cr else clip_stub cr
 
 type rectangle = {
   x:float;
@@ -199,11 +196,8 @@ external clip_reset : context -> unit = "caml_cairo_reset_clip"
 external clip_rectangle_list : context -> rectangle list
   = "caml_cairo_copy_clip_rectangle_list"
 
-external fill_stub : context -> unit = "caml_cairo_fill"
+external fill : context -> unit = "caml_cairo_fill"
 external fill_preserve : context -> unit = "caml_cairo_fill_preserve"
-
-let fill ?(preserve=false) cr =
-  if preserve then fill_preserve cr else fill_stub cr
 
 external fill_extents : context -> rectangle = "caml_cairo_fill_extents"
 
@@ -222,11 +216,8 @@ let paint ?alpha cr =
   | None -> paint_stub cr
   | Some a -> paint_with_alpha cr a
 
-external stroke_stub : context -> unit = "caml_cairo_stroke"
+external stroke : context -> unit = "caml_cairo_stroke"
 external stroke_preserve : context -> unit = "caml_cairo_stroke_preserve"
-
-let stroke ?(preserve=false) cr =
-  if preserve then stroke_preserve cr else stroke_stub cr
 
 external stroke_extents : context -> rectangle = "caml_cairo_stroke_extents"
 
