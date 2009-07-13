@@ -285,7 +285,7 @@ sig
     = "caml_cairo_glyph_extents"
     (** Gets the extents for an array of glyphs. The extents describe a
         user-space rectangle that encloses the "inked" portion of the
-        glyphs, (as they would be drawn by {!Cairo.Glyph.show}).
+        glyphs (as they would be drawn by {!Cairo.Glyph.show}).
         Additionally, the [x_advance] and [y_advance] values indicate
         the amount by which the current point would be advanced by
         {!Cairo.Glyph.show}.
@@ -699,7 +699,7 @@ sig
     = "caml_cairo_scaled_font_glyph_extents"
     (** [glyph_extents scaled_font glyphs] gets the [extents] for an
         array of glyphs. The extents describe a user-space rectangle
-        that encloses the "inked" portion of the glyphs, (as they
+        that encloses the "inked" portion of the glyphs (as they
         would be drawn by {!Cairo.Glyph.show} if the cairo graphics
         state were set to the same font_face, font_matrix, ctm, and
         font_options as [scaled_font]).  Additionally, the [x_advance] and
@@ -771,12 +771,12 @@ val select_font_face : context -> ?slant:slant -> ?weight:weight -> string ->
       {!Cairo.Scaled_font.set}.
 
       Similarly, when using the "real" font support, you can call
-      directly into the underlying font system, (such as fontconfig
+      directly into the underlying font system (such as fontconfig
       or freetype), for operations such as listing available fonts, etc.
 
       It is expected that most applications will need to use a more
-      comprehensive font handling and text layout library, (for
-      example, pango), in conjunction with cairo.
+      comprehensive font handling and text layout library (for
+      example, pango) in conjunction with cairo.
 
       If text is drawn without a call to {!Cairo.select_font_face},
       (nor {!Cairo.Font_face.set} nor {!Cairo.Scaled_font.set}), the
@@ -793,8 +793,8 @@ external set_font_size : context -> float -> unit
       this matrix will result in the font's em-square being a size by
       size square in user space.)
 
-      If text is drawn without a call to [set_font_size], (nor
-      {!Cairo.set_font_matrix} nor {!Cairo.Scaled_font.set}),
+      If text is drawn without a call to [set_font_size] (nor
+      {!Cairo.set_font_matrix}, nor {!Cairo.Scaled_font.set}),
       the default font size is 10.0. *)
 
 external set_font_matrix : context -> Matrix.t -> unit
@@ -835,7 +835,7 @@ external text_extents : context -> string -> text_extents
   = "caml_cairo_text_extents"
   (** [text_extents cr utf8] gets the extents for a string of text.
       The extents describe a user-space rectangle that encloses the
-      "inked" portion of the text, (as it would be drawn by
+      "inked" portion of the text (as it would be drawn by
       {!Cairo.show_text}).  Additionally, the [x_advance] and
       [y_advance] values indicate the amount by which the current
       point would be advanced by {!Cairo.show_text}.
@@ -971,7 +971,7 @@ sig
           image and then overlaying that image onto the output.  For
           backends that are natively vector-oriented, this function
           can be used to set the resolution used for these image
-          fallbacks, (larger values will result in more detailed
+          fallbacks (larger values will result in more detailed
           images, but also larger file sizes).
 
           Some examples of natively vector-oriented backends are the
@@ -1002,7 +1002,7 @@ sig
 
       The type of a surface is determined by the function used to
       create it, which will generally be of the form [cairo_]{i
-      type}[_surface_create], (though see {!Cairo.Surface.create_similar}
+      type}[_surface_create] (though see {!Cairo.Surface.create_similar}
       as well).  *)
   type kind =
       [ `Image
@@ -1499,7 +1499,7 @@ sig
 
         If two (or more) stops are specified with identical offset
         values, they will be sorted according to the order in which
-        the stops are added, (stops added earlier will compare less
+        the stops are added (stops added earlier will compare less
         than stops added later).  This can be useful for reliably
         making sharp color transitions instead of the typical blend. *)
 
@@ -1516,7 +1516,7 @@ sig
 
         If two (or more) stops are specified with identical offset
         values, they will be sorted according to the order in which
-        the stops are added, (stops added earlier will compare less
+        the stops are added (stops added earlier will compare less
         than stops added later). This can be useful for reliably
         making sharp color transitions instead of the typical
         blend.  *)
@@ -1602,7 +1602,7 @@ sig
           @return (x0, y0, r0, x1, y1, r1).      *)
 
   (** This is used to describe how pattern color/alpha will be
-      determined for areas "outside" the pattern's natural area, (for
+      determined for areas "outside" the pattern's natural area (for
       example, outside the surface bounds or outside the gradient
       geometry).  *)
   type extend =
@@ -1647,7 +1647,7 @@ sig
         filter.
 
         Note that you might want to control filtering even when you do
-        not have an explicit {!Cairo.Pattern.t} value, (for example
+        not have an explicit {!Cairo.Pattern.t} value (for example
         when using {!Cairo.set_source_surface}).  In these cases, it
         is convenient to use {!Cairo.get_source} to get access to the
         pattern that cairo creates implicitly. For example:
@@ -1727,13 +1727,13 @@ sig
         as a group.  The redirection lasts until the group is completed
         by a call to {!Cairo.Group.pop} or {!Cairo.Group.pop_to_source}.
         These calls provide the result of any drawing to the group as a
-        pattern, (either as an explicit object, or set as the source
+        pattern (either as an explicit object, or set as the source
         pattern).
 
         This group functionality can be convenient for performing
         intermediate compositing. One common use of a group is to render
-        objects as opaque within the group, (so that they occlude each
-        other), and then blend the result with translucence onto the
+        objects as opaque within the group (so that they occlude each
+        other) and then blend the result with translucence onto the
         destination.
 
         Groups can be nested arbitrarily deep by making balanced calls
@@ -1753,7 +1753,7 @@ sig
         {!Cairo.Group.push} and returns a new pattern containing the
         results of all drawing operations performed to the group.
 
-        The [Group.pop] function calls {!Cairo.restore}, (balancing a
+        The [Group.pop] function calls {!Cairo.restore} (balancing a
         call to {!Cairo.save} by the [Group.push] function), so that any
         changes to the graphics state will not be visible outside the
         group.
@@ -1805,7 +1805,7 @@ external set_source_rgba : context ->
       range 0 to 1. If the values passed in are outside that range,
       they will be clamped.
 
-      The default source pattern is opaque black, (that is, it is
+      The default source pattern is opaque black (that is, it is
       equivalent to [set_source_rgba cr 0. 0. 0. 1.0]). *)
 
 external set_source : context -> 'a Pattern.t -> unit = "caml_cairo_set_source"
@@ -1834,12 +1834,11 @@ external set_source_surface : context -> Surface.t -> x:float -> y:float -> unit
       translation values in the pattern matrix.
 
       Other than the initial translation pattern matrix, as described
-      above, all other pattern attributes, (such as its extend mode),
-      are set to the default values as in
-      {!Pattern.create_for_surface}.  The resulting pattern can be
-      queried with {!Cairo.get_source} so that these attributes can be
-      modified if desired (e.g. to create a repeating pattern with
-      {!Cairo.Pattern.set_extend}). *)
+      above, all other pattern attributes (such as its extend mode)
+      are set to the default values as in {!Pattern.create_for_surface}.
+      The resulting pattern can be queried with {!Cairo.get_source} so
+      that these attributes can be modified if desired (e.g. to create
+      a repeating pattern with {!Cairo.Pattern.set_extend}). *)
 
 external get_source : context -> Pattern.any = "caml_cairo_get_source"
   (** [get_source cr] gets the current source pattern for [cr]. *)
@@ -1970,7 +1969,7 @@ external get_line_join : context -> line_join = "caml_cairo_get_line_join"
 external set_line_width : context -> float -> unit = "caml_cairo_set_line_width"
     (** Sets the current line width within the cairo context. The line
         width value specifies the diameter of a pen that is circular in
-        user space, (though device-space pen may be an ellipse in general
+        user space (though device-space pen may be an ellipse in general
         due to scaling/shear/rotation of the CTM).
 
         Note: When the description above refers to user space and CTM
@@ -2152,7 +2151,7 @@ external clip_rectangle_list : context -> rectangle list
 
 external fill : context -> unit = "caml_cairo_fill"
   (** A drawing operator that fills the current path according to the
-      current fill rule, (each sub-path is implicitly closed before
+      current fill rule (each sub-path is implicitly closed before
       being filled).  After [fill], the current path will be cleared
       from the cairo context.
 
@@ -2160,7 +2159,7 @@ external fill : context -> unit = "caml_cairo_fill"
 
 external fill_preserve : context -> unit = "caml_cairo_fill_preserve"
   (** A drawing operator that fills the current path according to
-      the current fill rule, (each sub-path is implicitly closed
+      the current fill rule (each sub-path is implicitly closed
       before being filled).  Unlike {!Cairo.fill}, [fill_preserve]
       preserves the path within the cairo context.
 
@@ -2168,7 +2167,7 @@ external fill_preserve : context -> unit = "caml_cairo_fill_preserve"
 
 external fill_extents : context -> rectangle = "caml_cairo_fill_extents"
   (** Computes a bounding box in user coordinates covering the area
-      that would be affected, (the "inked" area), by a [fill]
+      that would be affected (the "inked" area) by a [fill]
       operation given the current path and fill parameters.  If the
       current path is empty, returns an empty rectangle [{ x1=0.;
       y1=0.; x2=0.; y2=0. }].  Surface dimensions and clipping are not
@@ -2237,7 +2236,7 @@ external stroke : context -> unit = "caml_cairo_stroke"
       the same coordinate as the {!Cairo.move_to}.  If the cap style
       is [ROUND] then these sub-paths will be drawn as circular dots.
       Note that in the case of [SQUARE] line cap, a degenerate
-      sub-path will not be drawn at all, (since the correct
+      sub-path will not be drawn at all (since the correct
       orientation is indeterminate).
 
       In no case will a cap style of [BUTT] cause anything to be drawn
@@ -2249,7 +2248,7 @@ external stroke_preserve : context -> unit = "caml_cairo_stroke_preserve"
 
 val stroke_extents : context -> rectangle
   (** Computes a bounding box in user coordinates covering the area
-      that would be affected, (the "inked" area), by a {!Cairo.stroke}
+      that would be affected (the "inked" area) by a {!Cairo.stroke}
       operation operation given the current path and stroke
       parameters.  If the current path is empty, returns an empty
       rectangle [{ x1=0.; y1=0.; x2=0.; y2=0. }].  Surface dimensions
@@ -2319,7 +2318,7 @@ sig
 
         This function is like {!Cairo.Path.copy} except that any
         curves in the path will be approximated with piecewise-linear
-        approximations, (accurate to within the current tolerance
+        approximations (accurate to within the current tolerance
         value).  That is, the result is guaranteed to not have any
         elements of type [CURVE_TO] which will instead be replaced by
         a series of [LINE_TO] elements.  *)
@@ -2372,8 +2371,8 @@ sig
 
   external close : context -> unit = "caml_cairo_close_path"
     (** Adds a line segment to the path from the current point to the
-        beginning of the current sub-path, (the most recent point
-        passed to {!Cairo.move_to}), and closes this sub-path.  After
+        beginning of the current sub-path (the most recent point
+        passed to {!Cairo.move_to}) and closes this sub-path.  After
         this call the current point will be at the joined endpoint of
         the sub-path.
 
@@ -2389,7 +2388,7 @@ sig
 
         Note: As of cairo version 1.2.4 any call to [close] will place
         an explicit [MOVE_TO] element into the path immediately after
-        the [CLOSE_PATH] element, (which can be seen in
+        the [CLOSE_PATH] element (which can be seen in
         {!Cairo.Path.copy} for example).  This can simplify path
         processing in some cases as it may not be necessary to save
         the "last move_to point" during processing as the [MOVE_TO]
@@ -2435,12 +2434,12 @@ sig
 
         The result of [Cairo.Path.extents] is defined as equivalent to
         the limit of {!Cairo.stroke_extents} with [ROUND] as the line
-        width approaches 0.0, (but never reaching the empty-rectangle
+        width approaches 0.0 (but never reaching the empty-rectangle
         returned by {!Cairo.stroke_extents} for a line width of 0.0).
 
         Specifically, this means that zero-area sub-paths such as
-        {!Cairo.move_to}; {!Cairo.line_to} segments, (even degenerate
-        cases where the coordinates to both calls are identical), will
+        {!Cairo.move_to} and {!Cairo.line_to} segments (even degenerate
+        cases where the coordinates to both calls are identical) will
         be considered as contributing to the extents.  However, a lone
         {!Cairo.move_to} will not contribute to the results of
         [Cairo.Path.extents]. *)
