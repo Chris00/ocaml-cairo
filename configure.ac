@@ -29,28 +29,33 @@ AC_CHECK_OCAML_OS_TYPE
 
 AC_PROG_CC()
 
-CAIRO_LIB="/usr/lib"
-AC_ARG_WITH(cairo-lib,
-    [  --with-cairo-lib=DIR (-L options to find cairo lib, default=/usr/lib)],
-    [CAIRO_LIB="$withval"], [])
-if test "`echo \"$CAIRO_LIB\" |grep \" \" `" = ""; then
-  LDFLAGS="$LDFLAGS -L$CAIRO_LIB"
+# AC_DEF_ARG_WITH(arg-with, variable, default, help)
+AC_DEFUN([AC_DEF_ARG_WITH],
+[dnl
+  $2="$3"
+  AC_ARG_WITH($1, [  $4, default=$3], [$2="$withval"], [])
+])
+
+if test "$OCAML_OS_TYPE" = "Win32"; then
+  AC_DEF_ARG_WITH(cairo-lib, [CAIRO_LIB], [C:/gtk/lib],
+    [--with-cairo-lib=DIR    path to find cairo lib])
 else
-  LDFLAGS="$LDFLAGS -L\"$CAIRO_LIB\""
+  AC_DEF_ARG_WITH(cairo-lib, [CAIRO_LIB], [/usr/lib],
+    [--with-cairo-lib=DIR    path to find cairo lib])
 fi
+LDFLAGS="$LDFLAGS -L$CAIRO_LIB"
 
 AC_SEARCH_LIBS([cairo_create], [cairo-2 cairo], [],
   [AC_MSG_ERROR([lib cairo missing, use --with-cairo-lib])])
 
-CAIRO_INCS="/usr/include/cairo"
-AC_ARG_WITH(cairo-inc,
-    [  --with-cairo-inc=DIR (-I options to find cairo headers, default=/usr/include/cairo)],
-    [CAIRO_INCS="$withval"], [])
-if test "`echo \"$CAIRO_INCS\" |grep \" \" `" = ""; then
-  CPPFLAGS="$CPPFLAGS -I $CAIRO_INCS"
+if test "$OCAML_OS_TYPE" = "Win32"; then
+  AC_DEF_ARG_WITH(cairo-inc, [CAIRO_INCS], [C:/gtk/include/cairo],
+    [--with-cairo-inc=DIR    path to find cairo headers])
 else
-  CPPFLAGS="$CPPFLAGS -I\"$CAIRO_INCS\""
+  AC_DEF_ARG_WITH(cairo-inc, [CAIRO_INCS], [/usr/include/cairo],
+    [--with-cairo-inc=DIR    path to find cairo headers])
 fi
+CPPFLAGS="$CPPFLAGS -I $CAIRO_INCS"
 
 AC_CHECK_HEADERS([cairo.h], ,
   [AC_MSG_ERROR([cairo.h missing, use --with-cairo-inc])])
