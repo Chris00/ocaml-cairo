@@ -55,7 +55,7 @@ let () =
     let size fq word =
       let te = text_extents cr word in
       size0 /. sqrt te.width  /. (1.4 -. fq) in
-    let color fq _ = Palette.random Palette.rainbow  in
+    let color fq _ = Palette.random Palette.clay  in
 
     (* Show canvas *)
     save cr;

@@ -87,13 +87,16 @@ let make cr canvas ?rotate:(rotp=0.) ?(padding=0.02) ~size ~color words =
   end words;
 
 
-(* References to check:
-  http://www.cs.cmu.edu/~sleator/papers/2d-bin-packing.htm
-   http://www.mat.ucsb.edu/projects/TagRiver/browser/src/algorithms2/PackingAlgorithm3.java
-   http://github.com/ninajansen/cloud/blob/6bda2f886ec34643294de636d87a48a59a71b171/lib/cloud/cloud.rb
+(* Inspired by git://github.com/ninajansen/cloud.git *)
 
-  See also http://www.bewitched.com/research.html for interesting
-  visualization algorithms.
+
+
+(* References to check:
+   http://www.cs.cmu.edu/~sleator/papers/2d-bin-packing.htm
+   http://www.mat.ucsb.edu/projects/TagRiver/browser/src/algorithms2/PackingAlgorithm3.java
+
+   See also http://www.bewitched.com/research.html for interesting
+   visualization algorithms.
 *)
 
 
@@ -127,6 +130,21 @@ struct
   let rainbow = Array.map color [|
     (176, 43, 44); (209, 86, 0); (199, 152, 16); (115, 136, 10);
     (107, 186, 112); (63, 76, 107); (53, 106, 160); (208, 31, 60) |]
+
+  let winter = Array.map color [|
+    (0,0,0); (52, 83, 121); (64, 114, 176); (69, 134, 210);
+    (155, 189, 246); (160, 189, 235) |]
+
+  let heat = Array.map color [|
+    (21, 0, 0); (119, 0, 0); (255, 0, 0); (203, 0, 0); (255, 66, 0) |]
+
+  let blue_yellow = Array.map color [|
+    (34, 68, 102); (102, 119, 136); (204, 170, 102); (136, 153, 170);
+    (255, 238, 187) |]
+
+  let clay = Array.map color [|
+    (0,0,0); (113, 76, 63); (177, 88, 79); (212, 192, 196);
+    (248, 214, 229); (188, 133, 136) |]
 
   let gray =
     let g x = (x, x, x, 1.) in [|  g 0.2;  g 0.4;  g 0.6; g 0.8 |]

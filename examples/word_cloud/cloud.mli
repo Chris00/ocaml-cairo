@@ -19,6 +19,10 @@ sig
   val blue_green : t
   val brown : t
   val rainbow : t
+  val winter : t
+  val heat : t
+  val blue_yellow : t
+  val clay : t
   val gray : t
   val light_gray : t
 end
