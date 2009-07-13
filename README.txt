@@ -38,3 +38,14 @@ Cygwin packages in order to create the configure script with
 ./autogen.sh
 
 [1] http://www.gtk.org/download-windows.html 
+
+
+Tutorial images
+---------------
+
+To generate the tutorial images, issue
+
+make tutorial
+
+from the toplevel directory.  Then open doc/tutorial.html in your
+favorite browser.
