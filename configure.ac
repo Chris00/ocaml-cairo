@@ -17,32 +17,32 @@ AC_CHECK_OCAML_OS_TYPE
 # C & Cairo library
 ########################################################################
 
-# AC_DEF_ARG_WITH(arg-with, variable, default, help)
+# AC_DEF_ARG_WITH(arg-with, variable, default-unix, default-win, help, msg)
 AC_DEFUN([AC_DEF_ARG_WITH],
 [dnl
-  $2="$3"
-  AC_ARG_WITH($1, [  $4, default=$3], [$2="$withval"], [])
+  if test "$OCAML_OS_TYPE" = "Win32"; then
+    $2="$4"
+  else
+    $2="$3"
+  fi
+  AC_ARG_WITH($1, [  $5 @<:@unix=$3,
+                          win32=$4@:>@],
+    [$2="$withval"], [])
   if test "`echo \"$$2\" | grep \" \"`" != ""; then
     AC_MSG_ERROR([The path passed to --with-$1 must NOT contain spaces])
   fi
+  AC_MSG_RESULT([Path for $6... $$2])
 ])
 
-if test "$OCAML_OS_TYPE" = "Win32"; then
-  AC_DEF_ARG_WITH(cairo-lib, [CAIRO_LIB], [C:/gtk/lib],
-    [--with-cairo-lib=DIR    path to find cairo lib])
-else
-  AC_DEF_ARG_WITH(cairo-lib, [CAIRO_LIB], [/usr/lib],
-    [--with-cairo-lib=DIR    path to find cairo lib])
-fi
+AC_DEF_ARG_WITH(cairo-lib, [CAIRO_LIB], [/usr/lib], [C:/gtk/lib],
+  [--with-cairo-lib=DIR    path to find cairo lib],
+  [the cairo library])
 LDFLAGS="$LDFLAGS -L$CAIRO_LIB"
 
-if test "$OCAML_OS_TYPE" = "Win32"; then
-  AC_DEF_ARG_WITH(cairo-inc, [CAIRO_INCS], [C:/gtk/include/cairo],
-    [--with-cairo-inc=DIR    path to find cairo headers])
-else
-  AC_DEF_ARG_WITH(cairo-inc, [CAIRO_INCS], [/usr/include/cairo],
-    [--with-cairo-inc=DIR    path to find cairo headers])
-fi
+AC_DEF_ARG_WITH(cairo-inc, [CAIRO_INCS], [/usr/include/cairo],
+  [C:/gtk/include/cairo],
+  [--with-cairo-inc=DIR    path to find cairo headers],
+  [cairo.h])
 CPPFLAGS="$CPPFLAGS -I $CAIRO_INCS"
 
 AC_PROG_CC()

@@ -13,13 +13,28 @@ findlib. Then issue
 ./configure
 make
 make examples   # optional
-make install
+make install    # requires findlib
 
 If you use the bzr version, you also need autoconf and automake in
-order to create the configure script with ./bootstrap
-
+order to create the configure script with ./autogen.sh
 
 
 INSTALLATION on windows
 -----------------------
 
+To install Cairo, we recommend that you download GTK+ for windows [1]
+and install it in C:/gtk (you can install it in any other directory
+whose path contains NO space but you will have to specify them with
+--with-cairo-lib and --with-cairo-inc) and put C:\gtk\bin in your PATH
+environment variable.  Then (in a cygwin shell), issue
+
+./configure
+make
+make exxamples  # optional
+make install    # requires findlib
+
+If you use the bzr version, you also need the autoconf and automake
+Cygwin packages in order to create the configure script with
+./autogen.sh
+
+[1] http://www.gtk.org/download-windows.html 
