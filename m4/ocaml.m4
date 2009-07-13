@@ -1,4 +1,4 @@
-dnl autoconf macros for OCaml
+dnl autoconf macros for OCaml		-*- mode:autoconf; coding:utf-8 -*-
 dnl
 dnl Copyright © 2009      Richard W.M. Jones
 dnl Copyright © 2009      Stefano Zacchiroli
@@ -16,7 +16,10 @@ AC_DEFUN([AC_PROG_OCAML],
   if test "$OCAMLC" != "no"; then
      OCAMLVERSION=`$OCAMLC -v | sed -n -e 's|.*version* *\(.*\)$|\1|p'`
      AC_MSG_RESULT([OCaml version is $OCAMLVERSION])
-     OCAMLLIB=`$OCAMLC -where 2>/dev/null || $OCAMLC -v|tail -1|cut -d ' ' -f 4`
+     # If OCAMLLIB is set, use it
+     if test "$OCAMLLIB" = ""; then
+        OCAMLLIB=`$OCAMLC -where 2>/dev/null || $OCAMLC -v|tail -1|cut -d ' ' -f 4`
+     fi
      AC_MSG_RESULT([OCaml library path is $OCAMLLIB])
 
      AC_SUBST([OCAMLVERSION])
@@ -67,6 +70,9 @@ AC_DEFUN([AC_PROG_OCAML],
   fi
 
   AC_SUBST([OCAMLC])
+
+  # checking for ocaml toplevel
+  AC_CHECK_TOOL([OCAML],[ocaml],[no])
 
   # checking for ocamldep
   AC_CHECK_TOOL([OCAMLDEP],[ocamldep],[no])
@@ -207,11 +213,26 @@ EOF
 dnl XXX Cross-compiling
 AC_DEFUN([AC_CHECK_OCAML_WORD_SIZE],
 [dnl
+  AC_REQUIRE([AC_PROG_OCAML])dnl
   AC_MSG_CHECKING([for OCaml compiler word size])
   cat > conftest.ml <<EOF
   print_endline (string_of_int Sys.word_size)
   EOF
-  OCAML_WORD_SIZE=`ocaml conftest.ml`
+  OCAML_WORD_SIZE=`$OCAML conftest.ml`
   AC_MSG_RESULT([$OCAML_WORD_SIZE])
   AC_SUBST([OCAML_WORD_SIZE])
+])
+
+AC_DEFUN([AC_CHECK_OCAML_OS_TYPE],
+[dnl
+  AC_REQUIRE([AC_PROG_OCAML])dnl
+  AC_MSG_CHECKING([OCaml Sys.os_type])
+
+  cat > conftest.ml <<EOF
+  print_string(Sys.os_type);;
+EOF
+
+  OCAML_OS_TYPE=`$OCAML conftest.ml`
+  AC_MSG_RESULT([$OCAML_OS_TYPE])
+  AC_SUBST([OCAML_OS_TYPE])
 ])
