@@ -22,6 +22,8 @@ else
    OCAMLFIND_OCAMLDOC="$OCAMLFIND ocamldoc"
 fi
 
+AC_CHECK_OCAML_OS_TYPE
+
 # C & Cairo library
 ########################################################################
 
