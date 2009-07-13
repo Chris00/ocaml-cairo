@@ -4,13 +4,19 @@ include $(ROOT)/Makefile.conf
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
+OS_TYPE = @OCAML_OS_TYPE@
 
 DOC_FILES = cairo.mli
 DOC_DIR = $(ROOT)/doc/html/
+ifeq "$(OS_TYPE)" "Win32"
+SO = .dll
+else
+SO = .so
+endif
 # Native code versions must be installed if and only if make opt was
 # called previously (i.e. the files exist):
 INSTALL_FILES = cairo.mli $(wildcard *.cmi *.cma *.cmx *.a *.cmxa) \
-  dllcairo_stubs.so
+  dllcairo_stubs$(SO)
 
 .PHONY: default all opt byte native
 default: @OCAMLBEST@
