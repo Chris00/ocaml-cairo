@@ -11,29 +11,20 @@ if test "$OCAMLC" = "no"; then
 fi
 
 AC_PROG_FINDLIB
-if test "$OCAMLFIND" = "no"; then
-   OCAMLFIND=
-   LINKPKG=
-else
-   #LINKPKG=-linkpkg
-   OCAMLFIND_OCAMLC="$OCAMLFIND ocamlc"
-   OCAMLFIND_OCAMLOPT="$OCAMLFIND ocamlopt"
-   OCAMLFIND_OCAMLDEP="$OCAMLFIND ocamldep"
-   OCAMLFIND_OCAMLDOC="$OCAMLFIND ocamldoc"
-fi
 
 AC_CHECK_OCAML_OS_TYPE
 
 # C & Cairo library
 ########################################################################
 
-AC_PROG_CC()
-
 # AC_DEF_ARG_WITH(arg-with, variable, default, help)
 AC_DEFUN([AC_DEF_ARG_WITH],
 [dnl
   $2="$3"
   AC_ARG_WITH($1, [  $4, default=$3], [$2="$withval"], [])
+  if test "`echo \"$$2\" | grep \" \"`" != ""; then
+    AC_MSG_ERROR([The path passed to --with-$1 must NOT contain spaces])
+  fi
 ])
 
 if test "$OCAML_OS_TYPE" = "Win32"; then
@@ -45,9 +36,6 @@ else
 fi
 LDFLAGS="$LDFLAGS -L$CAIRO_LIB"
 
-AC_SEARCH_LIBS([cairo_create], [cairo-2 cairo], [],
-  [AC_MSG_ERROR([lib cairo missing, use --with-cairo-lib])])
-
 if test "$OCAML_OS_TYPE" = "Win32"; then
   AC_DEF_ARG_WITH(cairo-inc, [CAIRO_INCS], [C:/gtk/include/cairo],
     [--with-cairo-inc=DIR    path to find cairo headers])
@@ -56,6 +44,11 @@ else
     [--with-cairo-inc=DIR    path to find cairo headers])
 fi
 CPPFLAGS="$CPPFLAGS -I $CAIRO_INCS"
+
+AC_PROG_CC()
+
+AC_SEARCH_LIBS([cairo_create], [cairo-2 cairo], [],
+  [AC_MSG_ERROR([lib cairo missing, use --with-cairo-lib])])
 
 AC_CHECK_HEADERS([cairo.h], ,
   [AC_MSG_ERROR([cairo.h missing, use --with-cairo-inc])])
