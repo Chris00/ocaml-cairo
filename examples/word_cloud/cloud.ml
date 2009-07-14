@@ -40,26 +40,70 @@ let outside r canvas =
 (* Return a random number between [-0.5 *. x] and [0.5 *. x]. *)
 let rand x = Random.float x -. 0.5 *. x
 
+type position =
+  | C    (* center around both x and y *)
+  | R    (* right of (x,y) *)
+  | L
+  | U
+  | D
+  | RU
+  | RD
+  | LU
+  | LD
 
+module Text =
+struct
+  let size cr ?(vert=false) text =
+    let te = text_extents cr text in
+    if vert then te.height, te.width else te.width, te.height
+
+  (* Return the box that the text will occupy if it is put at the
+     position [pos]. *)
+  let box cr ?vert ?(padding=0.02) pos x y text =
+    let width, height = size cr ?vert text in
+    let x0 = match pos with
+      | C | U | D -> x -. 0.5 *. width
+      | R | RU | RD -> x
+      | L | LU | LD -> x -. width
+    and y0 = match pos with
+      | C | R | L -> y -. 0.5 *. height
+      | U | RU | LU -> y -. height
+      | D | RD | LD -> y  in
+    let padding' = 1. +. 2. *. padding in
+    { Cairo.x = x0 -. padding *. width;  y = y0 -. padding *. height;
+      w = padding' *. width;  h = padding' *. height }
+  ;;
+
+  (* Display the [text] at position [pos] (vertically if [vert] is true). *)
+  let show cr ?(vert=false) pos x y text =
+    let te = text_extents cr text in
+    let r = box cr ~vert ~padding:0. pos x y text in
+    if vert then (
+      translate cr (r.x -. te.y_bearing) (r.y +. r.h +. te.x_bearing);
+      rotate cr neg_half_pi;
+    )
+    else
+      move_to cr (r.x -. te.x_bearing) (r.y -. te.y_bearing);
+    show_text cr text;
+    stroke cr
+end
+
+(* ---------------------------------------------------------------------- *)
 (* Inspired by ideas of Jim Lund, jiml at uky dot edu,
    http://elegans.uky.edu/blog/?p=103 *)
-let make cr canvas ?rotate:(rotp=0.) ?(padding=0.02) ~size ~color words =
+
+let make cr canvas ?rotate:(rotp=0.) ?padding ~size ~color words =
   let region = ref [] in
+  (* center of canvas *)
+  let cx = canvas.x +. 0.5 *. canvas.w
+  and cy = canvas.y +. 0.5 *. canvas.h in
 
   let rec position target col word =
     let vert = Random.float 1. < rotp in
-    let te = text_extents cr word in
-    let width, height = (if vert then te.height, te.width
-                         else te.width, te.height) in
-    let dx = canvas.w -. width
-    and dy = canvas.h -. height in
-    let x = canvas.x +. 0.5 *. dx +. rand(dx /. target)
-    and y = canvas.y +. 0.5 *. dy +. rand(dy /. target) in
-    (* make the rectangle slightly larger than the word to leave some
-       space aroubd. *)
-    let padding' = 1. +. 2. *. padding in
-    let r = { x = x -. padding *. width;  y = y -. padding *. height;
-              w = padding' *. width;  h = padding' *. height } in
+    let width, height = Text.size cr ~vert word in
+    let x = cx +. rand((canvas.w -. width) /. target)
+    and y = cy +. rand((canvas.h -. height) /. target) in
+    let r = Text.box cr ~vert C x y word in
     if intersect_region r !region || outside r canvas  then
       position (0.9995 *. target) col word
     else (
@@ -67,15 +111,7 @@ let make cr canvas ?rotate:(rotp=0.) ?(padding=0.02) ~size ~color words =
       set_source_rgba cr 0. 0. 0. 0.2;
       (* rectangle cr r.x r.y r.w r.h;  stroke cr; *)
       (let r, g, b, a = col in set_source_rgba cr r g b a);
-
-      if vert then (
-        translate cr (x -. te.y_bearing) (y +. height +. te.x_bearing);
-        rotate cr neg_half_pi;
-      )
-      else
-        move_to cr (x -. te.x_bearing) (y -. te.y_bearing);
-      show_text cr word;
-      stroke cr;
+      Text.show cr ~vert C x y word;
     )
   in
 
@@ -84,13 +120,50 @@ let make cr canvas ?rotate:(rotp=0.) ?(padding=0.02) ~size ~color words =
     set_font_size cr (size fq word);
     position 2. (color fq word) word;
     restore cr
-  end words;
+  end words
+;;
+
+(* ---------------------------------------------------------------------- *)
+(* Inspired by http://wiki.github.com/ninajansen/cloud
+   (see also git://github.com/ninajansen/cloud.git) *)
+
+let radial_center x y cx cy =
+  let dx = x -. cx and dy = y -. cy in
+  sqrt(dx *. dx +. dy *. dy)
+
+let x_dist x y cx cy =
+  let dx = x -. cx and dy = y -. cy in
+  min (abs_float dy) (sqrt(dx *. dx +. dy *. dy))
+
+let potato x y cx cy =
+  let dx = abs_float(x -. cx) and dy = y -. cy in
+  sqrt(dx**(2./.3.) +. dy *. dy)
 
 
-(* Inspired by git://github.com/ninajansen/cloud.git *)
+let bin_pack cr canvas ?(distance=radial_center) ~size ~color words =
+  (* Compute the sizes of all words *)
+  let text_size (fq, word) = (fq, word, size fq word) in
+  let words = List.map text_size words in
+  let from_larger (_,_,sz1) (_,_,sz2) = compare sz2 sz1 in
+  let words = List.sort from_larger words in
+  if words = [] then invalid_arg "Cloud.bin_pack: empty list";
+  (* center of canvas *)
+  let cx = canvas.x +. 0.5 *. canvas.w
+  and cy = canvas.y +. 0.5 *. canvas.h in
+  (* Place the largest word at the center of the canvas *)
+  let fq, word, sz = List.hd words in
+  set_font_size cr sz;
+  (let r, g, b, a = color fq word in set_source_rgba cr r g b a);
+  Text.show cr C cx cy word;
 
+  (* Place the other words *)
+  List.iter (fun (_, word, sz) ->
+               set_font_size cr sz;
+               
+            ) (List.tl words)
+;;
 
-
+(* ---------------------------------------------------------------------- *)
 (* References to check:
    http://www.cs.cmu.edu/~sleator/papers/2d-bin-packing.htm
    http://www.mat.ucsb.edu/projects/TagRiver/browser/src/algorithms2/PackingAlgorithm3.java

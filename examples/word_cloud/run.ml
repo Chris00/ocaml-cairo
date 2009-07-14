@@ -7,6 +7,7 @@ module Palette = Cloud.Palette
 let l1 = 1.
 let l2 = 0.7
 let words = [
+  (1.05, "Mons");
   (l1, "Psychologie");
   (l1, "Sciences de l'éducation");
   (l1, "Sciences Humaines et Sociales");
@@ -21,7 +22,6 @@ let words = [
   (l1, "Médecine");
   (l1, "Pharmacie");
   (l1, "Archi Mons");
-  (l1, "Mons");
   (l1, "Charleroi");
   l2, "Logopédie";
   l2, "Sciences politiques et sociales";
@@ -55,7 +55,7 @@ let () =
     let size fq word =
       let te = text_extents cr word in
       size0 /. sqrt te.width  /. (1.4 -. fq) in
-    let color fq _ = Palette.random Palette.clay  in
+    let color fq _ = Palette.random Palette.rainbow  in
 
     (* Show canvas *)
     save cr;
@@ -64,7 +64,8 @@ let () =
     set_dash cr [| 5. |];
     rectangle cr canvas.x canvas.y canvas.w canvas.h;   stroke cr;
     restore cr;
-    Cloud.make cr canvas words ~size ~color ~rotate:0.1;
+    (* Cloud.make cr canvas words ~size ~color ~rotate:0.1; *)
+    Cloud.bin_pack cr canvas words ~size ~color;
 
     Cairo.Surface.finish (get_target cr)
   with Cairo.Error st as e ->
