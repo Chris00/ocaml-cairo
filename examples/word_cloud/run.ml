@@ -64,8 +64,7 @@ let () =
     set_dash cr [| 5. |];
     rectangle cr canvas.x canvas.y canvas.w canvas.h;   stroke cr;
     restore cr;
-    (* Cloud.make cr canvas words ~size ~color ~rotate:0.1; *)
-    Cloud.bin_pack cr canvas words ~size ~color;
+    Cloud.make cr canvas words ~size ~color ~rotate:0.1;
 
     Cairo.Surface.finish (get_target cr)
   with Cairo.Error st as e ->

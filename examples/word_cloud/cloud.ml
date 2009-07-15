@@ -92,81 +92,50 @@ end
 (* Inspired by ideas of Jim Lund, jiml at uky dot edu,
    http://elegans.uky.edu/blog/?p=103 *)
 
-let make cr canvas ?rotate:(rotp=0.) ?padding ~size ~color words =
+let make cr canvas ?rotate:(rotp=0.) ?padding ?(word_box=fun _ _ -> ())
+    ~size ~color words =
   let region = ref [] in
   (* center of canvas *)
   let cx = canvas.x +. 0.5 *. canvas.w
   and cy = canvas.y +. 0.5 *. canvas.h in
 
-  let rec position target col word =
+  let rec position target fq word =
     let vert = Random.float 1. < rotp in
     let width, height = Text.size cr ~vert word in
     let x = cx +. rand((canvas.w -. width) /. target)
     and y = cy +. rand((canvas.h -. height) /. target) in
-    let r = Text.box cr ~vert C x y word in
+    let r = Text.box cr ~vert ?padding C x y word in
     if intersect_region r !region || outside r canvas  then
-      position (0.9995 *. target) col word
+      position (0.9995 *. target) fq word
     else (
       region := r :: !region;
       set_source_rgba cr 0. 0. 0. 0.2;
       (* rectangle cr r.x r.y r.w r.h;  stroke cr; *)
-      (let r, g, b, a = col in set_source_rgba cr r g b a);
+      (let r, g, b, a = color fq word in set_source_rgba cr r g b a);
       Text.show cr ~vert C x y word;
+      word_box r word;
     )
   in
 
   List.iter begin fun (fq, word) ->
     save cr;
     set_font_size cr (size fq word);
-    position 2. (color fq word) word;
+    position 2. fq word;
     restore cr
   end words
 ;;
 
-(* ---------------------------------------------------------------------- *)
-(* Inspired by http://wiki.github.com/ninajansen/cloud
-   (see also git://github.com/ninajansen/cloud.git) *)
-
-let radial_center x y cx cy =
-  let dx = x -. cx and dy = y -. cy in
-  sqrt(dx *. dx +. dy *. dy)
-
-let x_dist x y cx cy =
-  let dx = x -. cx and dy = y -. cy in
-  min (abs_float dy) (sqrt(dx *. dx +. dy *. dy))
-
-let potato x y cx cy =
-  let dx = abs_float(x -. cx) and dy = y -. cy in
-  sqrt(dx**(2./.3.) +. dy *. dy)
-
-
-let bin_pack cr canvas ?(distance=radial_center) ~size ~color words =
-  (* Compute the sizes of all words *)
-  let text_size (fq, word) = (fq, word, size fq word) in
-  let words = List.map text_size words in
-  let from_larger (_,_,sz1) (_,_,sz2) = compare sz2 sz1 in
-  let words = List.sort from_larger words in
-  if words = [] then invalid_arg "Cloud.bin_pack: empty list";
-  (* center of canvas *)
-  let cx = canvas.x +. 0.5 *. canvas.w
-  and cy = canvas.y +. 0.5 *. canvas.h in
-  (* Place the largest word at the center of the canvas *)
-  let fq, word, sz = List.hd words in
-  set_font_size cr sz;
-  (let r, g, b, a = color fq word in set_source_rgba cr r g b a);
-  Text.show cr C cx cy word;
-
-  (* Place the other words *)
-  List.iter (fun (_, word, sz) ->
-               set_font_size cr sz;
-               
-            ) (List.tl words)
-;;
 
 (* ---------------------------------------------------------------------- *)
 (* References to check:
    http://www.cs.cmu.edu/~sleator/papers/2d-bin-packing.htm
    http://www.mat.ucsb.edu/projects/TagRiver/browser/src/algorithms2/PackingAlgorithm3.java
+
+   Another implementation using bin packing
+   http://ninajansen.dk/2009/04/23/introducing-cloud-an-open-source-ruby-wordcloud-generator/
+   (source git://github.com/ninajansen/cloud.git ); however the result
+   did not look good enough for me so I did not implement it
+   <http://www.scribd.com/tag/wordcloud>.
 
    See also http://www.bewitched.com/research.html for interesting
    visualization algorithms.

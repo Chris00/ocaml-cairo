@@ -2,15 +2,18 @@
 open Cairo
 
 val make : context -> rectangle -> ?rotate:float -> ?padding:float ->
+  ?word_box:(rectangle -> string -> unit) ->
   size:('a -> string -> float) ->
   color:('a -> string -> float * float * float * float) ->
   ('a * string) list -> unit
+  (** [make cr canvas size color words] make a cloud of the [words] in
+      the rectangle [canvas] on the surface hold by [cr].  [size] and
+      [color] must resp. return the text size and color for a given
+      word.
 
-val bin_pack : context -> rectangle ->
-  ?distance:(float -> float -> rectangle -> float) ->
-  size:('a -> string -> float) ->
-  color:('a -> string -> float * float * float * float) ->
-  ('a * string) list -> unit
+      [word_box r word] is executed once for each [word] where [r] is
+      the rectangle reserved for that word.  This allows, for example,
+      to generate an image map for the cloud. *)
 
 
 module Palette :
