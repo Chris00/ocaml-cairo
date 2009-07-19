@@ -19,6 +19,8 @@ AC_DEFUN([AC_PROG_OCAML],
      # If OCAMLLIB is set, use it
      if test "$OCAMLLIB" = ""; then
         OCAMLLIB=`$OCAMLC -where 2>/dev/null || $OCAMLC -v|tail -1|cut -d ' ' -f 4`
+     else
+        AC_MSG_RESULT([OCAMLLIB previously set; preserving it.])
      fi
      AC_MSG_RESULT([OCaml library path is $OCAMLLIB])
 
