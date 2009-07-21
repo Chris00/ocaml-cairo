@@ -18,6 +18,8 @@
 open Printf
 open Cairo
 
+type rgba = float * float * float * float
+
 let neg_half_pi = -2. *. atan 1.
 
 
@@ -92,35 +94,42 @@ end
 (* Inspired by ideas of Jim Lund, jiml at uky dot edu,
    http://elegans.uky.edu/blog/?p=103 *)
 
-let make cr canvas ?rotate:(rotp=0.) ?padding ?(word_box=fun _ _ -> ())
+let make cr canvas ?rotate:(rotp=0.) ?padding ?(word_box=fun _ _ _ _ -> ())
     ~size ~color words =
   let region = ref [] in
   (* center of canvas *)
   let cx = canvas.x +. 0.5 *. canvas.w
   and cy = canvas.y +. 0.5 *. canvas.h in
 
-  let rec position target fq word =
+  let rec position target sz fq word =
     let vert = Random.float 1. < rotp in
     let width, height = Text.size cr ~vert word in
     let x = cx +. rand((canvas.w -. width) /. target)
     and y = cy +. rand((canvas.h -. height) /. target) in
-    let r = Text.box cr ~vert ?padding C x y word in
-    if intersect_region r !region || outside r canvas  then
-      position (0.9995 *. target) fq word
+    let rect = Text.box cr ~vert ?padding C x y word in
+    if intersect_region rect !region || outside rect canvas  then (
+      let target = 0.9995 *. target in
+      if target < 1. then (
+        set_font_size cr (0.9 *. sz);
+        position 2. (0.9 *. sz) fq word
+      )
+      else position target sz fq word
+    )
     else (
-      region := r :: !region;
+      region := rect :: !region;
       set_source_rgba cr 0. 0. 0. 0.2;
       (* rectangle cr r.x r.y r.w r.h;  stroke cr; *)
-      (let r, g, b, a = color fq word in set_source_rgba cr r g b a);
+      let r, g, b, a = color fq word in set_source_rgba cr r g b a;
       Text.show cr ~vert C x y word;
-      word_box r word;
+      word_box sz (r,g,b,a) rect word;
     )
   in
 
   List.iter begin fun (fq, word) ->
     save cr;
-    set_font_size cr (size fq word);
-    position 2. fq word;
+    let sz = size fq word in
+    set_font_size cr sz;
+    position 2. sz fq word;
     restore cr
   end words
 ;;
