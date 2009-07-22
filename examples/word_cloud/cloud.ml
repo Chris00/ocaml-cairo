@@ -94,8 +94,10 @@ end
 (* Inspired by ideas of Jim Lund, jiml at uky dot edu,
    http://elegans.uky.edu/blog/?p=103 *)
 
+exception Failure
+
 let make cr canvas ?rotate:(rotp=0.) ?padding ?(word_box=fun _ _ _ _ -> ())
-    ~size ~color words =
+    ~size ?(min_size=11.) ~color words =
   let region = ref [] in
   (* center of canvas *)
   let cx = canvas.x +. 0.5 *. canvas.w
@@ -110,8 +112,10 @@ let make cr canvas ?rotate:(rotp=0.) ?padding ?(word_box=fun _ _ _ _ -> ())
     if intersect_region rect !region || outside rect canvas  then (
       let target = 0.9995 *. target in
       if target < 1. then (
-        set_font_size cr (0.9 *. sz);
-        position 2. (0.9 *. sz) fq word
+        let sz = 0.9 *. sz in
+        if sz < min_size then raise Failure;
+        set_font_size cr sz;
+        position 2. sz fq word
       )
       else position target sz fq word
     )

@@ -3,9 +3,11 @@ open Cairo
 
 type rgba = float * float * float * float
 
+exception Failure
+
 val make : context -> rectangle -> ?rotate:float -> ?padding:float ->
   ?word_box:(float -> rgba -> rectangle -> string -> unit) ->
-  size:('a -> string -> float) ->
+  size:('a -> string -> float) -> ?min_size:float ->
   color:('a -> string -> rgba) ->
   ('a * string) list -> unit
   (** [make cr canvas size color words] make a cloud of the [words] in
