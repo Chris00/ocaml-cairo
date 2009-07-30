@@ -928,7 +928,7 @@ sig
           before doing such drawing.  *)
 
   external mark_dirty_rectangle : t ->
-    x:int -> y:int -> width:int -> height:int -> unit
+    x:int -> y:int -> w:int -> h:int -> unit
     = "caml_cairo_surface_mark_dirty_rectangle"
       (** Like {!Cairo.Surface.mark_dirty}, but drawing has been done
           only to the specified rectangle, so that cairo can retain cached
@@ -2169,8 +2169,8 @@ external fill_extents : context -> rectangle = "caml_cairo_fill_extents"
   (** Computes a bounding box in user coordinates covering the area
       that would be affected (the "inked" area) by a [fill]
       operation given the current path and fill parameters.  If the
-      current path is empty, returns an empty rectangle [{ x1=0.;
-      y1=0.; x2=0.; y2=0. }].  Surface dimensions and clipping are not
+      current path is empty, returns an empty rectangle [{ x=0.;
+      y=0.; w=0.; h=0. }].  Surface dimensions and clipping are not
       taken into account.
 
       Contrast with {!Cairo.Path.extents}, which is similar, but
@@ -2251,7 +2251,7 @@ val stroke_extents : context -> rectangle
       that would be affected (the "inked" area) by a {!Cairo.stroke}
       operation operation given the current path and stroke
       parameters.  If the current path is empty, returns an empty
-      rectangle [{ x1=0.; y1=0.; x2=0.; y2=0. }].  Surface dimensions
+      rectangle [{ x=0.; y=0.; w=0.; h=0. }].  Surface dimensions
       and clipping are not taken into account.
 
       Note that if the line width is set to exactly zero, then
@@ -2423,7 +2423,7 @@ sig
   external extents : context -> rectangle = "caml_cairo_path_extents"
     (** Computes a bounding box in user-space coordinates covering the
         points on the current path. If the current path is empty,
-        returns an empty rectangle [{ x1=0.; y1=0.; x2=0.; y2=0. }].
+        returns an empty rectangle [{ x=0.; y=0.; w=0.; h=0. }].
         Stroke parameters, fill rule, surface dimensions and clipping
         are not taken into account.
 
@@ -2536,7 +2536,7 @@ external move_to : context -> x:float -> y:float -> unit = "caml_cairo_move_to"
       (x, y). *)
 
 external rectangle : context ->
-  x:float -> y:float -> width:float -> height:float -> unit
+  x:float -> y:float -> w:float -> h:float -> unit
   = "caml_cairo_rectangle"
   (** Adds a closed sub-path rectangle of the given size to the
       current path at position (x, y) in user-space coordinates.

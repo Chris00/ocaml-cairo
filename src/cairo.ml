@@ -271,7 +271,7 @@ external curve_to : context -> x1:float -> y1:float -> x2:float -> y2:float ->
 external line_to : context -> x:float -> y:float -> unit = "caml_cairo_line_to"
 external move_to : context -> x:float -> y:float -> unit = "caml_cairo_move_to"
 external rectangle :
-  context -> x:float -> y:float -> width:float -> height:float -> unit
+  context -> x:float -> y:float -> w:float -> h:float -> unit
   = "caml_cairo_rectangle"
 
 external rel_curve_to : context -> x1:float -> y1:float ->
@@ -578,7 +578,7 @@ struct
   external get_content : t -> content = "caml_cairo_surface_get_content"
   external mark_dirty : t -> unit = "caml_cairo_surface_mark_dirty"
   external mark_dirty_rectangle : t ->
-    x:int -> y:int -> width:int -> height:int -> unit
+    x:int -> y:int -> w:int -> h:int -> unit
     = "caml_cairo_surface_mark_dirty_rectangle"
   external set_device_offset : t -> x:float -> y:float -> unit
     = "caml_cairo_surface_set_device_offset"
