@@ -37,7 +37,8 @@ cairo_stubs.o: cairo_stubs.c  cairo_macros.c cairo_ocaml_types.c
 	$(OCAMLC) $(CPPFLAGS) -c $<
 
 cairo.cmxs: cairo.cmx cairo_stubs.o
-	$(OCAMLOPT) -shared -o $@ $^
+	$(OCAMLOPT) -shared -o $@ $(addprefix -ccopt , $(LDFLAGS)) \
+	  $(addprefix -cclib , $(LIBS)) $^
 
 .PHONY: doc
 OCAMLDOC_FLAGS += $(if $(OCAMLINCLUDES), $(addprefix -I , $(OCAMLINCLUDES)))

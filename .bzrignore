@@ -1,6 +1,6 @@
 # 							-*-conf-unix-*-
 *.cm[ioax]
-*.cmxa
+*.cmx[as]
 *.annot
 .depend.ocaml
 *.exe
