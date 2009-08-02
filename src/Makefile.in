@@ -18,12 +18,16 @@ endif
 INSTALL_FILES = cairo.mli $(wildcard *.cmi *.cma *.cmx *.a *.cmxa) \
   dllcairo_stubs$(SO)
 
+ifeq "@OCAMLBEST@" "opt"
+  INSTALL_FILES	+= cairo.cmxs
+endif
+
 .PHONY: default all opt byte native
 default: @OCAMLBEST@
 all: byte
 opt: native
 byte: cairo.cma
-native: cairo.cmxa
+native: cairo.cmxa cairo.cmxs
 
 cairo.cma cairo.cmxa: cairo.cmo cairo.cmx cairo_stubs.o
 	$(OCAMLMKLIB) -o cairo -oc cairo_stubs -ocamlc $(OCAMLC) \
@@ -32,6 +36,8 @@ cairo.cma cairo.cmxa: cairo.cmo cairo.cmx cairo_stubs.o
 cairo_stubs.o: cairo_stubs.c  cairo_macros.c cairo_ocaml_types.c
 	$(OCAMLC) $(CPPFLAGS) -c $<
 
+cairo.cmxs: cairo.cmx cairo_stubs.o
+	$(OCAMLOPT) -shared -o $@ $^
 
 .PHONY: doc
 OCAMLDOC_FLAGS += $(if $(OCAMLINCLUDES), $(addprefix -I , $(OCAMLINCLUDES)))
