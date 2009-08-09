@@ -2456,7 +2456,7 @@ end
 external arc : context ->
   x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
   = "caml_cairo_arc_bc" "caml_cairo_arc"
-  (** [arc xc yc radius angla1 angle2] adds a circular arc of the
+  (** [arc xc yc radius angle1 angle2] adds a circular arc of the
       given radius to the current path.  The arc is centered at [(xc,
       yc)], begins at [angle1] and proceeds in the direction of
       increasing angles to end at [angle2].  If [angle2] is less than
@@ -2501,7 +2501,7 @@ external arc : context ->
 external arc_negative : context ->
   x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
   = "caml_cairo_arc_negative_bc" "caml_cairo_arc_negative"
-  (** [arc_negative xc yc radius angla1 angle2] adds a circular arc of
+  (** [arc_negative xc yc radius angle1 angle2] adds a circular arc of
       the given radius to the current path.  The arc is centered at
       [(xc, yc)], begins at [angle1] and proceeds in the direction of
       decreasing angles to end at [angle2].  If [angle2] is greater
