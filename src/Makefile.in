@@ -9,7 +9,7 @@ GDK_LIBS = @GDK_LIBS@
 OCAMLINCLUDES = @OCAMLINCLUDES@
 OS_TYPE = @OCAML_OS_TYPE@
 
-DOC_FILES = cairo.mli
+DOC_FILES = cairo.mli cairo_gtk.mli
 DOC_DIR = $(ROOT)/doc/html/
 ifeq "$(OS_TYPE)" "Win32"
 SO = .dll

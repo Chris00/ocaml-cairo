@@ -15,7 +15,7 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the file
    LICENSE for more details. *)
 
-(** Cairo GTK backend.  This module integrates Cairo with labgtk2.
+(** Integration of Cairo with labgtk2 (if the later is available).
 
     It allows to create Cairo contexts which can be used to draw on
     GDK drawables. Additional functions allow to convert GDK's
