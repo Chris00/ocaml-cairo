@@ -148,4 +148,5 @@ AC_SUBST(LINKPKG)
 AC_CONFIG_FILES([Makefile.ocaml],[chmod a-w Makefile.ocaml])
 AC_CONFIG_FILES([src/META])
 AC_CONFIG_FILES([src/Makefile], [chmod a-w src/Makefile])
+AC_CONFIG_FILES([examples/Makefile], [chmod a-w examples/Makefile])
 AC_OUTPUT

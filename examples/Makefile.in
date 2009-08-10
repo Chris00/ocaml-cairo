@@ -2,7 +2,7 @@ ROOT=..
 include $(ROOT)/Makefile.conf
 
 # Do not require that the library is installed to compile the examples:
-OCAMLINCLUDES = $(ROOT)/src
+OCAMLINCLUDES = $(ROOT)/src @OCAMLINCLUDES@
 LIBS_CMXA = bigarray.cmxa cairo.cmxa
 OCAMLOPT_FLAGS = -dtypes -inline 3 -g
 
@@ -11,9 +11,14 @@ SOURCES = arcs.ml clip.ml curve_to.ml dash.ml fill_stroke.ml \
   text.ml text_align_center.ml text_extents.ml text_rotate.ml \
   $(TUTORIAL_SOURCES)
 
+ifeq "@USE_GTK@" "yes"
+  SOURCES += gtk_demo.ml
+endif
+
 default: $(SOURCES:.ml=.com)
 	$(MAKE) -C word_cloud
 
+gtk_demo.com: LIBS_CMXA += lablgtk.cmxa cairo_gtk.cmxa
 
 include $(ROOT)/Makefile.ocaml
 
