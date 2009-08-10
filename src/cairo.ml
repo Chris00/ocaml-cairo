@@ -15,7 +15,7 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the file
    LICENSE for more details. *)
 
-(* Keep in sync with the C function caml_raise_Error *)
+(* Keep in sync with the C function caml_cairo_raise_Error *)
 type status =
   (* Programmer error *)
   | INVALID_RESTORE

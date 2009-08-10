@@ -25,6 +25,9 @@
 #define CAIRO_VAL(v) (* (cairo_t **) Data_custom_val(v))
 struct custom_operations caml_cairo_ops;
 
+void caml_cairo_raise_Error(cairo_status_t status);
+/* raise [Cairo.Error] if the status indicates a failure. */
+
 /* cairo_pattern_t
 ***********************************************************************/
 #define PATTERN_VAL(v) (* (cairo_pattern_t **) Data_custom_val(v))

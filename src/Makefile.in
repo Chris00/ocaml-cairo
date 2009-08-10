@@ -56,7 +56,6 @@ cairo_gtk.cma cairo_gtk.cmxa: cairo_gtk.cmo cairo_gtk.cmx cairo_gtk_stubs.o
 	$(OCAMLMKLIB) -o cairo_gtk -oc cairo_gtk_stubs -ocamlc $(OCAMLC) \
 	  -ocamlopt $(OCAMLOPT) $(LDFLAGS) $(GDK_LIBS) $(CPPFLAGS) $^
 
-
 cairo_gtk_stubs.o: cairo_gtk_stubs.c cairo_macros.c
 	$(OCAMLC) $(CPPFLAGS) $(GDK_CFLAGS) -c $<
 

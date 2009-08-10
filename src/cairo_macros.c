@@ -143,7 +143,7 @@
     /* noalloc */                                              \
     cairo_surface_t *surface = SURFACE_VAL(vsurf);             \
     name(surface);                                             \
-    caml_raise_Error(cairo_surface_status(surface));           \
+    caml_cairo_raise_Error(cairo_surface_status(surface));     \
     return(Val_unit);                                          \
   }
 
@@ -153,7 +153,7 @@
     /* noalloc */                                               \
     cairo_surface_t *surface = SURFACE_VAL(vsurf);              \
     name(surface, of_val1(v1));                                 \
-    caml_raise_Error(cairo_surface_status(surface));            \
+    caml_cairo_raise_Error(cairo_surface_status(surface));      \
     return(Val_unit);                                           \
   }
 
@@ -163,7 +163,7 @@
     /* noalloc */                                               \
     cairo_surface_t *surface = SURFACE_VAL(vsurf);              \
     name(surface, of_val1(v1), of_val2(v2));                    \
-    caml_raise_Error(cairo_surface_status(surface));            \
+    caml_cairo_raise_Error(cairo_surface_status(surface));            \
     return(Val_unit);                                           \
   }
 

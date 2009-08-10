@@ -231,7 +231,7 @@ CAMLexport value caml_cairo_copy_clip_rectangle_list(value vcr)
   int i;
   cairo_rectangle_t *r;
   /* assert(list != NULL); */
-  caml_raise_Error(list->status);
+  caml_cairo_raise_Error(list->status);
   vlist = Val_int(0); /* [] */
   for(i = 0, r = list->rectangles;  i < list->num_rectangles;  i++, r++) {
     /* New rectangle (pure float record) */
@@ -308,7 +308,7 @@ CAMLexport value caml_cairo_copy_path(value vcr)
   CAMLparam1(vcr);
   CAMLlocal1(vpath);
   cairo_path_t* path = cairo_copy_path(CAIRO_VAL(vcr));
-  caml_raise_Error(path->status);
+  caml_cairo_raise_Error(path->status);
   PATH_ASSIGN(vpath, path);
   CAMLreturn(vpath);
 }
@@ -318,7 +318,7 @@ CAMLexport value caml_cairo_copy_path_flat(value vcr)
   CAMLparam1(vcr);
   CAMLlocal1(vpath);
   cairo_path_t* path = cairo_copy_path_flat(CAIRO_VAL(vcr));
-  caml_raise_Error(path->status);
+  caml_cairo_raise_Error(path->status);
   PATH_ASSIGN(vpath, path);
   CAMLreturn(vpath);
 }
@@ -518,7 +518,7 @@ CAMLexport value caml_cairo_pattern_get_color_stop_count(value vpat)
   int count;
   cairo_status_t st = cairo_pattern_get_color_stop_count(PATTERN_VAL(vpat),
                                                          &count);
-  caml_raise_Error(st);
+  caml_cairo_raise_Error(st);
   CAMLreturn(Val_int(count));
 }
 
@@ -530,7 +530,7 @@ CAMLexport value caml_cairo_pattern_get_color_stop_rgba(value vpat,
   double offset, red, green, blue, alpha;
   cairo_status_t st = cairo_pattern_get_color_stop_rgba
     (PATTERN_VAL(vpat), Int_val(vidx), &offset, &red, &green, &blue, &alpha);
-  caml_raise_Error(st);
+  caml_cairo_raise_Error(st);
   /* tuple (offset, red, green, blue, alpha) */
   vcolors = caml_alloc_tuple(5);
   Store_field(vcolors, 0, caml_copy_double(offset));
@@ -548,7 +548,7 @@ CAMLexport value caml_cairo_pattern_create_rgb(value vr, value vg, value vb)
   cairo_pattern_t* pat = cairo_pattern_create_rgb(Double_val(vr),
                                                   Double_val(vg),
                                                   Double_val(vb));
-  caml_raise_Error(cairo_pattern_status(pat));
+  caml_cairo_raise_Error(cairo_pattern_status(pat));
   PATTERN_ASSIGN(vpat, pat);
   CAMLreturn(vpat);
 }
@@ -562,7 +562,7 @@ CAMLexport value caml_cairo_pattern_create_rgba(value vr, value vg, value vb,
                                                    Double_val(vg),
                                                    Double_val(vb),
                                                    Double_val(va));
-  caml_raise_Error(cairo_pattern_status(pat));
+  caml_cairo_raise_Error(cairo_pattern_status(pat));
   PATTERN_ASSIGN(vpat, pat);
   CAMLreturn(vpat);
 }
@@ -574,7 +574,7 @@ CAMLexport value caml_cairo_pattern_get_rgba(value vpat)
   double red, green, blue, alpha;
   cairo_status_t st = cairo_pattern_get_rgba(PATTERN_VAL(vpat),
                                              &red, &green, &blue, &alpha);
-  caml_raise_Error(st);
+  caml_cairo_raise_Error(st);
   vrgba = caml_alloc_tuple(4);
   Store_field(vrgba, 0, caml_copy_double(red));
   Store_field(vrgba, 1, caml_copy_double(green));
@@ -588,7 +588,7 @@ CAMLexport value caml_cairo_pattern_create_for_surface(value vsurf)
   CAMLparam1(vsurf);
   CAMLlocal1(vpat);
   cairo_pattern_t* pat = cairo_pattern_create_for_surface(SURFACE_VAL(vsurf));
-  caml_raise_Error(cairo_pattern_status(pat));
+  caml_cairo_raise_Error(cairo_pattern_status(pat));
   PATTERN_ASSIGN(vpat, pat);
   CAMLreturn(vpat);
 }
@@ -600,7 +600,7 @@ CAMLexport value caml_cairo_pattern_get_surface(value vpat)
   cairo_surface_t *surface;
   cairo_status_t st = cairo_pattern_get_surface(PATTERN_VAL(vpat),
                                                 &surface);
-  caml_raise_Error(st);
+  caml_cairo_raise_Error(st);
   /* The surface is shared with the pattern => incr ref count. */
   cairo_surface_reference(surface);
   SURFACE_ASSIGN(vsurf, surface);
@@ -614,7 +614,7 @@ CAMLexport value caml_cairo_pattern_create_linear
   CAMLlocal1(vpat);
   cairo_pattern_t* pat = cairo_pattern_create_linear
     (Double_val(vx0), Double_val(vy0), Double_val(vx1), Double_val(vy1));
-  caml_raise_Error(cairo_pattern_status(pat));
+  caml_cairo_raise_Error(cairo_pattern_status(pat));
   PATTERN_ASSIGN(vpat, pat);
   CAMLreturn(vpat);
 }
@@ -626,7 +626,7 @@ CAMLexport value caml_cairo_pattern_get_linear_points(value vpat)
   double x0, y0, x1, y1;
   cairo_status_t st = cairo_pattern_get_linear_points
     (PATTERN_VAL(vpat), &x0, &y0, &x1, &y1);
-  caml_raise_Error(st);
+  caml_cairo_raise_Error(st);
   vcoord = caml_alloc_tuple(4);
   Store_field(vcoord, 0, caml_copy_double(x0));
   Store_field(vcoord, 1, caml_copy_double(y0));
@@ -644,7 +644,7 @@ CAMLexport value caml_cairo_pattern_create_radial
   cairo_pattern_t* pat = cairo_pattern_create_radial
     (Double_val(vx0), Double_val(vy0), Double_val(vr0),
      Double_val(vx1), Double_val(vy1), Double_val(vr1));
-  caml_raise_Error(cairo_pattern_status(pat));
+  caml_cairo_raise_Error(cairo_pattern_status(pat));
   PATTERN_ASSIGN(vpat, pat);
   CAMLreturn(vpat);
 }
@@ -662,7 +662,7 @@ CAMLexport value caml_cairo_pattern_get_radial_circles(value vpat)
   double x0, y0, r0, x1, y1, r1;
   cairo_status_t st = cairo_pattern_get_radial_circles
     (PATTERN_VAL(vpat), &x0, &y0, &r0, &x1, &y1, &r1);
-  caml_raise_Error(st);
+  caml_cairo_raise_Error(st);
   vcircles = caml_alloc_tuple(6);
   Store_field(vcircles, 0, caml_copy_double(x0));
   Store_field(vcircles, 1, caml_copy_double(y0));
@@ -789,7 +789,7 @@ CAMLexport value caml_cairo_get_font_options(value vcr)
   CAMLparam1(vcr);
   CAMLlocal1(vfont_option);
   cairo_font_options_t *options = cairo_font_options_create();
-  caml_raise_Error(cairo_font_options_status(options));
+  caml_cairo_raise_Error(cairo_font_options_status(options));
   cairo_get_font_options(CAIRO_VAL(vcr), options);
   FONT_OPTIONS_ASSIGN(vfont_option, options);
   CAMLreturn(vfont_option);
@@ -800,7 +800,7 @@ CAMLexport value caml_cairo_font_options_create(value vunit)
   CAMLparam1(vunit);
   CAMLlocal1(vfo);
   cairo_font_options_t* fo = cairo_font_options_create();
-  caml_raise_Error(cairo_font_options_status(fo));
+  caml_cairo_raise_Error(cairo_font_options_status(fo));
   FONT_OPTIONS_ASSIGN(vfo, fo);
   CAMLreturn(vfo);
 }
@@ -810,7 +810,7 @@ CAMLexport value caml_cairo_font_options_copy(value vorig)
   CAMLparam1(vorig);
   CAMLlocal1(vcopy);
   cairo_font_options_t* copy = cairo_font_options_copy(FONT_OPTIONS_VAL(vorig));
-  caml_raise_Error(cairo_font_options_status(copy));
+  caml_cairo_raise_Error(cairo_font_options_status(copy));
   FONT_OPTIONS_ASSIGN(vcopy, copy);
   CAMLreturn(vcopy);
 }
@@ -875,7 +875,7 @@ CAMLexport value caml_cairo_get_font_face(value vcr)
   CAMLparam1(vcr);
   CAMLlocal1(vff);
   cairo_font_face_t* ff = cairo_get_font_face(CAIRO_VAL(vcr));
-  caml_raise_Error(cairo_font_face_status(ff));
+  caml_cairo_raise_Error(cairo_font_face_status(ff));
   /* Since we are going to create a value with the [ff] and this value
      is shared with the one hold inside the cairo context, one must
      increase the reference count (to avoid that destroying one of
@@ -1013,7 +1013,7 @@ CAMLexport value caml_cairo_scaled_font_text_to_glyphs
     (SCALED_FONT_VAL(vsf), Double_val(vx), Double_val(vy),
      String_val(vutf8), string_length(vutf8),
      &glyphs, &num_glyphs,  &clusters, &num_clusters,  &cluster_flags);
-  caml_raise_Error(status);
+  caml_cairo_raise_Error(status);
 
   vglyphs = caml_alloc_tuple(num_glyphs);
   for(i = 0; i < num_glyphs; i++) {
@@ -1056,7 +1056,7 @@ CAMLexport value caml_cairo_scaled_font_get_font_options(value vsf)
   CAMLparam1(vsf);
   CAMLlocal1(vfo);
   cairo_font_options_t *fo = cairo_font_options_create();
-  caml_raise_Error(cairo_font_options_status(fo));
+  caml_cairo_raise_Error(cairo_font_options_status(fo));
   cairo_scaled_font_get_font_options(SCALED_FONT_VAL(vsf), fo);
   FONT_OPTIONS_ASSIGN(vfo, fo);
   CAMLreturn(vfo);
@@ -1218,7 +1218,7 @@ CAMLexport value caml_cairo_surface_create_similar
   SET_CONTENT_VAL(content, vcontent);
   surf = cairo_surface_create_similar(SURFACE_VAL(vother), content,
                                       Int_val(vwidth), Int_val(vheight));
-  caml_raise_Error(cairo_surface_status(surf));
+  caml_cairo_raise_Error(cairo_surface_status(surf));
   SURFACE_ASSIGN(vsurf, surf);
   CAMLreturn(vsurf);
 }
@@ -1245,7 +1245,7 @@ CAMLexport value caml_cairo_surface_get_font_options(value vsurf)
   CAMLlocal1(vfo);
   cairo_surface_t *surface = SURFACE_VAL(vsurf);
   cairo_font_options_t *fo = cairo_font_options_create();
-  caml_raise_Error(cairo_font_options_status(fo));
+  caml_cairo_raise_Error(cairo_font_options_status(fo));
   cairo_surface_get_font_options(surface, fo);
   FONT_OPTIONS_ASSIGN(vfo, fo);
   CAMLreturn(vfo);
@@ -1365,14 +1365,14 @@ CAMLexport value caml_cairo_image_surface_create(value vformat,
   status = cairo_surface_status(surf);
   if (status != CAIRO_STATUS_SUCCESS) {
     free(data);
-    caml_raise_Error(status);
+    caml_cairo_raise_Error(status);
   }
   /* Create a proxy and attach it to the surface */
   proxy = malloc(sizeof(struct caml_ba_proxy));
   if (proxy == NULL) {
     cairo_surface_destroy(surf);
     free(data);
-    caml_raise_Error(CAIRO_STATUS_NO_MEMORY);
+    caml_cairo_raise_Error(CAIRO_STATUS_NO_MEMORY);
   }
   proxy->refcount = 1;      /* surface */
   proxy->data = data;
@@ -1383,7 +1383,7 @@ CAMLexport value caml_cairo_image_surface_create(value vformat,
     cairo_surface_destroy(surf);
     free(data);
     free(proxy);
-    caml_raise_Error(status);
+    caml_cairo_raise_Error(status);
   }
   SURFACE_VAL(vsurf) = surf;
   CAMLreturn(vsurf);
@@ -1443,11 +1443,11 @@ static cairo_status_t caml_cairo_image_bigarray_attach_proxy
     surf = cairo_image_surface_create_for_data                          \
       ((unsigned char *) b->data, FORMAT_VAL(vformat),                  \
        width, Int_val(vheight), Int_val(vstride));                      \
-    caml_raise_Error(cairo_surface_status(surf));                       \
+    caml_cairo_raise_Error(cairo_surface_status(surf));                       \
     status = caml_cairo_image_bigarray_attach_proxy(surf, b);           \
     if (status != CAIRO_STATUS_SUCCESS) {                               \
       cairo_surface_destroy(surf);                                      \
-      caml_raise_Error(status);                                         \
+      caml_cairo_raise_Error(status);                                         \
     }                                                                   \
     SURFACE_VAL(vsurf) = surf;                                          \
     CAMLreturn(vsurf);                                                  \
@@ -1542,7 +1542,7 @@ static cairo_status_t caml_cairo_output_string
                                                                         \
     surf = name(&caml_cairo_output_string, &voutput,                    \
                 Double_val(vwidth), Double_val(vheight));               \
-    caml_raise_Error(cairo_surface_status(surf));                       \
+    caml_cairo_raise_Error(cairo_surface_status(surf));                       \
     SURFACE_ASSIGN(vsurf, surf);                                        \
     CAMLreturn(vsurf);                                                  \
   }
@@ -1555,7 +1555,7 @@ static cairo_status_t caml_cairo_output_string
     cairo_surface_t* surf;                                              \
                                                                         \
     surf = name(String_val(vfname), Double_val(vwidth), Double_val(vheight)); \
-    caml_raise_Error(cairo_surface_status(surf));                       \
+    caml_cairo_raise_Error(cairo_surface_status(surf));                       \
     SURFACE_ASSIGN(vsurf, surf);                                        \
     CAMLreturn(vsurf);                                                  \
   }
@@ -1605,7 +1605,7 @@ CAMLexport value caml_cairo_image_surface_create_from_png(value fname)
   cairo_surface_t* surf;
 
   surf = cairo_image_surface_create_from_png(String_val(fname));
-  caml_raise_Error(cairo_surface_status(surf));
+  caml_cairo_raise_Error(cairo_surface_status(surf));
   SURFACE_ASSIGN(vsurf, surf);
   CAMLreturn(vsurf);
 }
@@ -1618,8 +1618,8 @@ CAMLexport value caml_cairo_image_surface_create_from_png_stream(value vinput)
 
   surf = cairo_image_surface_create_from_png_stream(&caml_cairo_input_string,
                                                     &vinput);
-  if (surf == NULL) caml_raise_Error(CAIRO_STATUS_READ_ERROR);
-  caml_raise_Error(cairo_surface_status(surf));
+  if (surf == NULL) caml_cairo_raise_Error(CAIRO_STATUS_READ_ERROR);
+  caml_cairo_raise_Error(cairo_surface_status(surf));
   SURFACE_ASSIGN(vsurf, surf);
   CAMLreturn(vsurf);
 }
@@ -1630,7 +1630,7 @@ CAMLexport value caml_cairo_surface_write_to_png(value vsurf, value vfname)
   cairo_status_t status;
 
   status = cairo_surface_write_to_png(SURFACE_VAL(vsurf), String_val(vfname));
-  caml_raise_Error(status);
+  caml_cairo_raise_Error(status);
   return(Val_unit);
 }
 
@@ -1640,7 +1640,7 @@ CAMLexport value caml_cairo_surface_write_to_png_stream(value vsurf,
   CAMLparam2(vsurf, voutput);
   cairo_status_t status = cairo_surface_write_to_png_stream
     (SURFACE_VAL(vsurf), &caml_cairo_output_string, &voutput);
-  caml_raise_Error(status);
+  caml_cairo_raise_Error(status);
   CAMLreturn(Val_unit);
 }
 

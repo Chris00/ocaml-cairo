@@ -56,7 +56,7 @@ static void caml_cairo_cairo_finalize(value v)
 CUSTOM_OPERATIONS(cairo)
 
 /* raise [Error] if the status indicates a failure. */
-static void caml_raise_Error(cairo_status_t status)
+void caml_cairo_raise_Error(cairo_status_t status)
 {
   static value * exn = NULL;
 
@@ -78,7 +78,7 @@ static void caml_raise_Error(cairo_status_t status)
 /* For non Raise the corresponding OCaml exception. */
 static void caml_check_status(cairo_t *cr)
 {
-  caml_raise_Error(cairo_status(cr));
+  caml_cairo_raise_Error(cairo_status(cr));
 }
 
 
