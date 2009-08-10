@@ -1,5 +1,7 @@
 /* Generic functions for types */
 
+#include "cairo_ocaml.h"
+
 static int caml_cairo_compare_pointers(value v1, value v2)
 {
   void *p1 = * (void **) Data_custom_val(v1);
@@ -15,7 +17,7 @@ static long caml_cairo_hash_pointer(value v)
 }
 
 #define CUSTOM_OPERATIONS(name)                                         \
-  static struct custom_operations caml_##name##_ops = {                 \
+  struct custom_operations caml_##name##_ops = {                        \
     #name "_t", /* identifier for serialization and deserialization */  \
     &caml_cairo_##name##_finalize,                                      \
     &caml_cairo_compare_pointers,                                       \
@@ -36,7 +38,6 @@ static long caml_cairo_hash_pointer(value v)
 /* Type cairo_t
 ***********************************************************************/
 
-#define CAIRO_VAL(v) (* (cairo_t **) Data_custom_val(v))
 #define CAIRO_ASSIGN(v, x) v = ALLOC(cairo); CAIRO_VAL(v) = x
 
 /* The only way to create a context is from a surface.  To express the
@@ -92,44 +93,16 @@ CAMLexport value caml_cairo_status_to_string(value vstatus)
 /* Type cairo_pattern_t
 ***********************************************************************/
 
-#define PATTERN_VAL(v) (* (cairo_pattern_t **) Data_custom_val(v))
 #define PATTERN_ASSIGN(v, x) v = ALLOC(pattern); PATTERN_VAL(v) = x
 
 DEFINE_CUSTOM_OPERATIONS(pattern, cairo_pattern_destroy, PATTERN_VAL)
 
-#define EXTEND_VAL(v) ((cairo_extend_t) Int_val(v))
-#define VAL_EXTEND(v) Val_int(v)
-
-#define FILTER_VAL(v) ((cairo_filter_t) Int_val(v))
-#define VAL_FILTER(v) Val_int(v)
-
 /* Type cairo_surface_t
 ***********************************************************************/
 
-#define SURFACE_VAL(v) (* (cairo_surface_t **) Data_custom_val(v))
 #define SURFACE_ASSIGN(v, x) v = ALLOC(surface); SURFACE_VAL(v) = x
 
 DEFINE_CUSTOM_OPERATIONS(surface, cairo_surface_destroy, SURFACE_VAL)
-
-/* Type cairo_content_t */
-
-#define SET_CONTENT_VAL(c, vcontent)                                    \
-  switch (Int_val(vcontent))                                            \
-    {                                                                   \
-    case 0 : c = CAIRO_CONTENT_COLOR;  break;                           \
-    case 1 : c = CAIRO_CONTENT_ALPHA;  break;                           \
-    case 2 : c = CAIRO_CONTENT_COLOR_ALPHA;  break;                     \
-    default : caml_failwith("Decode Cairo.content");                    \
-    }
-
-#define CONTENT_ASSIGN(vcontent, content)                               \
-  switch (content)                                                      \
-    {                                                                   \
-    case CAIRO_CONTENT_COLOR: vcontent = Val_int(0); break;             \
-    case CAIRO_CONTENT_ALPHA: vcontent = Val_int(1); break;             \
-    case CAIRO_CONTENT_COLOR_ALPHA: vcontent = Val_int(2); break;       \
-    default : caml_failwith("Assign Cairo.content");                    \
-    }
 
 static value caml_cairo_surface_kind[14];
 
@@ -159,58 +132,9 @@ CAMLexport value caml_cairo_surface_kind_init(value unit)
 /* Type cairo_path_t
 ***********************************************************************/
 
-#define PATH_VAL(v) (* (cairo_path_t **) Data_custom_val(v))
 #define PATH_ASSIGN(v, x) v = ALLOC(path); PATH_VAL(v) = x
 
 DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
-
-#define PATH_DATA_ASSIGN(vdata, data)                                   \
-  switch (data->header.type) {                                          \
-    /* keep in sync the tags with the OCaml def of path_data */         \
-  case CAIRO_PATH_MOVE_TO:                                              \
-    vdata = caml_alloc(2, 0);                                           \
-    Store_field(vdata, 0, caml_copy_double(data[1].point.x));           \
-    Store_field(vdata, 1, caml_copy_double(data[1].point.y));           \
-    break;                                                              \
-  case CAIRO_PATH_LINE_TO:                                              \
-    vdata = caml_alloc(2, 1);                                           \
-    Store_field(vdata, 0, caml_copy_double(data[1].point.x));           \
-    Store_field(vdata, 1, caml_copy_double(data[1].point.y));           \
-    break;                                                              \
-  case CAIRO_PATH_CURVE_TO:                                             \
-    vdata = caml_alloc(6, 2);                                           \
-    Store_field(vdata, 0, caml_copy_double(data[1].point.x));           \
-    Store_field(vdata, 1, caml_copy_double(data[1].point.y));           \
-    Store_field(vdata, 2, caml_copy_double(data[2].point.x));           \
-    Store_field(vdata, 3, caml_copy_double(data[2].point.y));           \
-    Store_field(vdata, 4, caml_copy_double(data[3].point.x));           \
-    Store_field(vdata, 5, caml_copy_double(data[3].point.y));           \
-    break;                                                              \
-  case CAIRO_PATH_CLOSE_PATH:                                           \
-    vdata = Val_int(0); /* first constant constructor */                \
-    break;                                                              \
-  }
-
-#define SWITCH_PATH_DATA(v, move, line, curve, close)   \
-  if(Is_long(v)) {                                      \
-    close;                                              \
-  } else switch(Tag_val(v)) {                           \
-    case 0:                                             \
-      move(Field(v,0), Field(v,1));                     \
-      break;                                            \
-    case 1:                                             \
-      line(Field(v,0), Field(v,1));                     \
-      break;                                            \
-    case 2:                                             \
-      curve(Field(v,0), Field(v,1),                     \
-            Field(v,2), Field(v,3),                     \
-            Field(v,4), Field(v,5));                    \
-      break;                                            \
-    default:                                            \
-      caml_failwith("C bindings: SWITCH_PATH_DATA");    \
-    }
-
-
 
 
 /* Type cairo_glyph_t

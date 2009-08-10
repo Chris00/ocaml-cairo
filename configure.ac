@@ -39,11 +39,11 @@ AC_DEF_ARG_WITH(cairo-lib, [CAIRO_LIB], [/usr/lib], [C:/gtk/lib],
   [the cairo library])
 LDFLAGS="$LDFLAGS -L$CAIRO_LIB"
 
-AC_DEF_ARG_WITH(cairo-inc, [CAIRO_INCS], [/usr/include/cairo],
+AC_DEF_ARG_WITH(cairo-inc, [CAIRO_INC], [/usr/include/cairo],
   [C:/gtk/include/cairo],
   [--with-cairo-inc=DIR    path to find cairo headers],
   [cairo.h])
-CPPFLAGS="$CPPFLAGS -I $CAIRO_INCS"
+CPPFLAGS="$CPPFLAGS -I $CAIRO_INC"
 
 AC_PROG_CC()
 
@@ -53,17 +53,21 @@ AC_SEARCH_LIBS([cairo_create], [cairo-2 cairo], [],
 AC_CHECK_HEADERS([cairo.h], ,
   [AC_MSG_ERROR([cairo.h missing, use --with-cairo-inc])])
 
+AC_LANG_PUSH([C])
 # Require cairo >= 1.6 for extend to be fully implemented
-AC_TRY_RUN([#include <cairo.h>
+AC_RUN_IFELSE([AC_LANG_SOURCE([
+        #include <cairo.h>
         int main(int argc, char **argv) {
             if(CAIRO_VERSION_MAJOR >= 1 && CAIRO_VERSION_MINOR >= 6) {
 	      return(0);
             } else {
 	      return(1);
 	    }
-        }],
-	[],
-	[AC_MSG_WARN([Please install cairo version >= 1.6])])
+        }
+      ])],
+      [],
+      [AC_MSG_WARN([Please install cairo version >= 1.6])],
+      [AC_MSG_FAILURE([Cross compiling not supported])])
 
 
 dnl AC_TRY_RUN([#include <cairo.h>
@@ -81,26 +85,44 @@ dnl 	 ])
 # Check for freetype
 #PKG_CHECK_MODULES(freetype2, freetype2)
 
-# Optional GTK support (for the X11 backend)
+AC_LANG_POP([C])
+
+# Optional GTK support (for the X11 backend only?)
 AC_ARG_WITH(gtk, 
 	    AS_HELP_STRING([--with-gtk],[Cairo/GTK+ integration via LablGTK]),
-	    use_gtk=$withval, use_gtk=yes)
+	    USE_GTK=$withval, USE_GTK=yes)
 AC_ARG_VAR(LABLGTKDIR,[Location of the LablGTK library])
 
-if test $use_gtk = yes ; then
-  # Check for LablGTK
-  AC_CHECK_OCAML_MODULE(lablgtk, LABLGTKDIR, Gobject, +lablgtk2 +lablgtk)
+AC_DEF_ARG_WITH(gtk-inc, [GTK_INC], [/usr/include/gtk-2.0],
+  [C:/gtk/include],
+  [--with-gtk-inc=DIR      path to Gtk+ headers],
+  [cairo.h])
+CPPFLAGS="$CPPFLAGS -I $GTK_INC"
+
+if test $USE_GTK = yes ; then
+  # Check for LablGTK (we need the full paths for C header files)
+  AC_CHECK_OCAML_MODULE(LABLGTKDIR, lablgtk2, Gobject,
+    $OCAMLLIB/lablgtk2 $OCAMLLIB/lablgtk)
+
+  dnl ml_gobject.h,... are supposed to be in LABLGTKDIR:
+  CPPFLAGS="$CPPFLAGS -I $LABLGTKDIR"
+  OCAMLINCLUDES="$OCAMLINCLUDES $LABLGTKDIR"
 
   if test "$LABLGTKDIR" ; then
-    # Check for gdk-pixbuf
-#    PKG_CHECK_MODULES(GDK, cairo gdk-2.0 gdk-pixbuf-2.0, :, use_gtk=no)
-     AC_CHECK_HEADERS([gdk.h], ,
-       [AC_MSG_ERROR([gdk.h missing, try to use --with-gdk])])
+    # Check for gdk and gdk-pixbuf (=> GDK_CFLAGS, GDK_LIBS)
+    if test "$OCAML_OS_TYPE" = "Win32"; then
+      # FIXME: test to be added
+      USE_GTK=no
+    else
+      PKG_CHECK_MODULES(GDK, gdk-2.0 gdk-pixbuf-2.0, :, USE_GTK=no)
+    fi
+
   else
-    use_gtk=no
+    USE_GTK=no
   fi
 fi
 
+AC_SUBST([USE_GTK])
 
 # Under Cygwin, ocamlc may fail due to gcc being a symbolic link...
 AC_CHECK_PROGS([READLINK], [readlink], [no])
@@ -113,12 +135,12 @@ if test "$READLINK" != "no"  -a  -d /cygdrive ; then
 fi
 
 
-# substitutions to perform
+# Additional substitutions to perform
 AC_SUBST(PACKAGE_NAME)
 AC_SUBST(PACKAGE_VERSION)
 AC_SUBST(CPPFLAGS)
 AC_SUBST(LIBS)
-
+AC_SUBST(OCAMLINCLUDES)
 AC_SUBST(LINKPKG)
 
 # Finally create the Makefile and samples (read only to avoid changing

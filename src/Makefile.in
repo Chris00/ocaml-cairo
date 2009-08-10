@@ -2,8 +2,11 @@ ROOT=..
 include $(ROOT)/Makefile.conf
 
 CPPFLAGS = @CPPFLAGS@
+GDK_CFLAGS = $(patsubst -D%,-ccopt -D%, $(patsubst -I%, -I %,@GDK_CFLAGS@))
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
+GDK_LIBS = @GDK_LIBS@
+OCAMLINCLUDES = @OCAMLINCLUDES@
 OS_TYPE = @OCAML_OS_TYPE@
 
 DOC_FILES = cairo.mli
@@ -16,18 +19,26 @@ endif
 # Native code versions must be installed if and only if make opt was
 # called previously (i.e. the files exist):
 INSTALL_FILES = cairo.mli $(wildcard *.cmi *.cma *.cmx *.a *.cmxa) \
-  dllcairo_stubs$(SO)
+  dllcairo_stubs$(SO) cairo_ocaml.h
 
 ifeq "@OCAMLBEST@" "opt"
   INSTALL_FILES	+= cairo.cmxs
+  ifeq "@USE_GTK@" "yes"
+    INSTALL_FILES += cairo_gtk.cmxs
+  endif
+endif
+
+DEFAULT=cairo
+ifeq "@USE_GTK@" "yes"
+  DEFAULT+=cairo_gtk
 endif
 
 .PHONY: default all opt byte native
 default: @OCAMLBEST@
 all: byte
 opt: native
-byte: cairo.cma
-native: cairo.cmxa cairo.cmxs
+byte: $(addsuffix .cma, $(DEFAULT))
+native: $(addsuffix .cmxa, $(DEFAULT)) $(addsuffix .cmxs, $(DEFAULT))
 
 cairo.cma cairo.cmxa: cairo.cmo cairo.cmx cairo_stubs.o
 	$(OCAMLMKLIB) -o cairo -oc cairo_stubs -ocamlc $(OCAMLC) \
@@ -39,6 +50,19 @@ cairo_stubs.o: cairo_stubs.c  cairo_macros.c cairo_ocaml_types.c
 cairo.cmxs: cairo.cmx cairo_stubs.o
 	$(OCAMLOPT) -shared -o $@ $(addprefix -ccopt , $(LDFLAGS)) \
 	  $(addprefix -cclib , $(LIBS)) $^
+
+# Gtk integration
+cairo_gtk.cma cairo_gtk.cmxa: cairo_gtk.cmo cairo_gtk.cmx cairo_gtk_stubs.o
+	$(OCAMLMKLIB) -o cairo_gtk -oc cairo_gtk_stubs -ocamlc $(OCAMLC) \
+	  -ocamlopt $(OCAMLOPT) $(LDFLAGS) $(GDK_LIBS) $(CPPFLAGS) $^
+
+
+cairo_gtk_stubs.o: cairo_gtk_stubs.c cairo_macros.c
+	$(OCAMLC) $(CPPFLAGS) $(GDK_CFLAGS) -c $<
+
+cairo_gtk.cmxs: cairo_gtk.cmx cairo_gtk_stubs.o
+	$(OCAMLOPT) -shared -o $@ $(addprefix -ccopt , $(LDFLAGS)) \
+	  $(addprefix -cclib , $(GDK_LIBS)) $^
 
 .PHONY: doc
 OCAMLDOC_FLAGS += $(if $(OCAMLINCLUDES), $(addprefix -I , $(OCAMLINCLUDES)))
