@@ -8,9 +8,12 @@ archive(native) = "cairo.cmxa"
 
 package "lablgtk2" (
   version = "@PACKAGE_VERSION@"
-  require ="lablgtk2"
+  require ="lablgtk2 cairo"
   description = "Rendering on Gtk canvas."
+  archive(byte) = "cairo_gtk.cma"
+  archive(native) = "cairo_gtk.cmxa"
 )
+
 package "win32" (
   version = "@PACKAGE_VERSION@"
 #  require =""

@@ -24,7 +24,7 @@ INSTALL_FILES = cairo.mli $(wildcard *.cmi *.cma *.cmx *.a *.cmxa) \
 ifeq "@OCAMLBEST@" "opt"
   INSTALL_FILES	+= cairo.cmxs
   ifeq "@USE_GTK@" "yes"
-    INSTALL_FILES += cairo_gtk.cmxs
+    INSTALL_FILES += dllcairo_gtk_stubs$(SO) cairo_gtk.cmxs
   endif
 endif
 
