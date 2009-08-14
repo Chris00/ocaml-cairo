@@ -25,4 +25,22 @@ let () =
   PNG.write (get_target cr) "test_image.png";
   eprintf "Finish surface\n%!";
   Surface.finish (get_target cr);
-  Gc.compact();
+  Gc.compact()
+
+
+(* Test for stride < 0 (not handled for now) and for incoherent width
+   / stride *)
+let () =
+  let mat = Array1.create int8_unsigned c_layout 80_000 in
+  let test_stride stride =
+    try
+      let surf = Image.create_for_data8 mat Image.A8 100 100 ~stride in
+      assert(Image.get_stride surf = stride)
+    with Error INVALID_STRIDE ->
+      assert(stride < 100)
+  in
+
+  test_stride 108;
+  test_stride 99;
+  test_stride 0;
+  test_stride (-108);

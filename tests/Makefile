@@ -7,7 +7,7 @@ LIBS_CMA = bigarray.cma cairo.cma
 LIBS_CMXA = bigarray.cmxa cairo.cmxa
 OCAMLOPT_FLAGS = -dtypes -inline 3 -g
 
-SOURCES = image.ml matrix.ml
+SOURCES = image.ml matrix.ml surface.ml
 
 default: $(SOURCES:.ml=.com)
 
