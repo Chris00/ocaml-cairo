@@ -704,9 +704,8 @@ CAMLexport value caml_cairo_pattern_get_filter(value vpat)
 CAMLexport value caml_cairo_pattern_set_matrix(value vpat, value vmat)
 {
   /* noalloc */
-  cairo_matrix_t matrix;
-  SET_MATRIX_VAL(matrix, vmat);
-  cairo_pattern_set_matrix(PATTERN_VAL(vpat), &matrix);
+  ALLOC_CAIRO_MATRIX(vmat);
+  cairo_pattern_set_matrix(PATTERN_VAL(vpat), GET_MATRIX(vmat));
   return(Val_unit);
 }
 
@@ -714,9 +713,8 @@ CAMLexport value caml_cairo_pattern_get_matrix(value vpat)
 {
   CAMLparam1(vpat);
   CAMLlocal1(vmat);
-  cairo_matrix_t matrix;
-  cairo_pattern_get_matrix(PATTERN_VAL(vpat), &matrix);
-  MATRIX_ASSIGN(vmat, matrix);
+  WITH_MATRIX_DO(vmat,
+                 cairo_pattern_get_matrix(PATTERN_VAL(vpat), GET_MATRIX(vmat)));
   CAMLreturn(vmat);
 }
 
@@ -731,18 +729,16 @@ DO1_CONTEXT(cairo_rotate, Double_val)
 CAMLexport value caml_cairo_transform(value vcr, value vmat)
 {
   /* noalloc */
-  cairo_matrix_t matrix;
-  SET_MATRIX_VAL(matrix, vmat);
-  cairo_transform(CAIRO_VAL(vcr), &matrix);
+  ALLOC_CAIRO_MATRIX(vmat);
+  cairo_transform(CAIRO_VAL(vcr), GET_MATRIX(vmat));
   return(Val_unit);
 }
 
 CAMLexport value caml_cairo_set_matrix(value vcr, value vmat)
 {
   /* noalloc */
-  cairo_matrix_t matrix;
-  SET_MATRIX_VAL(matrix, vmat);
-  cairo_set_matrix(CAIRO_VAL(vcr), &matrix);
+  ALLOC_CAIRO_MATRIX(vmat);
+  cairo_set_matrix(CAIRO_VAL(vcr), GET_MATRIX(vmat));
   return(Val_unit);
 }
 
@@ -750,9 +746,8 @@ CAMLexport value caml_cairo_get_matrix(value vcr)
 {
   CAMLparam1(vcr);
   CAMLlocal1(vmat);
-  cairo_matrix_t matrix;
-  cairo_get_matrix(CAIRO_VAL(vcr), &matrix);
-  MATRIX_ASSIGN(vmat, matrix);
+  WITH_MATRIX_DO(vmat,
+                 cairo_get_matrix(CAIRO_VAL(vcr), GET_MATRIX(vmat)));
   CAMLreturn(vmat);
 }
 
@@ -945,11 +940,10 @@ CAMLexport value caml_cairo_scaled_font_create
 {
   CAMLparam4(vff, vfont_matrix, vctm, voptions);
   CAMLlocal1(vsf);
-  cairo_matrix_t font_matrix, ctm;
-  SET_MATRIX_VAL(font_matrix, vfont_matrix);
-  SET_MATRIX_VAL(ctm, vctm);
+  ALLOC_CAIRO_MATRIX2(vfont_matrix, vctm);
   cairo_scaled_font_t* sf = cairo_scaled_font_create
-    (FONT_FACE_VAL(vff), &font_matrix, &ctm, FONT_OPTIONS_VAL(voptions));
+    (FONT_FACE_VAL(vff), GET_MATRIX(vfont_matrix), GET_MATRIX(vctm),
+     FONT_OPTIONS_VAL(voptions));
   vsf = ALLOC(scaled_font);
   SCALED_FONT_VAL(vsf) = sf;
   CAMLreturn(vsf);
@@ -1067,9 +1061,8 @@ CAMLexport value caml_cairo_scaled_font_get_font_options(value vsf)
   {                                                                     \
     CAMLparam1(vsf);                                                    \
     CAMLlocal1(vmatrix);                                                \
-    cairo_matrix_t matrix;                                              \
-    name(SCALED_FONT_VAL(vsf), &matrix);                                 \
-    MATRIX_ASSIGN(vmatrix, matrix);                                     \
+    WITH_MATRIX_DO(vmatrix,                                             \
+                   name(SCALED_FONT_VAL(vsf), GET_MATRIX(vmatrix)));    \
     CAMLreturn(vmatrix);                                                \
   }
 
@@ -1160,9 +1153,8 @@ CAMLexport value caml_cairo_set_font_matrix(value vcr, value vmatrix)
 {
   CAMLparam2(vcr, vmatrix);
   cairo_t *cr = CAIRO_VAL(vcr);
-  cairo_matrix_t matrix;
-  SET_MATRIX_VAL(matrix, vmatrix);
-  cairo_set_font_matrix(cr, &matrix);
+  ALLOC_CAIRO_MATRIX(vmatrix);
+  cairo_set_font_matrix(cr, GET_MATRIX(vmatrix));
   caml_check_status(cr);
   CAMLreturn(Val_unit);
 }
@@ -1172,9 +1164,8 @@ CAMLexport value caml_cairo_get_font_matrix(value vcr)
   CAMLparam1(vcr);
   CAMLlocal1(vmatrix);
   cairo_t *cr = CAIRO_VAL(vcr);
-  cairo_matrix_t matrix;
-  cairo_get_font_matrix(cr, &matrix);
-  MATRIX_ASSIGN(vmatrix, matrix);
+  WITH_MATRIX_DO(vmatrix,
+                 cairo_get_font_matrix(cr, GET_MATRIX(vmatrix)));
   CAMLreturn(vmatrix);
 }
 
