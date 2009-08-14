@@ -15,10 +15,11 @@ Makefile.ocaml
 src/Makefile
 src/META
 doc/html
-# Examples output
+# Examples
 *.pdf
 *.ps
 *.png
 *.svg
+examples/Makefile
 # Documentation
 doc/html
