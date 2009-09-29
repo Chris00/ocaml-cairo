@@ -63,6 +63,7 @@ type context
 type surface
 type content = COLOR | ALPHA | COLOR_ALPHA
 type 'a pattern
+  constraint 'a = [<`Solid | `Surface | `Gradient | `Linear | `Radial]
 type any_pattern = [`Solid | `Surface | `Gradient | `Linear | `Radial] pattern
 type glyph = { index: int;  x: float;  y: float }
 

@@ -1469,7 +1469,7 @@ end
     associated function. *)
 module Pattern :
 sig
-  type 'a t
+  type 'a t constraint 'a = [<`Solid | `Surface | `Gradient | `Linear | `Radial]
     (** This is the paint with which cairo draws.  The primary use of
         patterns is as the source for all cairo drawing operations,
         although they can also be used as masks, that is, as the brush
