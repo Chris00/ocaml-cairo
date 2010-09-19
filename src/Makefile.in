@@ -6,7 +6,7 @@ CPPFLAGS = @CPPFLAGS@
 GDK_CFLAGS = $(patsubst -D%,-ccopt -D%, $(patsubst -I%, -I %,@GDK_CFLAGS@))
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-GDK_LIBS = @GDK_LIBS@
+GDK_LIBS = $(subst -pthread,-ccopt -pthread,@GDK_LIBS@)
 OCAMLINCLUDES = @OCAMLINCLUDES@
 OS_TYPE = @OCAML_OS_TYPE@
 
@@ -55,15 +55,14 @@ cairo.cmxs: cairo.cmx cairo_stubs.o
 # Gtk integration
 cairo_gtk.cma cairo_gtk.cmxa: cairo_gtk.cmo cairo_gtk.cmx cairo_gtk_stubs.o
 	$(OCAMLMKLIB) -o cairo_gtk -oc cairo_gtk_stubs -ocamlc $(OCAMLC) \
-	  -ocamlopt $(OCAMLOPT) $(LDFLAGS) \
-	  $(subst -pthread,-ccopt -pthread,$(GDK_LIBS)) $(CPPFLAGS) $^
+	  -ocamlopt $(OCAMLOPT) $(LDFLAGS) $(GDK_LIBS) $(CPPFLAGS) $^
 
 cairo_gtk_stubs.o: cairo_gtk_stubs.c cairo_macros.c
 	$(CC) $(CPPFLAGS) $(GDK_CFLAGS) -c $<
 
 cairo_gtk.cmxs: cairo_gtk.cmx cairo_gtk_stubs.o
 	$(OCAMLOPT) -shared -o $@ $(addprefix -ccopt , $(LDFLAGS)) \
-	  $(addprefix -cclib , $(GDK_LIBS)) $^
+	  $(patsubst -l%,-cclib -l%, $(GDK_LIBS)) $^
 
 .PHONY: doc
 OCAMLDOC_FLAGS += $(if $(OCAMLINCLUDES), $(addprefix -I , $(OCAMLINCLUDES)))
