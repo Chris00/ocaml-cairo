@@ -200,15 +200,15 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
   SET_CAIRO_MATRIX_(v2)  
 
 /* `f' may use `GET_MATRIX(v)' */
-#define WITH_MATRIX_DO(v, f)                             \
-  cairo_matrix_t matrix_##v;                             \
-  f;                                                     \
-  v = caml_alloc(6, Double_array_tag);                   \
-  Store_double_field(v, 0, matrix_##v.xx);               \
-  Store_double_field(v, 1, matrix_##v.yx);               \
-  Store_double_field(v, 2, matrix_##v.xy);               \
-  Store_double_field(v, 3, matrix_##v.yy);               \
-  Store_double_field(v, 4, matrix_##v.x0);               \
+#define WITH_MATRIX_DO(v, f)                                            \
+  cairo_matrix_t matrix_##v;                                            \
+  f;                                                                    \
+  v = caml_alloc(6 * sizeof(double) / sizeof(void *), Double_array_tag); \
+  Store_double_field(v, 0, matrix_##v.xx);                              \
+  Store_double_field(v, 1, matrix_##v.yx);                              \
+  Store_double_field(v, 2, matrix_##v.xy);                              \
+  Store_double_field(v, 3, matrix_##v.yy);                              \
+  Store_double_field(v, 4, matrix_##v.x0);                              \
   Store_double_field(v, 5, matrix_##v.y0)
 
 #define GET_MATRIX(v) &matrix_##v
@@ -218,8 +218,8 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
 #define ALLOC_CAIRO_MATRIX(v)       /* nothing to do */
 #define ALLOC_CAIRO_MATRIX2(v1, v2) /* nothing to do */
 
-#define WITH_MATRIX_DO(v, f)                 \
-  v = caml_alloc(6, Double_array_tag);       \
+#define WITH_MATRIX_DO(v, f)                                            \
+  v = caml_alloc(6 * sizeof(double) / sizeof(void *), Double_array_tag); \
   f /* `f' may use `GET_MATRIX(v)' */
 
 /* Optimize by using a pointer to OCaml data */
