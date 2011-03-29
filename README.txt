@@ -11,7 +11,6 @@ libcairo2-dev in Debian).  To use Cairo with GTK+, please also install
 lablgtk2.  The installation of the library depends on findlib. Then
 issue
 
-./autogen.sh
 ./configure
 make
 make examples   # optional
@@ -31,7 +30,6 @@ whose path contains NO space but you will have to specify them with
 environment variable.  To use Cairo with GTK+, please also install
 lablgtk2 [2].  Then (in a cygwin shell), issue
 
-./autogen.sh
 ./configure
 make
 make examples   # optional
