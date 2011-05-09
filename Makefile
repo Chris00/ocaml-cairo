@@ -1,13 +1,32 @@
 ROOT=.
 include Makefile.conf
 
-.PHONY: default all opt byte native install uninstall htdoc doc examples
-default: byte opt
-all: byte
-opt: native
-htdoc: doc
-byte native install uninstall doc:
-	$(MAKE) -C src $@
+VERSION = $(shell oasis query version)
+PACKAGE = $(shell oasis query name)
+TARBALL = $(PACKAGE)-$(VERSION).tar.gz
+
+DISTFILES = AUTHORS.txt INSTALL.txt _oasis _tags myocamlbuild.ml \
+  setup.ml \
+  $(wildcard $(addprefix src/, *.ml *.mli *.mllib *.c *.h *.clib)) \
+  tests/ examples/ $(wildcard doc/*.{css,html})
+
+.PHONY: all byte native configure doc install uninstall reinstall upload-doc
+
+all byte native: configure
+	ocaml setup.ml -build
+
+configure: setup.ml
+	ocaml $< -configure
+
+setup.ml: _oasis
+	oasis setup
+
+doc install uninstall reinstall:
+	ocaml setup.ml -$@
+
+upload-doc: doc
+	scp -C -p -r _build/src/API.docdir/ $(WEB)
+
 examples: native
 	$(MAKE) -C examples
 
@@ -24,10 +43,13 @@ cairo.godiva: cairo.godiva.in
 godi: cairo.godiva
 	godiva $<
 
-# "Force" a tag to be defined for each released tarball
-tar:
-	bzr export /tmp/$(TARBALL) -r "tag:$(VERSION)"
-	@echo "Created tarball '/tmp/$(TARBALL)'."
+# Make a tarball
+.PHONY: dist tar
+dist tar: $(DISTFILES)
+	mkdir $(PKGNAME)-$(PKGVERSION)
+	cp --parents -r $(DISTFILES) $(PKGNAME)-$(PKGVERSION)/
+	tar -zcvf $(PKG_TARBALL) $(PKGNAME)-$(PKGVERSION)
+	rm -rf $(PKGNAME)-$(PKGVERSION)
 
 .PHONY: tests
 tests: native
@@ -46,7 +68,7 @@ sync-scm sync_scm:
 
 .PHONY: clean dist-clean
 clean:
-	$(RM) $(wildcard *~ *.pdf *.ps *.png *.svg) cairo.godiva
+	$(RM) $(wildcard *~ *.pdf *.ps *.png *.svg) cairo.godiva setup.data
 	$(MAKE) -C src $@
 	$(MAKE) -C examples $@
 	$(MAKE) -C doc $@

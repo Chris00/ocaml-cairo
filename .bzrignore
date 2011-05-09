@@ -23,3 +23,11 @@ doc/html
 examples/Makefile
 # Documentation
 doc/html
+# OASIS / ocamlbuild
+_tags
+_build/
+*.data
+AUTHORS.txt
+INSTALL.txt
+src/*.mllib
+src/*.clib

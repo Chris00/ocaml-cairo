@@ -1,0 +1,42 @@
+#								-*-conf-*-
+OASISFormat: 0.2
+Name:        cairo
+Version:     0.2
+Synopsis:    Binding to Cairo, a Vector Graphics Library.
+Description: This is a binding to Cairo, a 2D graphics library with
+  support for multiple output devices.  Currently supported output targets
+  include the X Window System, Quartz, Win32, image buffers, PostScript,
+  PDF, and SVG file output. 
+Authors:     Christophe Troestler <Christophe.Troestler@umons.ac.be>,
+  Pierre Hauweele <antegallya@gmail.com>
+License:     LGPL-3.0 with OCaml linking exception
+Maintainers: Christophe Troestler <Christophe.Troestler@umons.ac.be>
+Homepage:    http://forge.ocamlcore.org/projects/archimedes/
+Plugins:     META (0.2), StdFiles (0.2)
+
+Library cairo2
+  Path:         src
+  BuildTools:   ocamlbuild
+  Modules:      Cairo
+  CSources:     cairo_stubs.c
+  BuildDepends: bigarray
+
+Library cairo_gtk
+  Path:         src/
+  BuildTools:   ocamlbuild
+  Modules:	Cairo_gtk
+  CSources:	cairo_gtk_stubs.c
+  BuildDepends: lablgtk2, cairo2
+  FindlibParent: cairo2
+  FindlibName:   lablgtk2
+  XMETADescription: Rendering Cairo on Gtk canvas.
+
+# Library win32
+#   Path:	         src/
+#   FindlibParent: cairo
+#   XMETADescription: Rendering on Windows.
+
+# Library quartz
+#   Path:	         src/
+#   FindlibParent: cairo
+#   XMETADescription: Rendering on Quartz (MacOS).

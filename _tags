@@ -1,0 +1,20 @@
+# OASIS_START
+# DO NOT EDIT (digest: f2e66af7c19949f5c82628995b8bfee8)
+# Library cairo2
+<src/cairo2.{cma,cmxa}>: use_libcairo2
+"src/cairo_stubs.c": pkg_bigarray
+# Library cairo_gtk
+"src": include
+<src/cairo_gtk.{cma,cmxa}>: use_libcairo_gtk
+<src/*.ml{,i}>: use_cairo2
+<src/*.ml{,i}>: pkg_lablgtk2
+<src/*.ml{,i}>: pkg_bigarray
+"src/cairo_gtk_stubs.c": use_cairo2
+"src/cairo_gtk_stubs.c": pkg_lablgtk2
+"src/cairo_gtk_stubs.c": pkg_bigarray
+# OASIS_STOP
+
+<**/*.ml>: annot
+<src/*.c>: use_libcairo_c
+<src/cairo.{cma,cmxa}>: use_libcairo
+<src/cairo_gtk_stubs.c>: use_libgtk_c
