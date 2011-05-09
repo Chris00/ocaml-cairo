@@ -27,9 +27,6 @@ doc install uninstall reinstall:
 upload-doc: doc
 	scp -C -p -r _build/src/API.docdir/ $(WEB)
 
-examples: native
-	$(MAKE) -C examples
-
 # Depends on the version number set in delimited_overloading.mli :
 cairo.godiva: cairo.godiva.in
 	@ sed -e "s/@PACKAGE@/$(PKGNAME)/" $< \
@@ -58,7 +55,7 @@ tests: native
 .PHONY: web web-html tutorial
 web-html: doc
 	$(MAKE) -C doc $@
-web tutorial: doc examples
+web tutorial: all doc
 	$(MAKE) -C doc $@
 
 

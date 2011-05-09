@@ -31,3 +31,6 @@ AUTHORS.txt
 INSTALL.txt
 src/*.mllib
 src/*.clib
+*.native
+setup.log
+*.bak

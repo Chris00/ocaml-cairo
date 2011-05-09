@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: f2e66af7c19949f5c82628995b8bfee8)
+# DO NOT EDIT (digest: 32bc491fc2c2db8e98fe4bec8a41c1c0)
 # Library cairo2
 <src/cairo2.{cma,cmxa}>: use_libcairo2
 "src/cairo_stubs.c": pkg_bigarray
@@ -12,9 +12,104 @@
 "src/cairo_gtk_stubs.c": use_cairo2
 "src/cairo_gtk_stubs.c": pkg_lablgtk2
 "src/cairo_gtk_stubs.c": pkg_bigarray
+# Executable text_align_center
+<examples/text_align_center.{native,byte}>: use_cairo2
+<examples/text_align_center.{native,byte}>: pkg_bigarray
+# Executable tips_font
+<examples/tips_font.{native,byte}>: use_cairo2
+<examples/tips_font.{native,byte}>: pkg_bigarray
+# Executable paint
+<examples/paint.{native,byte}>: use_cairo2
+<examples/paint.{native,byte}>: pkg_bigarray
+# Executable stroke
+<examples/stroke.{native,byte}>: use_cairo2
+<examples/stroke.{native,byte}>: pkg_bigarray
+# Executable fill
+<examples/fill.{native,byte}>: use_cairo2
+<examples/fill.{native,byte}>: pkg_bigarray
+# Executable gradient
+<examples/gradient.{native,byte}>: use_cairo2
+<examples/gradient.{native,byte}>: pkg_bigarray
+# Executable set_line_cap
+<examples/set_line_cap.{native,byte}>: use_cairo2
+<examples/set_line_cap.{native,byte}>: pkg_bigarray
+# Executable dash
+<examples/dash.{native,byte}>: use_cairo2
+<examples/dash.{native,byte}>: pkg_bigarray
+# Executable text
+<examples/text.{native,byte}>: use_cairo2
+<examples/text.{native,byte}>: pkg_bigarray
+# Executable fill_stroke
+<examples/fill_stroke.{native,byte}>: use_cairo2
+<examples/fill_stroke.{native,byte}>: pkg_bigarray
+# Executable text_rotate
+<examples/text_rotate.{native,byte}>: use_cairo2
+<examples/text_rotate.{native,byte}>: pkg_bigarray
+# Executable setsourcegradient
+<examples/setsourcegradient.{native,byte}>: use_cairo2
+<examples/setsourcegradient.{native,byte}>: pkg_bigarray
+# Executable tips_letter
+<examples/tips_letter.{native,byte}>: use_cairo2
+<examples/tips_letter.{native,byte}>: pkg_bigarray
+# Executable clip
+<examples/clip.{native,byte}>: use_cairo2
+<examples/clip.{native,byte}>: pkg_bigarray
+# Executable showtext
+<examples/showtext.{native,byte}>: use_cairo2
+<examples/showtext.{native,byte}>: pkg_bigarray
+# Executable fill_style
+<examples/fill_style.{native,byte}>: use_cairo2
+<examples/fill_style.{native,byte}>: pkg_bigarray
+# Executable mask
+<examples/mask.{native,byte}>: use_cairo2
+<examples/mask.{native,byte}>: pkg_bigarray
+# Executable diagram
+<examples/diagram.{native,byte}>: use_cairo2
+<examples/diagram.{native,byte}>: pkg_bigarray
+# Executable path_close
+<examples/path_close.{native,byte}>: use_cairo2
+<examples/path_close.{native,byte}>: pkg_bigarray
+# Executable gtk_demo
+<examples/gtk_demo.{native,byte}>: use_cairo_gtk
+<examples/gtk_demo.{native,byte}>: use_cairo2
+<examples/gtk_demo.{native,byte}>: pkg_lablgtk2
+<examples/gtk_demo.{native,byte}>: pkg_bigarray
+<examples/*.ml{,i}>: use_cairo_gtk
+<examples/*.ml{,i}>: pkg_lablgtk2
+# Executable set_line_join
+<examples/set_line_join.{native,byte}>: use_cairo2
+<examples/set_line_join.{native,byte}>: pkg_bigarray
+# Executable tips_ellipse
+<examples/tips_ellipse.{native,byte}>: use_cairo2
+<examples/tips_ellipse.{native,byte}>: pkg_bigarray
+# Executable arcs
+<examples/arcs.{native,byte}>: use_cairo2
+<examples/arcs.{native,byte}>: pkg_bigarray
+# Executable curve_to
+<examples/curve_to.{native,byte}>: use_cairo2
+<examples/curve_to.{native,byte}>: pkg_bigarray
+# Executable setsourcergba
+<examples/setsourcergba.{native,byte}>: use_cairo2
+<examples/setsourcergba.{native,byte}>: pkg_bigarray
+# Executable cloud
+<examples/word_cloud/run.{native,byte}>: use_cairo2
+<examples/word_cloud/run.{native,byte}>: pkg_bigarray
+<examples/word_cloud/*.ml{,i}>: use_cairo2
+<examples/word_cloud/*.ml{,i}>: pkg_bigarray
+# Executable text_extents
+<examples/text_extents.{native,byte}>: use_cairo2
+<examples/text_extents.{native,byte}>: pkg_bigarray
+# Executable textextents
+<examples/textextents.{native,byte}>: use_cairo2
+<examples/textextents.{native,byte}>: pkg_bigarray
+# Executable draw
+<examples/draw.{native,byte}>: use_cairo2
+<examples/draw.{native,byte}>: pkg_bigarray
+<examples/*.ml{,i}>: use_cairo2
+<examples/*.ml{,i}>: pkg_bigarray
 # OASIS_STOP
 
 <**/*.ml>: annot
 <src/*.c>: use_libcairo_c
-<src/cairo.{cma,cmxa}>: use_libcairo
+<src/cairo2.{cma,cmxa}>: use_libcairo_c
 <src/cairo_gtk_stubs.c>: use_libgtk_c
