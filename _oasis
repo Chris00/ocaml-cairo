@@ -45,6 +45,29 @@ Library cairo_gtk
 #   FindlibParent: cairo
 #   XMETADescription: Rendering on Quartz (MacOS).
 
+# Tests
+######################################################################
+Executable image_create
+  Path:           tests/
+  MainIs:         image_create.ml
+  BuildDepends:   cairo2
+  BuildTools:     ocamlbuild
+  Install:        false
+
+Executable matrix_set
+  Path:           tests/
+  MainIs:         matrix_set.ml
+  BuildDepends:   cairo2
+  BuildTools:     ocamlbuild
+  Install:        false
+
+Executable surface_gc
+  Path:           tests/
+  MainIs:         surface_gc.ml
+  BuildDepends:   cairo2
+  BuildTools:     ocamlbuild
+  Install:        false
+
 # Examples
 ######################################################################
 Executable arcs

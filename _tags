@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 32bc491fc2c2db8e98fe4bec8a41c1c0)
+# DO NOT EDIT (digest: 2287d88ff5638117fc6155dd59f3505a)
 # Library cairo2
 <src/cairo2.{cma,cmxa}>: use_libcairo2
 "src/cairo_stubs.c": pkg_bigarray
@@ -24,6 +24,9 @@
 # Executable stroke
 <examples/stroke.{native,byte}>: use_cairo2
 <examples/stroke.{native,byte}>: pkg_bigarray
+# Executable matrix_set
+"tests/matrix_set.byte": use_cairo2
+"tests/matrix_set.byte": pkg_bigarray
 # Executable fill
 <examples/fill.{native,byte}>: use_cairo2
 <examples/fill.{native,byte}>: pkg_bigarray
@@ -42,6 +45,9 @@
 # Executable fill_stroke
 <examples/fill_stroke.{native,byte}>: use_cairo2
 <examples/fill_stroke.{native,byte}>: pkg_bigarray
+# Executable image_create
+"tests/image_create.byte": use_cairo2
+"tests/image_create.byte": pkg_bigarray
 # Executable text_rotate
 <examples/text_rotate.{native,byte}>: use_cairo2
 <examples/text_rotate.{native,byte}>: pkg_bigarray
@@ -63,6 +69,11 @@
 # Executable mask
 <examples/mask.{native,byte}>: use_cairo2
 <examples/mask.{native,byte}>: pkg_bigarray
+# Executable surface_gc
+"tests/surface_gc.byte": use_cairo2
+"tests/surface_gc.byte": pkg_bigarray
+<tests/*.ml{,i}>: use_cairo2
+<tests/*.ml{,i}>: pkg_bigarray
 # Executable diagram
 <examples/diagram.{native,byte}>: use_cairo2
 <examples/diagram.{native,byte}>: pkg_bigarray
