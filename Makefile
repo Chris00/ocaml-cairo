@@ -68,11 +68,13 @@ sync-scm sync_scm:
 
 .PHONY: clean dist-clean
 clean:
+	ocaml setup.ml -clean
 	$(RM) $(wildcard *~ *.pdf *.ps *.png *.svg) cairo.godiva setup.data
-	$(MAKE) -C src $@
 	$(MAKE) -C examples $@
 	$(MAKE) -C doc $@
 	$(MAKE) -C tests $@
 
 dist-clean::
-	$(RM) -r aclocal.m4 autom4te.cache config.log config.status
+	ocaml setup.ml -distclean
+	$(RM) $(wildcard *.ba[0-9] *.bak *~ *.odocl) setup.log
+
