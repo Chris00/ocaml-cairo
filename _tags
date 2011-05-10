@@ -1,10 +1,12 @@
 # OASIS_START
-# DO NOT EDIT (digest: 2287d88ff5638117fc6155dd59f3505a)
+# DO NOT EDIT (digest: f88bb9ea3f9214a008099be829f222d2)
 # Library cairo2
+"src/cairo2.cmxs": use_cairo2
 <src/cairo2.{cma,cmxa}>: use_libcairo2
 "src/cairo_stubs.c": pkg_bigarray
 # Library cairo_gtk
 "src": include
+"src/cairo_gtk.cmxs": use_cairo_gtk
 <src/cairo_gtk.{cma,cmxa}>: use_libcairo_gtk
 <src/*.ml{,i}>: use_cairo2
 <src/*.ml{,i}>: pkg_lablgtk2
@@ -122,5 +124,5 @@
 
 <**/*.ml>: annot
 <src/*.c>: use_libcairo_c
-<src/cairo2.{cma,cmxa}>: use_libcairo_c
+<src/cairo2.{cma,cmxa,cmxs}>: use_libcairo_c
 <src/cairo_gtk_stubs.c>: use_libgtk_c

@@ -14,12 +14,13 @@ DISTFILES = AUTHORS.txt INSTALL.txt README.txt _oasis _tags myocamlbuild.ml \
 
 all byte native: configure
 	ocaml setup.ml -build
+#	ocamlbuild src/cairo2.cmxs
 
 configure: setup.ml
 	ocaml $< -configure
 
 setup.ml: _oasis
-	oasis setup
+	oasis.dev setup
 
 doc install uninstall reinstall:
 	ocaml setup.ml -$@
@@ -67,9 +68,7 @@ sync-scm sync_scm:
 clean:
 	ocaml setup.ml -clean
 	$(RM) $(wildcard *~ *.pdf *.ps *.png *.svg) cairo.godiva setup.data
-	$(MAKE) -C examples $@
 	$(MAKE) -C doc $@
-	$(MAKE) -C tests $@
 
 dist-clean::
 	ocaml setup.ml -distclean
