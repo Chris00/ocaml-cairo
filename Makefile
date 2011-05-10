@@ -67,6 +67,7 @@ sync-scm sync_scm:
 .PHONY: clean dist-clean
 clean:
 	ocaml setup.ml -clean
+	$(RM) $(PKG_TARBALL)
 	$(RM) $(wildcard *~ *.pdf *.ps *.png *.svg) cairo.godiva setup.data
 	$(MAKE) -C doc $@
 
