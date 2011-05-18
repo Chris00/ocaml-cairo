@@ -28,7 +28,6 @@ doc install uninstall reinstall:
 upload-doc: doc
 	scp -C -p -r _build/src/API.docdir/ $(WEB)
 
-# Depends on the version number set in delimited_overloading.mli :
 cairo.godiva: cairo.godiva.in
 	@ sed -e "s/@PACKAGE@/$(PKGNAME)/" $< \
 	| sed -e "s/@VERSION@/$(PKGVERSION)/" \
