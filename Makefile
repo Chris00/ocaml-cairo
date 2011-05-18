@@ -8,6 +8,7 @@ PKG_TARBALL = $(PKGNAME)-$(PKGVERSION).tar.gz
 DISTFILES = AUTHORS.txt INSTALL.txt README.txt _oasis _tags myocamlbuild.ml \
   config.ml setup.ml Makefile \
   $(wildcard $(addprefix src/, *.ml *.mli *.mllib *.c *.h *.clib)) \
+  src/META \
   tests/ examples/ doc/
 
 .PHONY: all byte native configure doc install uninstall reinstall upload-doc
@@ -28,7 +29,6 @@ doc install uninstall reinstall:
 upload-doc: doc
 	scp -C -p -r _build/src/API.docdir/ $(WEB)
 
-# Depends on the version number set in delimited_overloading.mli :
 cairo.godiva: cairo.godiva.in
 	@ sed -e "s/@PACKAGE@/$(PKGNAME)/" $< \
 	| sed -e "s/@VERSION@/$(PKGVERSION)/" \
