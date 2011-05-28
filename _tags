@@ -1,5 +1,18 @@
 # OASIS_START
-# DO NOT EDIT (digest: f88bb9ea3f9214a008099be829f222d2)
+# DO NOT EDIT (digest: 89f6c720b416bf9c9410e94d2174bd58)
+# Ignore VCS directories, you can use the same kind of rule outside 
+# OASIS_START/STOP if you want to exclude directories that contains 
+# useless stuff for the build process
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
 # Library cairo2
 "src/cairo2.cmxs": use_cairo2
 <src/cairo2.{cma,cmxa}>: use_libcairo2
@@ -14,74 +27,94 @@
 "src/cairo_gtk_stubs.c": use_cairo2
 "src/cairo_gtk_stubs.c": pkg_lablgtk2
 "src/cairo_gtk_stubs.c": pkg_bigarray
+# Executable fill
+"examples/fill.byte": use_cairo2
+"examples/fill.byte": pkg_bigarray
+# Executable curve_to
+<examples/curve_to.{native,byte}>: use_cairo2
+<examples/curve_to.{native,byte}>: pkg_bigarray
+# Executable dash
+<examples/dash.{native,byte}>: use_cairo2
+<examples/dash.{native,byte}>: pkg_bigarray
+# Executable setsourcergba
+"examples/setsourcergba.byte": use_cairo2
+"examples/setsourcergba.byte": pkg_bigarray
+# Executable fill_stroke
+<examples/fill_stroke.{native,byte}>: use_cairo2
+<examples/fill_stroke.{native,byte}>: pkg_bigarray
+# Executable textextents
+"examples/textextents.byte": use_cairo2
+"examples/textextents.byte": pkg_bigarray
+# Executable draw
+"examples/draw.byte": use_cairo2
+"examples/draw.byte": pkg_bigarray
+# Executable setsourcegradient
+"examples/setsourcegradient.byte": use_cairo2
+"examples/setsourcegradient.byte": pkg_bigarray
 # Executable text_align_center
 <examples/text_align_center.{native,byte}>: use_cairo2
 <examples/text_align_center.{native,byte}>: pkg_bigarray
-# Executable tips_font
-<examples/tips_font.{native,byte}>: use_cairo2
-<examples/tips_font.{native,byte}>: pkg_bigarray
 # Executable paint
-<examples/paint.{native,byte}>: use_cairo2
-<examples/paint.{native,byte}>: pkg_bigarray
+"examples/paint.byte": use_cairo2
+"examples/paint.byte": pkg_bigarray
 # Executable stroke
-<examples/stroke.{native,byte}>: use_cairo2
-<examples/stroke.{native,byte}>: pkg_bigarray
+"examples/stroke.byte": use_cairo2
+"examples/stroke.byte": pkg_bigarray
+# Executable fill_style
+<examples/fill_style.{native,byte}>: use_cairo2
+<examples/fill_style.{native,byte}>: pkg_bigarray
 # Executable matrix_set
 "tests/matrix_set.byte": use_cairo2
 "tests/matrix_set.byte": pkg_bigarray
-# Executable fill
-<examples/fill.{native,byte}>: use_cairo2
-<examples/fill.{native,byte}>: pkg_bigarray
 # Executable gradient
 <examples/gradient.{native,byte}>: use_cairo2
 <examples/gradient.{native,byte}>: pkg_bigarray
 # Executable set_line_cap
 <examples/set_line_cap.{native,byte}>: use_cairo2
 <examples/set_line_cap.{native,byte}>: pkg_bigarray
-# Executable dash
-<examples/dash.{native,byte}>: use_cairo2
-<examples/dash.{native,byte}>: pkg_bigarray
+# Executable surface_gc
+"tests/surface_gc.byte": use_cairo2
+"tests/surface_gc.byte": pkg_bigarray
+# Executable diagram
+"examples/diagram.byte": use_cairo2
+"examples/diagram.byte": pkg_bigarray
 # Executable text
 <examples/text.{native,byte}>: use_cairo2
 <examples/text.{native,byte}>: pkg_bigarray
-# Executable fill_stroke
-<examples/fill_stroke.{native,byte}>: use_cairo2
-<examples/fill_stroke.{native,byte}>: pkg_bigarray
 # Executable image_create
 "tests/image_create.byte": use_cairo2
 "tests/image_create.byte": pkg_bigarray
+<tests/*.ml{,i}>: use_cairo2
+<tests/*.ml{,i}>: pkg_bigarray
 # Executable text_rotate
 <examples/text_rotate.{native,byte}>: use_cairo2
 <examples/text_rotate.{native,byte}>: pkg_bigarray
-# Executable setsourcegradient
-<examples/setsourcegradient.{native,byte}>: use_cairo2
-<examples/setsourcegradient.{native,byte}>: pkg_bigarray
 # Executable tips_letter
-<examples/tips_letter.{native,byte}>: use_cairo2
-<examples/tips_letter.{native,byte}>: pkg_bigarray
+"examples/tips_letter.byte": use_cairo2
+"examples/tips_letter.byte": pkg_bigarray
 # Executable clip
 <examples/clip.{native,byte}>: use_cairo2
 <examples/clip.{native,byte}>: pkg_bigarray
 # Executable showtext
-<examples/showtext.{native,byte}>: use_cairo2
-<examples/showtext.{native,byte}>: pkg_bigarray
-# Executable fill_style
-<examples/fill_style.{native,byte}>: use_cairo2
-<examples/fill_style.{native,byte}>: pkg_bigarray
+"examples/showtext.byte": use_cairo2
+"examples/showtext.byte": pkg_bigarray
+# Executable arcs
+<examples/arcs.{native,byte}>: use_cairo2
+<examples/arcs.{native,byte}>: pkg_bigarray
 # Executable mask
-<examples/mask.{native,byte}>: use_cairo2
-<examples/mask.{native,byte}>: pkg_bigarray
-# Executable surface_gc
-"tests/surface_gc.byte": use_cairo2
-"tests/surface_gc.byte": pkg_bigarray
-<tests/*.ml{,i}>: use_cairo2
-<tests/*.ml{,i}>: pkg_bigarray
-# Executable diagram
-<examples/diagram.{native,byte}>: use_cairo2
-<examples/diagram.{native,byte}>: pkg_bigarray
+"examples/mask.byte": use_cairo2
+"examples/mask.byte": pkg_bigarray
+# Executable cloud
+<examples/word_cloud/run.{native,byte}>: use_cairo2
+<examples/word_cloud/run.{native,byte}>: pkg_bigarray
+<examples/word_cloud/*.ml{,i}>: use_cairo2
+<examples/word_cloud/*.ml{,i}>: pkg_bigarray
+# Executable text_extents
+<examples/text_extents.{native,byte}>: use_cairo2
+<examples/text_extents.{native,byte}>: pkg_bigarray
 # Executable path_close
-<examples/path_close.{native,byte}>: use_cairo2
-<examples/path_close.{native,byte}>: pkg_bigarray
+"examples/path_close.byte": use_cairo2
+"examples/path_close.byte": pkg_bigarray
 # Executable gtk_demo
 <examples/gtk_demo.{native,byte}>: use_cairo_gtk
 <examples/gtk_demo.{native,byte}>: use_cairo2
@@ -92,32 +125,12 @@
 # Executable set_line_join
 <examples/set_line_join.{native,byte}>: use_cairo2
 <examples/set_line_join.{native,byte}>: pkg_bigarray
+# Executable tips_font
+"examples/tips_font.byte": use_cairo2
+"examples/tips_font.byte": pkg_bigarray
 # Executable tips_ellipse
-<examples/tips_ellipse.{native,byte}>: use_cairo2
-<examples/tips_ellipse.{native,byte}>: pkg_bigarray
-# Executable arcs
-<examples/arcs.{native,byte}>: use_cairo2
-<examples/arcs.{native,byte}>: pkg_bigarray
-# Executable curve_to
-<examples/curve_to.{native,byte}>: use_cairo2
-<examples/curve_to.{native,byte}>: pkg_bigarray
-# Executable setsourcergba
-<examples/setsourcergba.{native,byte}>: use_cairo2
-<examples/setsourcergba.{native,byte}>: pkg_bigarray
-# Executable cloud
-<examples/word_cloud/run.{native,byte}>: use_cairo2
-<examples/word_cloud/run.{native,byte}>: pkg_bigarray
-<examples/word_cloud/*.ml{,i}>: use_cairo2
-<examples/word_cloud/*.ml{,i}>: pkg_bigarray
-# Executable text_extents
-<examples/text_extents.{native,byte}>: use_cairo2
-<examples/text_extents.{native,byte}>: pkg_bigarray
-# Executable textextents
-<examples/textextents.{native,byte}>: use_cairo2
-<examples/textextents.{native,byte}>: pkg_bigarray
-# Executable draw
-<examples/draw.{native,byte}>: use_cairo2
-<examples/draw.{native,byte}>: pkg_bigarray
+"examples/tips_ellipse.byte": use_cairo2
+"examples/tips_ellipse.byte": pkg_bigarray
 <examples/*.ml{,i}>: use_cairo2
 <examples/*.ml{,i}>: pkg_bigarray
 # OASIS_STOP
