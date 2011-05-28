@@ -29,6 +29,8 @@ doc/html
 _tags
 _build/
 *.data
+*.docdir
+*.odocl
 AUTHORS.txt
 INSTALL.txt
 src/*.mllib

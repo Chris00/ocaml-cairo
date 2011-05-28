@@ -22,7 +22,7 @@ setup.data: setup.ml
 setup.ml: _oasis
 	oasis.dev setup
 
-doc install uninstall reinstall:
+doc install uninstall reinstall: setup.data
 	ocaml setup.ml -$@
 
 upload-doc: doc
