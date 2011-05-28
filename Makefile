@@ -59,10 +59,6 @@ web tutorial: all doc
 	$(MAKE) -C doc $@
 
 
-.PHONY: sync-scm sync_scm
-sync-scm sync_scm:
-	bzr push  svn+ssh://svn.forge.ocamlcore.org/svnroot/archimedes/cairo
-
 .PHONY: clean dist-clean
 clean:
 	ocaml setup.ml -clean
