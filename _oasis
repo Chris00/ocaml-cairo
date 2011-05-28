@@ -1,7 +1,7 @@
 #								-*-conf-*-
 OASISFormat: 0.2
 Name:        cairo
-Version:     0.3.1
+Version:     0.3.2
 Synopsis:    Binding to Cairo, a Vector Graphics Library.
 Description: This is a binding to Cairo, a 2D graphics library with
   support for multiple output devices.  Currently supported output targets
