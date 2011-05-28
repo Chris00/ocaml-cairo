@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 4cfe701ac7a2306a61e95e0e825fbe30) *)
+(* DO NOT EDIT (digest: e6fbacac384e87e65eefc7febff448a6) *)
 module OASISGettext = struct
 # 21 "/home/trch-nobackup/software/oasis/src/oasis/OASISGettext.ml"
   
@@ -311,6 +311,7 @@ module MyOCamlbuildFindlib = struct
            * the "threads" package using the previous plugin.
            *)
           flag ["ocaml"; "pkg_threads"; "compile"] (S[A "-thread"]);
+          flag ["ocaml"; "pkg_threads"; "doc"] (S[A "-I"; A "+threads"]);
           flag ["ocaml"; "pkg_threads"; "link"] (S[A "-thread"]);
           flag ["ocaml"; "pkg_threads"; "infer_interface"] (S[A "-thread"])
   

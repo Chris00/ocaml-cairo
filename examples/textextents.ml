@@ -1,5 +1,5 @@
 (* This file is part of the tutorial
-   http://archimedes.forge.ocamlcore.org/cairo/
+   http://cairo.forge.ocamlcore.org/tutorial/
 *)
 
 open Cairo

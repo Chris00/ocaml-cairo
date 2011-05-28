@@ -45,6 +45,15 @@ Library cairo_gtk
 #   FindlibParent: cairo
 #   XMETADescription: Rendering on Quartz (MacOS).
 
+Document API
+  Title:           API reference for Cairo
+  Type:            OCamlbuild (0.2)
+  InstallDir:      $docdir/api
+  BuildTools:      ocamldoc, ocamlbuild
+  XOCamlbuildPath: src/
+  XOCamlbuildLibraries: cairo2, cairo2.lablgtk2
+
+
 # Tests
 ######################################################################
 Executable image_create
@@ -198,7 +207,7 @@ Executable stroke
   Path:           examples/
   MainIs:         stroke.ml
   BuildDepends:   cairo2
-  CompiledObject: best
+  CompiledObject: byte
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -206,7 +215,7 @@ Executable fill
   Path:           examples/
   MainIs:         fill.ml
   BuildDepends:   cairo2
-  CompiledObject: best
+  CompiledObject: byte
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -214,7 +223,7 @@ Executable showtext
   Path:           examples/
   MainIs:         showtext.ml
   BuildDepends:   cairo2
-  CompiledObject: best
+  CompiledObject: byte
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -222,7 +231,7 @@ Executable paint
   Path:           examples/
   MainIs:         paint.ml
   BuildDepends:   cairo2
-  CompiledObject: best
+  CompiledObject: byte
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -230,7 +239,7 @@ Executable mask
   Path:           examples/
   MainIs:         mask.ml
   BuildDepends:   cairo2
-  CompiledObject: best
+  CompiledObject: byte
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -238,7 +247,7 @@ Executable setsourcergba
   Path:           examples/
   MainIs:         setsourcergba.ml
   BuildDepends:   cairo2
-  CompiledObject: best
+  CompiledObject: byte
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -246,7 +255,7 @@ Executable setsourcegradient
   Path:           examples/
   MainIs:         setsourcegradient.ml
   BuildDepends:   cairo2
-  CompiledObject: best
+  CompiledObject: byte
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -254,7 +263,7 @@ Executable path_close
   Path:           examples/
   MainIs:         path_close.ml
   BuildDepends:   cairo2
-  CompiledObject: best
+  CompiledObject: byte
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -262,7 +271,7 @@ Executable textextents
   Path:           examples/
   MainIs:         textextents.ml
   BuildDepends:   cairo2
-  CompiledObject: best
+  CompiledObject: byte
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -270,7 +279,7 @@ Executable diagram
   Path:           examples/
   MainIs:         diagram.ml
   BuildDepends:   cairo2
-  CompiledObject: best
+  CompiledObject: byte
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -278,7 +287,7 @@ Executable draw
   Path:           examples/
   MainIs:         draw.ml
   BuildDepends:   cairo2
-  CompiledObject: best
+  CompiledObject: byte
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -286,7 +295,7 @@ Executable tips_ellipse
   Path:           examples/
   MainIs:         tips_ellipse.ml
   BuildDepends:   cairo2
-  CompiledObject: best
+  CompiledObject: byte
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -294,7 +303,7 @@ Executable tips_letter
   Path:           examples/
   MainIs:         tips_letter.ml
   BuildDepends:   cairo2
-  CompiledObject: best
+  CompiledObject: byte
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -302,6 +311,6 @@ Executable tips_font
   Path:           examples/
   MainIs:         tips_font.ml
   BuildDepends:   cairo2
-  CompiledObject: best
+  CompiledObject: byte
   BuildTools:     ocamlbuild
   Install:        false

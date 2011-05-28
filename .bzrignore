@@ -5,6 +5,8 @@
 .depend.ocaml
 *.exe
 *.com
+*.byte
+*.native
 # Automake & configure
 autom4te.cache
 configure

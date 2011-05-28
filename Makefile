@@ -6,7 +6,7 @@ PKGVERSION = $(shell oasis query version)
 PKG_TARBALL = $(PKGNAME)-$(PKGVERSION).tar.gz
 
 DISTFILES = AUTHORS.txt INSTALL.txt README.txt _oasis _tags myocamlbuild.ml \
-  config.ml setup.ml Makefile src/META \
+  config.ml setup.ml Makefile src/META API.odocl \
   $(wildcard $(addprefix src/, *.ml *.mli *.mllib *.c *.h *.clib)) \
   tests/ examples/ $(addprefix doc/,Makefile tutorial.css tutorial.html)
 
@@ -14,9 +14,9 @@ DISTFILES = AUTHORS.txt INSTALL.txt README.txt _oasis _tags myocamlbuild.ml \
 
 all byte native: configure
 	ocaml setup.ml -build
-#	ocamlbuild src/cairo2.cmxs
 
-configure: setup.ml
+configure: setup.data
+setup.data: setup.ml
 	ocaml $< -configure
 
 setup.ml: _oasis
@@ -26,7 +26,7 @@ doc install uninstall reinstall:
 	ocaml setup.ml -$@
 
 upload-doc: doc
-	scp -C -p -r _build/src/API.docdir/ $(WEB)
+	scp -C -r _build/src/API.docdir/ $(WEB)/API
 
 cairo.godiva: cairo.godiva.in
 	@ sed -e "s/@PACKAGE@/$(PKGNAME)/" $< \
