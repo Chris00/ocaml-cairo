@@ -1748,6 +1748,75 @@ UNAVAILABLE1(cairo_svg_version_to_string)
 
 #endif /* CAIRO_HAS_SVG_SURFACE */
 
+/* Recording surface
+***********************************************************************/
+
+#ifdef CAIRO_HAS_RECORDING_SURFACE
+
+CAMLexport value caml_cairo_recording_surface_create(value vcontent, value vextents)
+{
+    CAMLparam2(vcontent, vextents);
+    CAMLlocal2(vsurf, vrectangle);
+    cairo_surface_t *surf;
+    cairo_content_t content;
+    cairo_rectangle_t *extents;
+
+    SET_CONTENT_VAL(content, vcontent);
+
+    /* Get extents rectangle */
+    if (vextents == Int_val(0))
+    {
+        /* No extents given - unbounded surface*/
+        extents = NULL;
+    }
+    else
+    {
+        vrectangle = Field(vextents, 0);
+        SET_MALLOC(extents, 1, cairo_rectangle_t);
+        extents->x = Double_field(vextents, 0);
+        extents->y = Double_field(vextents, 1);
+        extents->width = Double_field(vextents, 2);
+        extents->height = Double_field(vextents, 3);
+    }
+
+    surf = cairo_recording_surface_create(content, extents);
+
+    if (extents != NULL)
+    {
+        /* Free the extents rectangle */
+        free(extents);
+    }
+
+    caml_cairo_raise_Error(cairo_surface_status(surf));
+
+    SURFACE_ASSIGN(vsurf, surf);
+    CAMLreturn(vsurf);
+}
+
+CAMLexport value caml_cairo_recording_surface_ink_extents(value vsurf)
+{
+    CAMLparam1(vsurf);
+    CAMLlocal1(vextents);
+    double x, y, w, h;
+
+    cairo_recording_surface_ink_extents(SURFACE_VAL(vsurf), &x, &y, &w, &h);
+
+    vextents = caml_alloc(4 * Double_wosize, Double_array_tag);
+    Store_double_field(vextents, 0, x);
+    Store_double_field(vextents, 1, y);
+    Store_double_field(vextents, 2, w);
+    Store_double_field(vextents, 3, h);
+
+    CAMLreturn(vextents);
+}
+
+#else
+
+UNAVAILABLE2(cairo_recording_surface_create)
+UNAVAILABLE1(cairo_recording_surface_ink_extents)
+
+#endif /* CAIRO_HAS_RECORDING_SURFACE */
+
 
 
 /* Local Variables: */

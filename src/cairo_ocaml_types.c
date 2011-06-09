@@ -104,7 +104,7 @@ DEFINE_CUSTOM_OPERATIONS(pattern, cairo_pattern_destroy, PATTERN_VAL)
 
 DEFINE_CUSTOM_OPERATIONS(surface, cairo_surface_destroy, SURFACE_VAL)
 
-static value caml_cairo_surface_kind[14];
+static value caml_cairo_surface_kind[15];
 
 CAMLexport value caml_cairo_surface_kind_init(value unit)
 {
@@ -123,6 +123,7 @@ CAMLexport value caml_cairo_surface_kind_init(value unit)
   caml_cairo_surface_kind[11] = caml_hash_variant("OS2");
   caml_cairo_surface_kind[12] = caml_hash_variant("Win32_printing");
   caml_cairo_surface_kind[13] = caml_hash_variant("Quartz_image");
+  caml_cairo_surface_kind[14] = caml_hash_variant("Recording");
   return(Val_unit);
 }
 

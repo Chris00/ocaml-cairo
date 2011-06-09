@@ -853,6 +853,14 @@ external text_extents : context -> string -> text_extents
 
 (** {2:surfaces  Surfaces} *)
 
+(** A data structure for holding a rectangle. *)
+type rectangle = {
+  x:float;   (** X coordinate of the left side of the rectangle *)
+  y:float;   (** Y coordinate of the the top side of the rectangle  *)
+  w:float;   (** width of the rectangle *)
+  h:float;   (** height of the rectangle  *)
+}
+
 (** {3 Base module for surfaces} *)
 
 (** This is used to describe the content that a surface will contain,
@@ -1019,6 +1027,7 @@ sig
       | `OS2
       | `Win32_printing
       | `Quartz_image
+      | `Recording
       ]
 
   external get_type : t -> kind = "caml_cairo_surface_get_type"
@@ -1460,6 +1469,30 @@ sig
       (** Get the string representation of the given version id. *)
 end
 
+(** The recording surface is a surface that records all drawing operations at
+    the highest level of the surface backend interface.  The surface can then
+    be "replayed" against any target surface by using it as a source
+    surface.
+
+    A recording surface is logically unbounded. *)
+module Recording :
+sig
+  external create : ?extents:rectangle option -> content -> Surface.t
+    = "caml_cairo_recording_surface_create"
+  (** Creates a recording surface with the specified [content].
+      The surface is unbounded (no constraints on the size of the
+      drawing surface) unless the [extents] argument is provided.
+      Copying to another surface will be more efficient if the
+      extents are specified when the recording surface is
+      created. *)
+
+  external ink_extents : Surface.t -> rectangle
+    = "caml_cairo_recording_surface_ink_extents"
+  (** Measures the extents of the operations stored within the recording
+      surface.  This is useful to compute the required size of another
+      drawing surface into which to replay the full sequence of drawing
+      operations. *)
+end
 
 
 (* ---------------------------------------------------------------------- *)
@@ -2082,14 +2115,6 @@ external set_tolerance : context -> float -> unit = "caml_cairo_set_tolerance"
 external get_tolerance : context -> float = "caml_cairo_get_tolerance"
     (** Gets the current tolerance value, as set by {!Cairo.set_tolerance}. *)
 
-
-(** A data structure for holding a rectangle. *)
-type rectangle = {
-  x:float;   (** X coordinate of the left side of the rectangle *)
-  y:float;   (** Y coordinate of the the top side of the rectangle  *)
-  w:float;   (** width of the rectangle *)
-  h:float;   (** height of the rectangle  *)
-}
 
 external clip : context -> unit = "caml_cairo_clip"
   (** Establishes a new clip region by intersecting the current clip

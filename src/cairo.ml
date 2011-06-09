@@ -605,6 +605,7 @@ struct
       | `OS2
       | `Win32_printing
       | `Quartz_image
+      | `Recording
       ]
   external init : unit -> unit = "caml_cairo_surface_kind_init"
   let () = init()
@@ -807,6 +808,15 @@ struct
     = "caml_cairo_svg_get_versions"
   external version_to_string : version -> string
     = "caml_cairo_svg_version_to_string"
+end
+
+module Recording =
+struct
+  external create : ?extents:rectangle option -> content -> Surface.t
+    = "caml_cairo_recording_surface_create"
+
+  external ink_extents : Surface.t -> rectangle
+    = "caml_cairo_recording_surface_ink_extents"
 end
 
 
