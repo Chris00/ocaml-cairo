@@ -1474,17 +1474,21 @@ end
     be "replayed" against any target surface by using it as a source
     surface.
 
-    A recording surface is logically unbounded. *)
+    A recording surface is logically unbounded, i.e. it has no
+    implicit constraint on the size of the drawing surface.  *)
 module Recording :
 sig
-  external create : ?extents:rectangle option -> content -> Surface.t
+  external create : ?extents:rectangle -> content -> Surface.t
     = "caml_cairo_recording_surface_create"
-  (** Creates a recording surface with the specified [content].
-      The surface is unbounded (no constraints on the size of the
-      drawing surface) unless the [extents] argument is provided.
-      Copying to another surface will be more efficient if the
-      extents are specified when the recording surface is
-      created. *)
+  (** Creates a recording surface with the specified [content].  It
+      can record all drawing operations at the highest level (that is,
+      the level of {!paint}, {!mask}, {!stroke}, {!fill} and
+      {!Glyph.show_text}).  The surface is unbounded (no constraints
+      on the size of the drawing surface) unless the [extents]
+      argument is provided.  Copying to another surface (see
+      {!set_source_surface}) will be more efficient (and sometime
+      required) if the extents are specified when the recording
+      surface is created. *)
 
   external ink_extents : Surface.t -> rectangle
     = "caml_cairo_recording_surface_ink_extents"

@@ -812,7 +812,7 @@ end
 
 module Recording =
 struct
-  external create : ?extents:rectangle option -> content -> Surface.t
+  external create : ?extents:rectangle -> content -> Surface.t
     = "caml_cairo_recording_surface_create"
 
   external ink_extents : Surface.t -> rectangle

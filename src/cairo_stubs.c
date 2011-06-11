@@ -1218,7 +1218,7 @@ CAMLexport value caml_cairo_surface_finish(value vsurf)
 {
   /* noalloc */
   cairo_surface_t *surface = SURFACE_VAL(vsurf);
-  
+
   cairo_surface_finish(surface);
   /* Remove the user data with the bigarray key.  That will cause the
      finalizer to be executed (and release the proxy) and the
@@ -1753,38 +1753,31 @@ UNAVAILABLE1(cairo_svg_version_to_string)
 
 #ifdef CAIRO_HAS_RECORDING_SURFACE
 
-CAMLexport value caml_cairo_recording_surface_create(value vcontent, value vextents)
+CAMLexport value caml_cairo_recording_surface_create(
+  value vextents, value vcontent)
 {
     CAMLparam2(vcontent, vextents);
     CAMLlocal2(vsurf, vrectangle);
     cairo_surface_t *surf;
     cairo_content_t content;
-    cairo_rectangle_t *extents;
+    cairo_rectangle_t *extents = NULL;
 
     SET_CONTENT_VAL(content, vcontent);
 
-    /* Get extents rectangle */
-    if (vextents == Int_val(0))
-    {
-        /* No extents given - unbounded surface*/
-        extents = NULL;
-    }
-    else
-    {
-        vrectangle = Field(vextents, 0);
-        SET_MALLOC(extents, 1, cairo_rectangle_t);
-        extents->x = Double_field(vextents, 0);
-        extents->y = Double_field(vextents, 1);
-        extents->width = Double_field(vextents, 2);
-        extents->height = Double_field(vextents, 3);
+    /* Get extents rectangle, if given. */
+    if (Is_block(vextents)) /* = Some _ */ {
+      vrectangle = Field(vextents, 0);
+      SET_MALLOC(extents, 1, cairo_rectangle_t);
+      extents->x = Double_field(vextents, 0);
+      extents->y = Double_field(vextents, 1);
+      extents->width = Double_field(vextents, 2);
+      extents->height = Double_field(vextents, 3);
     }
 
     surf = cairo_recording_surface_create(content, extents);
 
-    if (extents != NULL)
-    {
-        /* Free the extents rectangle */
-        free(extents);
+    if (extents != NULL) {
+      free(extents);
     }
 
     caml_cairo_raise_Error(cairo_surface_status(surf));
