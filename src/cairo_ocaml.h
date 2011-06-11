@@ -53,7 +53,7 @@ struct custom_operations caml_surface_ops;
     case 0 : c = CAIRO_CONTENT_COLOR;  break;                           \
     case 1 : c = CAIRO_CONTENT_ALPHA;  break;                           \
     case 2 : c = CAIRO_CONTENT_COLOR_ALPHA;  break;                     \
-    default : caml_failwith("Decode Cairo.content");                    \
+    default : caml_failwith(__FILE__ ": Decode Cairo.content");         \
     }
 
 #define CONTENT_ASSIGN(vcontent, content)                               \
@@ -62,7 +62,7 @@ struct custom_operations caml_surface_ops;
     case CAIRO_CONTENT_COLOR: vcontent = Val_int(0); break;             \
     case CAIRO_CONTENT_ALPHA: vcontent = Val_int(1); break;             \
     case CAIRO_CONTENT_COLOR_ALPHA: vcontent = Val_int(2); break;       \
-    default : caml_failwith("Assign Cairo.content");                    \
+    default : caml_failwith(__FILE__ ": Assign Cairo.content");         \
     }
 
 /* cairo_path_t
