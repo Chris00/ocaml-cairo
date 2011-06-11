@@ -1768,10 +1768,10 @@ CAMLexport value caml_cairo_recording_surface_create(
     if (Is_block(vextents)) /* = Some _ */ {
       vrectangle = Field(vextents, 0);
       SET_MALLOC(extents, 1, cairo_rectangle_t);
-      extents->x = Double_field(vextents, 0);
-      extents->y = Double_field(vextents, 1);
-      extents->width = Double_field(vextents, 2);
-      extents->height = Double_field(vextents, 3);
+      extents->x = Double_field(vrectangle, 0);
+      extents->y = Double_field(vrectangle, 1);
+      extents->width = Double_field(vrectangle, 2);
+      extents->height = Double_field(vrectangle, 3);
     }
 
     surf = cairo_recording_surface_create(content, extents);
