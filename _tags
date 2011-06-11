@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 89f6c720b416bf9c9410e94d2174bd58)
+# DO NOT EDIT (digest: b3815a2813bbe61a8c3dd72e7766683e)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -86,6 +86,9 @@
 "tests/image_create.byte": pkg_bigarray
 <tests/*.ml{,i}>: use_cairo2
 <tests/*.ml{,i}>: pkg_bigarray
+# Executable recording
+<examples/recording.{native,byte}>: use_cairo2
+<examples/recording.{native,byte}>: pkg_bigarray
 # Executable text_rotate
 <examples/text_rotate.{native,byte}>: use_cairo2
 <examples/text_rotate.{native,byte}>: pkg_bigarray

@@ -201,6 +201,14 @@ Executable cloud
   BuildTools:     ocamlbuild
   Install:        false
 
+Executable recording
+  Path:           examples
+  MainIs:         recording.ml
+  BuildDepends:   cairo2
+  CompiledObject: best
+  BuildTools:     ocamlbuild
+  Install:        false
+
 # Tutorial sources
 ######################################################################
 Executable stroke
