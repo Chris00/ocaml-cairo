@@ -5912,17 +5912,17 @@ let compile_and_run_c ?(flags=[]) pgm ?(run_err=(fun _ -> ())) compile_err =
   let tmp, fh = Filename.open_temp_file "setup" ".c" in
   output_string fh pgm;
   close_out fh;
-  let pgm = Filename.temp_file "oasis-" ".exe" in
+  let exe = Filename.temp_file "oasis-" ".exe" in
   let o = match Sys.os_type with
-    | "Unix" | "Cygwin" -> "-o" ^ pgm
-    | "Win32" -> "/Fe" ^ pgm
+    | "Unix" | "Cygwin" -> "-o " ^ exe
+    | "Win32" -> "/Fe" ^ exe
     | _ -> assert false in
   let args = o :: (flags @ [tmp]) in
   BaseExec.run (BaseStandardVar.bytecomp_c_compiler()) args
     ~f_exit_code:(fun e -> if e <> 0 then (compile_err(); exit 1));
   Sys.remove tmp;
-  BaseExec.run pgm [] ~f_exit_code:run_err;
-  Sys.remove pgm
+  BaseExec.run exe [] ~f_exit_code:run_err;
+  Sys.remove exe
 
 let get_cairo_cflags () =
   let cairo_cflags = cairo_cflags() in
