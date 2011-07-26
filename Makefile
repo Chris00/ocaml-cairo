@@ -48,6 +48,10 @@ dist tar: $(DISTFILES)
 	tar -zcvf $(PKG_TARBALL) $(PKGNAME)-$(PKGVERSION)
 	rm -rf $(PKGNAME)-$(PKGVERSION)
 
+.PHONY: svn
+svn:
+	bzr push svn+ssh://svn.forge.ocamlcore.org/svn/archimedes/cairo
+
 .PHONY: tests
 tests: native
 	$(MAKE) -C tests
