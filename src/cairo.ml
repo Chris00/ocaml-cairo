@@ -54,6 +54,43 @@ type status =
 exception Error of status
 let () = Callback.register_exception "Cairo.Error" (Error INVALID_RESTORE)
 
+let error_of_status = function
+  | INVALID_RESTORE        -> "Cairo.Error(INVALID_RESTORE)"
+  | INVALID_POP_GROUP      -> "Cairo.Error(INVALID_POP_GROUP)"
+  | NO_CURRENT_POINT       -> "Cairo.Error(NO_CURRENT_POINT)"
+  | INVALID_MATRIX         -> "Cairo.Error(INVALID_MATRIX)"
+  | INVALID_STATUS         -> "Cairo.Error(INVALID_STATUS)"
+  | NULL_POINTER           -> "Cairo.Error(NULL_POINTER)"
+  | INVALID_STRING         -> "Cairo.Error(INVALID_STRING)"
+  | INVALID_PATH_DATA      -> "Cairo.Error(INVALID_PATH_DATA)"
+  | READ_ERROR             -> "Cairo.Error(READ_ERROR)"
+  | WRITE_ERROR            -> "Cairo.Error(WRITE_ERROR)"
+  | SURFACE_FINISHED       -> "Cairo.Error(SURFACE_FINISHED)"
+  | SURFACE_TYPE_MISMATCH  -> "Cairo.Error(SURFACE_TYPE_MISMATCH)"
+  | PATTERN_TYPE_MISMATCH  -> "Cairo.Error(PATTERN_TYPE_MISMATCH)"
+  | INVALID_CONTENT        -> "Cairo.Error(INVALID_CONTENT)"
+  | INVALID_FORMAT         -> "Cairo.Error(INVALID_FORMAT)"
+  | INVALID_VISUAL         -> "Cairo.Error(INVALID_VISUAL)"
+  | FILE_NOT_FOUND         -> "Cairo.Error(FILE_NOT_FOUND)"
+  | INVALID_DASH           -> "Cairo.Error(INVALID_DASH)"
+  | INVALID_DSC_COMMENT    -> "Cairo.Error(INVALID_DSC_COMMENT)"
+  | INVALID_INDEX          -> "Cairo.Error(INVALID_INDEX)"
+  | CLIP_NOT_REPRESENTABLE -> "Cairo.Error(CLIP_NOT_REPRESENTABLE)"
+  | TEMP_FILE_ERROR        -> "Cairo.Error(TEMP_FILE_ERROR)"
+  | INVALID_STRIDE         -> "Cairo.Error(INVALID_STRIDE)"
+  | FONT_TYPE_MISMATCH     -> "Cairo.Error(FONT_TYPE_MISMATCH)"
+  | USER_FONT_IMMUTABLE    -> "Cairo.Error(USER_FONT_IMMUTABLE)"
+  | USER_FONT_ERROR        -> "Cairo.Error(USER_FONT_ERROR)"
+  | NEGATIVE_COUNT         -> "Cairo.Error(NEGATIVE_COUNT)"
+  | INVALID_CLUSTERS       -> "Cairo.Error(INVALID_CLUSTERS)"
+  | INVALID_SLANT          -> "Cairo.Error(INVALID_SLANT)"
+  | INVALID_WEIGHT         -> "Cairo.Error(INVALID_WEIGHT)"
+
+let () =
+  Printexc.register_printer (function
+  | Error s -> Some(error_of_status s)
+  | _ -> None)
+
 external status_to_string  : status -> string = "caml_cairo_status_to_string"
 
 exception Unavailable

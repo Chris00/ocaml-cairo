@@ -2557,7 +2557,7 @@ external line_to : context -> x:float -> y:float -> unit = "caml_cairo_line_to"
       y) in user-space coordinates. After this call the current point
       will be (x, y).
 
-      If there is no current point before the call to cairo_line_to()
+      If there is no current point before the call to [Cairo.line_to],
       this function will behave as {!Cairo.move_to}[ cr x y]. *)
 
 external move_to : context -> x:float -> y:float -> unit = "caml_cairo_move_to"
