@@ -1,3 +1,4 @@
+# Makefile for developers (users use oasis exclusively).
 ROOT=.
 include Makefile.conf
 
