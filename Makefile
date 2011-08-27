@@ -28,18 +28,6 @@ doc install uninstall reinstall: setup.data
 upload-doc: doc
 	scp -C -r _build/src/API.docdir/ $(WEB)/API
 
-cairo.godiva: cairo.godiva.in
-	@ sed -e "s/@PACKAGE@/$(PKGNAME)/" $< \
-	| sed -e "s/@VERSION@/$(PKGVERSION)/" \
-	| sed -e "s/@TARBALL@/$(PKG_TARBALL)/" \
-	| sed -e "s/@DOWNLOAD@/$(OCAMLFORGE_FILE_NO)/" > $@
-	@ echo "Updated \"$@\"."
-
-# Assume the environment variable $GODI_LOCALBASE is set
-.PHONY: godi
-godi: cairo.godiva
-	godiva $<
-
 # Make a tarball
 .PHONY: dist tar
 dist tar: $(DISTFILES)
