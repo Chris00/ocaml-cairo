@@ -52,14 +52,14 @@ web tutorial: all doc
 	$(MAKE) -C doc $@
 
 
-.PHONY: clean dist-clean
+.PHONY: clean dist-clean distclean
 clean:
 	ocaml setup.ml -clean
 	$(RM) $(PKG_TARBALL)
 	$(RM) $(wildcard *~ *.pdf *.ps *.png *.svg) cairo.godiva setup.data
 	$(MAKE) -C doc $@
 
-dist-clean::
+distclean dist-clean::
 	ocaml setup.ml -distclean
 	$(RM) $(wildcard *.ba[0-9] *.bak *~ *.odocl) setup.log
 
