@@ -2,7 +2,7 @@
 ROOT=.
 include Makefile.conf
 
-PKGNAME = $(shell oasis query name)
+PKGNAME = $(shell oasis query name || echo "oasis")
 PKGVERSION = $(shell oasis query version)
 PKG_TARBALL = $(PKGNAME)-$(PKGVERSION).tar.gz
 

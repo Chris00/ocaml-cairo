@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: e6fbacac384e87e65eefc7febff448a6) *)
+(* DO NOT EDIT (digest: 6f16242b07e1100edc02ef46eeb372fe) *)
 module OASISGettext = struct
 # 21 "/home/trch-nobackup/software/oasis/src/oasis/OASISGettext.ml"
   
@@ -461,8 +461,8 @@ let package_default =
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
+# 465 "myocamlbuild.ml"
 (* OASIS_STOP *)
-# 1 "myocamlbuild.ml"
 
 let rec split_on is_delim s i0 i i1 =
   if i >= i1 then [String.sub s i0 (i1 - i0)]
@@ -504,12 +504,28 @@ Ocamlbuild_plugin.dispatch
       flag ["use_libcairo_c"; "compile"; "c"] (S cflags);
       flag ["use_libcairo_c"; "library"; "shared"]
         (S (A "-cclib" :: A "-Lsrc/" :: cflags));
-      flag ["use_libcairo_c"; "link"]
-        (S (List.fold_right (fun o l -> A "-cclib" :: A o :: l) cclib []));
+      let cclib_spec =
+        List.fold_right (fun o l -> A "-cclib" :: A o :: l) cclib [] in
+      flag ["use_libcairo_c"; "link"] (S cclib_spec);
       flag ["ocamlmklib"; "c"]
         (S (List.map (fun o -> A o) cclib));
       flag ["use_libgtk_c"; "compile"; "c"]
         (S (List.fold_right (fun o l -> A "-ccopt" :: A o :: l) gtk_cflags []));
+
+      (* ocamlbuild does not support cmxs before 3.12.0.  Quick hack. *)
+      let version_major, version_minor =
+        Scanf.sscanf Sys.ocaml_version "%i.%i" (fun mj mi -> mj, mi) in
+      if version_major <= 3 && version_minor <= 11 then (
+        rule "cmxa -> cmxs" ~dep:"%.cmxa" ~prod:"%.cmxs"
+          begin fun env build ->
+            let cmxa = env "%.cmxa" and cmxs = env "%.cmxs" in
+            Cmd(S [!Options.ocamlopt; A "-shared"; A "-linkall";
+                   T (tags_of_pathname cmxs ++ "library" ++ "native" ++ "ocaml"
+                      ++ "link" ++ "shared");
+                   P cmxa; A "-o"; Px cmxs])
+          end;
+      )
+
     | _ -> ()
     end;
   ]);;
