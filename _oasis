@@ -26,6 +26,7 @@ Library cairo2
   BuildDepends: bigarray
 
 Library cairo_gtk
+  Build: false
   if flag(lablgtk2)
     Build: true
   Path:         src/
@@ -186,6 +187,7 @@ Executable text_rotate
   Install:        false
 
 Executable gtk_demo
+  Build: false
   if flag(lablgtk2)
     Build: true
   Path:           examples/
