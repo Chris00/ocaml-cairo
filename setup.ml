@@ -5924,7 +5924,7 @@ let compile_and_run_c ?(flags=[]) pgm ?(run_err=(fun _ -> ())) compile_err =
     | "Unix" | "Cygwin" -> "-o " ^ exe
     | "Win32" -> "/Fe" ^ exe
     | _ -> assert false in
-  let args = o :: tmp :: flags in
+  let args = o :: (flags @ [tmp]) in
   BaseExec.run (BaseStandardVar.bytecomp_c_compiler()) args
     ~f_exit_code:(fun e -> if e <> 0 then (compile_err(); exit 1));
   Sys.remove tmp;
