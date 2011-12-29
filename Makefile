@@ -23,15 +23,8 @@ setup.data: setup.ml
 setup.ml: _oasis
 	oasis.dev setup
 
-doc install: setup.data
+doc install uninstall reinstall: setup.data
 	ocaml setup.ml -$@
-uninstall: setup.data
-	ocaml setup.ml -$@
-	ocamlfind remove cairo2
-	ocamlfind remove cairo_gtk
-reinstall:
-	$(MAKE) uninstall
-	$(MAKE) install
 
 upload-doc: doc
 	scp -C -r _build/src/API.docdir/ $(WEB)/API
@@ -68,5 +61,5 @@ clean:
 
 distclean dist-clean::
 	ocaml setup.ml -distclean
-	$(RM) $(wildcard *.ba[0-9] *.bak *~ *.odocl) setup.log
+	$(RM) $(wildcard *.ba[0-9] *.bak *~ *.odocl)
 
