@@ -6047,35 +6047,33 @@ let gtk_cflags =
        | _ -> String.concat "\t" gtk_cflags)
 
 let () =
-  let conf t args =
+  let configure t args =
     setup_t.BaseSetup.configure t args;
     (* One must define this variable after the standard configure for
        the flag(lablgtk2) to be correctly set if --disable-lablgtk2
        was present on the command line of configure. *)
     let _ = BaseEnv.var_define "gtk_cflags" (fun () -> Lazy.force gtk_cflags) in
-    () in
-  BaseSetup.setup { setup_t with BaseSetup.configure = conf }
 
-
-(* Cheks at the end of configure for early warnings. *)
-let () =
-  if BaseEnv.var_get "lablgtk2" = "true" then (
-    (* When lablgtk2 will be used, make sure the C headers are present
-       (these may be in a different package than the OCaml library). *)
-    let gtk2 = BaseEnv.var_get "gtk_cflags" in
-    let lablgtk2 = "-I" ^ BaseExec.run_read_one_line
-                            (BaseCheck.ocamlfind ())
-                            ["query"; "-format"; "%d"; "lablgtk2"] in
-    compile_and_run_c ~flags:[gtk2; lablgtk2]
-      "#include <gtk/gtkversion.h>\n\
-       #include <gdk/gdk.h>\n\
-       #include <wrappers.h>\n\
-       #include <ml_gobject.h>\n\
-       #include <ml_gdk.h>\n\
-       #include <ml_gdkpixbuf.h>\n\
-       int main(int argc, char **argv) {
-         return(0);
-       }"
-      (fun _ -> printf "ERROR: Install the development files for lablgtk2 \
-        (e.g. the\n  liblablgtk2-ocaml-dev package for Debian).\n");
-  )
+    (* Checks at the end of configure for early warnings.  [gtk_cflags]
+       is only known here; one cannot put this ourside [configure]. *)
+    if BaseEnv.var_get "lablgtk2" = "true" then (
+      (* When lablgtk2 will be used, make sure the C headers are present
+         (these may be in a different package than the OCaml library). *)
+      let gtk2 = BaseEnv.var_get "gtk_cflags" in
+      let lablgtk2 = "-I" ^ BaseExec.run_read_one_line
+                              (BaseCheck.ocamlfind ())
+                              ["query"; "-format"; "%d"; "lablgtk2"] in
+      compile_and_run_c ~flags:[gtk2; lablgtk2]
+        "#include <gtk/gtkversion.h>\n\
+         #include <gdk/gdk.h>\n\
+         #include <wrappers.h>\n\
+         #include <ml_gobject.h>\n\
+         #include <ml_gdk.h>\n\
+         #include <ml_gdkpixbuf.h>\n\
+         int main(int argc, char **argv) {
+           return(0);
+         }"
+        (fun _ -> printf "ERROR: Install the development files for lablgtk2 \
+          (e.g. the\n  liblablgtk2-ocaml-dev package for Debian).\n");
+    ) in
+  BaseSetup.setup { setup_t with BaseSetup.configure = configure }
