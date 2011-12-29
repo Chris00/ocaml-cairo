@@ -483,9 +483,13 @@ let cflags = split_on_tab (BaseEnvLight.var_get "cairo_cflags" env)
 let cclib = split_on_tab (BaseEnvLight.var_get "cairo_clibs" env)
 
 (* Gtk *)
-let lablgtk2_cflags = "-I" ^ BaseEnvLight.var_get "pkg_lablgtk2" env
+let lablgtk2_cflags =
+  try ["-I" ^ BaseEnvLight.var_get "pkg_lablgtk2" env]
+  with Not_found -> [] (* if --disable-lablgtk2 *)
 let gtk_cflags =
-  lablgtk2_cflags :: split_on_tab(BaseEnvLight.var_get "gtk_cflags" env)
+  try split_on_tab(BaseEnvLight.var_get "gtk_cflags" env) @ lablgtk2_cflags
+  with Not_found ->
+       Printf.eprintf "ERROR: gtk_cflags variable not in setup.data\n"; exit 1
 ;;
 
 

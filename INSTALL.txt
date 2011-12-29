@@ -39,6 +39,11 @@ installation: no additional library is required.
 Further configuration
 =====================
 
+To compile cairo_gtk, you will need the development files for lablgtk
+which are present in the Debian package liblablgtk2-ocaml-dev (or
+similar for other distributions).  If you do not want that module, use
+the flag --disable-lablgtk2 at the configure step.
+
 The file 'config.ml' allows to set your own flags for the C libraries
 Cairo and Gtk+, bypassing pkg-config detection during configure.
 
