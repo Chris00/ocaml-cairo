@@ -2,7 +2,7 @@
 ROOT=.
 include Makefile.conf
 
-PKGNAME = $(shell oasis query name || echo "oasis")
+PKGNAME = $(shell oasis query name)
 PKGVERSION = $(shell oasis query version)
 PKG_TARBALL = $(PKGNAME)-$(PKGVERSION).tar.gz
 
@@ -23,8 +23,15 @@ setup.data: setup.ml
 setup.ml: _oasis
 	oasis.dev setup
 
-doc install uninstall reinstall: setup.data
+doc install: setup.data
 	ocaml setup.ml -$@
+uninstall: setup.data
+	ocaml setup.ml -$@
+	ocamlfind remove cairo2
+	ocamlfind remove cairo_gtk
+reinstall:
+	$(MAKE) uninstall
+	$(MAKE) install
 
 upload-doc: doc
 	scp -C -r _build/src/API.docdir/ $(WEB)/API
