@@ -5987,6 +5987,9 @@ let cairo_clibs =
 
 let compile_and_run_c =
   let cc = BaseStandardVar.bytecomp_c_compiler() in
+  (* On some platforms, the OCaml C headers are not in a the locations
+     searched by the C compiler. *)
+  let stdlib = "-I" ^ BaseStandardVar.standard_library() in
   fun ?(flags=[]) pgm ?(run_err=(fun _ -> ())) compile_err -> (
     let tmp, fh = Filename.open_temp_file "setup" ".c" in
     output_string fh pgm;
@@ -5996,9 +5999,10 @@ let compile_and_run_c =
       | "Unix" | "Cygwin" -> "-o " ^ exe
       | "Win32" -> "/Fe" ^ exe
       | _ -> assert false in
-    let args = o :: (flags @ [tmp]) in
-    BaseExec.run cc args
-                 ~f_exit_code:(fun e -> if e <> 0 then (compile_err(); exit 1));
+    let args = o :: stdlib :: (flags @ [tmp]) in
+    let f_exit_code e =
+      if e <> 0 then (compile_err(); Sys.remove tmp; exit 1) in
+    BaseExec.run cc args ~f_exit_code;
     Sys.remove tmp;
     BaseExec.run exe [] ~f_exit_code:run_err;
     Sys.remove exe
@@ -6037,7 +6041,7 @@ let get_cairo_clibs () =
     (fun _ -> printf "ERROR: Could not compile a test program. The \
       cairo library flags %S are likely incorrect.  Set them in config.ml.\n"
       (String.concat " " cairo_clibs));
-    String.concat "\t" cairo_clibs
+  String.concat "\t" cairo_clibs
 
 let _ = BaseEnv.var_define "cairo_clibs" get_cairo_clibs
 
