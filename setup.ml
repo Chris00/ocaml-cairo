@@ -5990,7 +5990,7 @@ let compile_and_run_c =
   (* On some platforms, the OCaml C headers are not in a the locations
      searched by the C compiler. *)
   let stdlib = "-I" ^ BaseStandardVar.standard_library() in
-  fun ?(flags=[]) pgm ?(run_err=(fun _ -> ())) compile_err -> (
+  fun ?(cflags=[]) ?(lflags=[]) pgm ?(run_err=(fun _ -> ())) compile_err -> (
     let tmp, fh = Filename.open_temp_file "setup" ".c" in
     output_string fh pgm;
     close_out fh;
@@ -5999,7 +5999,7 @@ let compile_and_run_c =
       | "Unix" | "Cygwin" -> "-o " ^ exe
       | "Win32" -> "/Fe" ^ exe
       | _ -> assert false in
-    let args = o :: stdlib :: (flags @ [tmp]) in
+    let args = o :: stdlib :: (cflags @ [tmp] @ lflags) in
     let f_exit_code e =
       if e <> 0 then (compile_err(); Sys.remove tmp; exit 1) in
     BaseExec.run cc args ~f_exit_code;
@@ -6010,7 +6010,7 @@ let compile_and_run_c =
 
 let get_cairo_cflags () =
   let cairo_cflags = Lazy.force cairo_cflags in
-  compile_and_run_c ~flags:cairo_cflags
+  compile_and_run_c ~cflags:cairo_cflags
     "#include <cairo.h>
      int main(int argc, char **argv) {
         if(CAIRO_VERSION_MAJOR >= 1 && CAIRO_VERSION_MINOR >= 6) {
@@ -6031,7 +6031,7 @@ let _ = BaseEnv.var_define "cairo_cflags" get_cairo_cflags
 
 let get_cairo_clibs () =
   let cairo_clibs = Lazy.force cairo_clibs in
-  compile_and_run_c ~flags:(Lazy.force cairo_cflags @ cairo_clibs)
+  compile_and_run_c ~cflags:(Lazy.force cairo_cflags) ~lflags:cairo_clibs
     "#include <cairo.h>
      int main(int argc, char **argv) {
        cairo_t* cr;
@@ -6071,7 +6071,7 @@ let () =
       let lablgtk2 = "-I" ^ BaseExec.run_read_one_line
                               (BaseCheck.ocamlfind ())
                               ["query"; "-format"; "%d"; "lablgtk2"] in
-      compile_and_run_c ~flags:[gtk2; lablgtk2]
+      compile_and_run_c ~cflags:[gtk2; lablgtk2]
         "#include <gtk/gtkversion.h>\n\
          #include <gdk/gdk.h>\n\
          #include <wrappers.h>\n\
