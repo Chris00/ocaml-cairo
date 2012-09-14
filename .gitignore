@@ -31,10 +31,13 @@ _build/
 *.data
 *.docdir
 *.odocl
+README.txt
 AUTHORS.txt
 INSTALL.txt
 src/*.mllib
 src/*.clib
 *.native
+*.byte
 setup.log
 *.bak
+*.tar.gz
