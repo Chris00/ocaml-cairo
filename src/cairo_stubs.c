@@ -1388,7 +1388,7 @@ CAMLexport value caml_cairo_format_stride_for_width(value vformat, value vw)
 }
 
 
-/* Attach a proxy the the bigarray (no need to create another bigarray
+/* Attach a proxy to the bigarray (no need to create another bigarray
    refering to the same proxy as for sub-arrays).  This proxy is
    finalized when the surface is destroyed. */
 static cairo_status_t caml_cairo_image_bigarray_attach_proxy
