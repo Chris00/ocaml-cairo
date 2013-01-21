@@ -28,7 +28,6 @@ let () =
   ignore(w#connect#destroy GMain.quit);
 
   let d = GMisc.drawing_area ~packing:w#add () in
-  d#misc#set_double_buffered false;
   ignore(d#event#connect#expose (expose d));
 
   w#show();
