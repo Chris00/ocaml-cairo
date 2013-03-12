@@ -1473,8 +1473,8 @@ SURFACE_GET_DATA(UINT8, 1,
                  cairo_image_surface_get_stride(SURFACE_VAL(vsurf))
                  * cairo_image_surface_get_height(SURFACE_VAL(vsurf)) )
 SURFACE_GET_DATA(INT32, 2,
-                 cairo_image_surface_get_stride(SURFACE_VAL(vsurf)),
-                 cairo_image_surface_get_height(SURFACE_VAL(vsurf)) )
+                 cairo_image_surface_get_height(SURFACE_VAL(vsurf)),
+                 cairo_image_surface_get_stride(SURFACE_VAL(vsurf)) / 4 )
 
 
 #define GET_SURFACE(name, val_of, type)                         \

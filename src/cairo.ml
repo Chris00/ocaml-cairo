@@ -729,10 +729,7 @@ struct
     if format <> ARGB32 && format <> RGB24 then
       invalid_arg "Cairo.Image.get_data32: image format must be \
 		   ARGB32 or RGB24";
-    if get_width surface <> get_stride surface then
-      invalid_arg "Cairo.Image.get_data32: width <> stride";
     get_data32 surface
-
 
   let output_ppm fh ?width ?height (data: data32) =
     let width = match width with

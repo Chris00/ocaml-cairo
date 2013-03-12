@@ -1135,13 +1135,18 @@ sig
 
   val get_data8 : Surface.t -> data8
     (** Get the data of the image surface (shared), for direct
-        inspection or modification. *)
+        inspection or modification. A call to
+        {!Cairo.Surface.mark_dirty} or
+        {!Cairo.Surface.mark_dirty_rectangle} is required after the
+        data is modified. *)
 
   val get_data32 : Surface.t -> data32
     (** Get the data of the image surface (shared), for direct
         inspection or modification.  The 1st (resp. 2nd) dimension of
-        the bigarray correspond to the width (resp. height) of the
-        surface.
+        the bigarray correspond to the height (resp. width) of the
+        surface. A call to {!Cairo.Surface.mark_dirty} or
+        {!Cairo.Surface.mark_dirty_rectangle} is required after the
+        data is modified.
 
         @raise Invalid_argument if the format is not [ARGB32] or
         [RGB24] because the array dimensions would not reflect the
