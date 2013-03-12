@@ -1349,7 +1349,8 @@ CAMLexport value caml_cairo_image_surface_create(value vformat,
   cairo_status_t status;
 
   vsurf = ALLOC(surface); /* alloc this first in case it raises an exn */
-  data = malloc(stride * Int_val(vheight));
+  /* Use calloc to initialize the surface to all black. */
+  data = calloc(1, stride * Int_val(vheight));
   if (data == NULL) caml_raise_out_of_memory();
   surf = cairo_image_surface_create_for_data(data, format, Int_val(vwidth),
                                              Int_val(vheight), stride);
