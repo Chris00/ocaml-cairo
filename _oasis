@@ -197,6 +197,14 @@ Executable gtk_demo
   BuildTools:     ocamlbuild
   Install:        false
 
+Executable graphics_demo
+  Path:           examples/
+  MainIs:         graphics_demo.ml
+  BuildDepends:   cairo2, graphics
+  CompiledObject: best
+  BuildTools:     ocamlbuild
+  Install:        false
+
 Executable cloud
   Path:           examples/word_cloud/
   MainIs:         run.ml
