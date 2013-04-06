@@ -1162,7 +1162,7 @@ sig
   external get_height : Surface.t -> int = "caml_cairo_image_surface_get_height"
       (** Get the height of the image surface in pixels. *)
 
-  external get_stride : Surface.t -> int = "caml_cairo_image_surface_get_stride"
+  val get_stride : Surface.t -> int
       (** Get the stride of the image surface in bytes. *)
 
   val output_ppm : out_channel -> ?width:int -> ?height:int -> data32 -> unit
