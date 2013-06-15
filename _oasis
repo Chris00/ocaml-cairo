@@ -56,6 +56,11 @@ Document API
   XOCamlbuildPath: src/
   XOCamlbuildLibraries: cairo2, cairo2.lablgtk2
 
+SourceRepository trunk
+  Type:       git
+  Location:   https://forge.ocamlcore.org/anonscm/git/cairo/cairo.git
+  Browser:    http://forge.ocamlcore.org/scm/browser.php?group_id=246
+
 
 # Tests
 ######################################################################
