@@ -17,7 +17,7 @@ all byte native: configure
 	ocaml setup.ml -build
 
 configure: setup.data
-setup.data: setup.ml
+setup.data: setup.ml config.ml
 	ocaml $< -configure
 
 setup.ml: _oasis
