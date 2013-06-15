@@ -13,12 +13,22 @@ DISTFILES = AUTHORS.txt INSTALL.txt README.txt _oasis _tags myocamlbuild.ml \
 
 .PHONY: all byte native configure doc install uninstall reinstall upload-doc
 
+# setup.ml modifies setup_t => not compatible with dyn mode for oasis ≤ 0.3
+SAVE = cp _tags _tags.bak && cp myocamlbuild.ml myocamlbuild.ml.bak \
+	&& cp setup.ml setup.ml.bak
+RESTORE = cp _tags.bak _tags && cp myocamlbuild.ml.bak myocamlbuild.ml \
+	&& cp setup.ml.bak setup.ml
+
 all byte native: configure
+	$(SAVE) && oasis setup
 	ocaml setup.ml -build
+	$(RESTORE)
 
 configure: setup.data
 setup.data: setup.ml config.ml
+	$(SAVE) && oasis setup
 	ocaml $< -configure
+	$(RESTORE)
 
 setup.ml: _oasis
 	oasis setup -setup-update dynamic
@@ -38,10 +48,6 @@ dist tar: $(DISTFILES)
 	cd $(PKGNAME)-$(PKGVERSION) && oasis setup
 	tar -zcvf $(PKG_TARBALL) $(PKGNAME)-$(PKGVERSION)
 	rm -rf $(PKGNAME)-$(PKGVERSION)
-
-.PHONY: svn
-svn:
-	bzr push svn+ssh://svn.forge.ocamlcore.org/svn/archimedes/cairo
 
 .PHONY: tests
 tests: native
