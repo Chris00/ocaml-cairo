@@ -45,7 +45,10 @@ static long caml_cairo_hash_pointer(value v)
   be in bad shape if the surface is garbage collected -- thus
   destroyed by the finalizer), the ref count of the surface will be
   increased.  This however requires that the context finalizer
-  decreases it. */
+  decreases it.
+
+  FIXME: a context can also be created from a GdkDrawable object
+  whose ref count needs to be handled too. */
 static void caml_cairo_cairo_finalize(value v)
 {
   cairo_surface_t *surface = cairo_get_target(CAIRO_VAL(v));

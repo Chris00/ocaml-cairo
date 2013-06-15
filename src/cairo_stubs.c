@@ -1349,7 +1349,8 @@ CAMLexport value caml_cairo_image_surface_create(value vformat,
   cairo_status_t status;
 
   vsurf = ALLOC(surface); /* alloc this first in case it raises an exn */
-  data = malloc(stride * Int_val(vheight));
+  /* Use calloc to initialize the surface to all black. */
+  data = calloc(1, stride * Int_val(vheight));
   if (data == NULL) caml_raise_out_of_memory();
   surf = cairo_image_surface_create_for_data(data, format, Int_val(vwidth),
                                              Int_val(vheight), stride);
@@ -1388,7 +1389,7 @@ CAMLexport value caml_cairo_format_stride_for_width(value vformat, value vw)
 }
 
 
-/* Attach a proxy the the bigarray (no need to create another bigarray
+/* Attach a proxy to the bigarray (no need to create another bigarray
    refering to the same proxy as for sub-arrays).  This proxy is
    finalized when the surface is destroyed. */
 static cairo_status_t caml_cairo_image_bigarray_attach_proxy
@@ -1473,8 +1474,8 @@ SURFACE_GET_DATA(UINT8, 1,
                  cairo_image_surface_get_stride(SURFACE_VAL(vsurf))
                  * cairo_image_surface_get_height(SURFACE_VAL(vsurf)) )
 SURFACE_GET_DATA(INT32, 2,
-                 cairo_image_surface_get_stride(SURFACE_VAL(vsurf)),
-                 cairo_image_surface_get_height(SURFACE_VAL(vsurf)) )
+                 cairo_image_surface_get_height(SURFACE_VAL(vsurf)),
+                 cairo_image_surface_get_stride(SURFACE_VAL(vsurf)) / 4 )
 
 
 #define GET_SURFACE(name, val_of, type)                         \

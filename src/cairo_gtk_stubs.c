@@ -66,6 +66,10 @@ CAMLexport value caml_gdk_cairo_create(value vdrawable)
   CAMLlocal1(vcontext);
   cairo_t *cr = gdk_cairo_create(GdkDrawable_val(vdrawable));
   caml_cairo_raise_Error(cairo_status(cr));
+  /* Quick fix to avoid destroying this context's target surface upon
+     its finalization. */
+  cairo_surface_t *surface = cairo_get_target(cr);
+  cairo_surface_reference(surface);
   /* FIXME: is there a way to indicate the dependence of [vcontext] on
      [vdrawable] ? */
   vcontext = alloc_custom(&caml_cairo_ops, sizeof(void*), 1, 50);
