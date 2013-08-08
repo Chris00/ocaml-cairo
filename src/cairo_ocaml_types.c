@@ -107,6 +107,30 @@ DEFINE_CUSTOM_OPERATIONS(pattern, cairo_pattern_destroy, PATTERN_VAL)
 
 DEFINE_CUSTOM_OPERATIONS(surface, cairo_surface_destroy, SURFACE_VAL)
 
+/* Some surfaces have a callback attached.  We must store its value at
+   a location that exists for the lifetime of the surface so one can
+   pass a pointer to it to the *_for_stream functions and the
+   finalizer may unregister it.  Wrapping cairo_surface_t is not
+   possible because such values are returned by C functions.  Thus
+   store it in the surface (thanks Cairo!). */
+static const cairo_user_data_key_t surface_callback;
+
+static void caml_destroy_surface_callback(void *data)
+{
+  /* fprintf(stderr, "DESTROY surface callback\n");  fflush(stderr); */
+  caml_remove_generational_global_root((value *)data);
+  free(data);
+}
+
+/* [output] is a pointer on the callback [value], already allocated
+   (and assigned). */
+#define SET_SURFACE_CALLBACK(surf, output)                              \
+  caml_register_generational_global_root(output);                       \
+  caml_cairo_raise_Error(                                               \
+    cairo_surface_set_user_data (surf, &surface_callback, output,       \
+                                 &caml_destroy_surface_callback))
+
+
 static value caml_cairo_surface_kind[15];
 
 CAMLexport value caml_cairo_surface_kind_init(value unit)
@@ -201,7 +225,7 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
 #define ALLOC_CAIRO_MATRIX2(v1, v2)                      \
   cairo_matrix_t matrix_##v1, matrix_##v2;               \
   SET_CAIRO_MATRIX_(v1);                                 \
-  SET_CAIRO_MATRIX_(v2)  
+  SET_CAIRO_MATRIX_(v2)
 
 /* `f' may use `GET_MATRIX(v)' */
 #define WITH_MATRIX_DO(v, f)                                            \

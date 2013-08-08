@@ -1439,7 +1439,7 @@ sig
     *)
 
   external create_for_stream : output:(string -> unit) ->
-    width:float -> height:float -> Surface.t
+                               width:float -> height:float -> Surface.t
     = "caml_cairo_svg_surface_create_for_stream"
     (** Creates a SVG surface of the specified size in points to be
         written incrementally to the stream represented by [output].

@@ -2,7 +2,7 @@
 OASISFormat: 0.3
 Name:        cairo
 Version:     0.4.3
-Synopsis:    Binding to Cairo, a Vector Graphics Library.
+Synopsis:    Binding to Cairo, a 2D Vector Graphics Library.
 Description: This is a binding to Cairo, a 2D graphics library with
   support for multiple output devices.  Currently supported output targets
   include the X Window System, Quartz, Win32, image buffers, PostScript,
@@ -81,6 +81,13 @@ Executable matrix_set
 Executable surface_gc
   Path:           tests/
   MainIs:         surface_gc.ml
+  BuildDepends:   cairo2
+  BuildTools:     ocamlbuild
+  Install:        false
+
+Executable test_for_stream
+  Path:           tests/
+  MainIs:         test_for_stream.ml
   BuildDepends:   cairo2
   BuildTools:     ocamlbuild
   Install:        false

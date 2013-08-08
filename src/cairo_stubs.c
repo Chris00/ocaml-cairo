@@ -1435,11 +1435,11 @@ static cairo_status_t caml_cairo_image_bigarray_attach_proxy
     surf = cairo_image_surface_create_for_data                          \
       ((unsigned char *) b->data, FORMAT_VAL(vformat),                  \
        width, Int_val(vheight), Int_val(vstride));                      \
-    caml_cairo_raise_Error(cairo_surface_status(surf));                       \
+    caml_cairo_raise_Error(cairo_surface_status(surf));                 \
     status = caml_cairo_image_bigarray_attach_proxy(surf, b);           \
     if (status != CAIRO_STATUS_SUCCESS) {                               \
       cairo_surface_destroy(surf);                                      \
-      caml_cairo_raise_Error(status);                                         \
+      caml_cairo_raise_Error(status);                                   \
     }                                                                   \
     SURFACE_VAL(vsurf) = surf;                                          \
     CAMLreturn(vsurf);                                                  \
@@ -1514,15 +1514,16 @@ UNAVAILABLE1(cairo_image_surface_get_stride)
 static cairo_status_t caml_cairo_output_string
 (void *fn, const unsigned char *data, unsigned int length)
 {
-  value s, r;
-  /* should protect s ? */
+  CAMLparam0();
+  CAMLlocal2(s, r);
+
   s = caml_alloc_string(length);
   memmove(String_val(s), data, length);
   r = caml_callback_exn(* ((value *) fn), s);
   if (Is_exception_result(r))
-    return(CAIRO_STATUS_WRITE_ERROR);
+    CAMLreturn(CAIRO_STATUS_WRITE_ERROR);
   else
-    return(CAIRO_STATUS_SUCCESS);
+    CAMLreturn(CAIRO_STATUS_SUCCESS);
 }
 
 #define SURFACE_CREATE_FROM_STREAM(name)                                \
@@ -1531,10 +1532,14 @@ static cairo_status_t caml_cairo_output_string
     CAMLparam3(voutput, vwidth, vheight);                               \
     CAMLlocal1(vsurf);                                                  \
     cairo_surface_t* surf;                                              \
+    value *output;                                                      \
                                                                         \
-    surf = name(&caml_cairo_output_string, &voutput,                    \
+    output = malloc(sizeof(value));                                     \
+    output[0] = voutput;                                                \
+    surf = name(&caml_cairo_output_string, output,                      \
                 Double_val(vwidth), Double_val(vheight));               \
-    caml_cairo_raise_Error(cairo_surface_status(surf));                       \
+    caml_cairo_raise_Error(cairo_surface_status(surf));                 \
+    SET_SURFACE_CALLBACK(surf, output);                                 \
     SURFACE_ASSIGN(vsurf, surf);                                        \
     CAMLreturn(vsurf);                                                  \
   }
