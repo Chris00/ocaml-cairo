@@ -6,8 +6,8 @@ PKGNAME = $(shell oasis query name)
 PKGVERSION = $(shell oasis query version)
 PKG_TARBALL = $(PKGNAME)-$(PKGVERSION).tar.gz
 
-DISTFILES = AUTHORS.txt INSTALL.txt README.txt _oasis _tags myocamlbuild.ml \
-  config.ml setup.ml Makefile src/META src/API.odocl \
+DISTFILES = AUTHORS.txt INSTALL.txt README.txt _oasis _opam _tags \
+  myocamlbuild.ml config.ml setup.ml Makefile src/META src/API.odocl \
   $(wildcard $(addprefix src/, *.ml *.mli *.mllib *.c *.h *.clib)) \
   tests/ examples/ $(addprefix doc/,Makefile tutorial.css tutorial.html)
 

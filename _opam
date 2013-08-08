@@ -1,0 +1,5 @@
+depexts: [
+  [ [ "debian"  ] [ "libcairo2-dev" ] ]
+  [ [ "freebsd" ] [ "Graphics/cairo" ] ]
+  [ [ "openbsd" ] [ "Graphics/cairo" ] ]
+]
