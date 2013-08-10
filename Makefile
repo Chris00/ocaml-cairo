@@ -13,22 +13,22 @@ DISTFILES = AUTHORS.txt INSTALL.txt README.txt _oasis _opam _tags \
 
 .PHONY: all byte native configure doc install uninstall reinstall upload-doc
 
-# setup.ml modifies setup_t => not compatible with dyn mode for oasis ≤ 0.3
-SAVE = cp _tags _tags.bak && cp myocamlbuild.ml myocamlbuild.ml.bak \
-	&& cp setup.ml setup.ml.bak
-RESTORE = cp _tags.bak _tags && cp myocamlbuild.ml.bak myocamlbuild.ml \
-	&& cp setup.ml.bak setup.ml
-
 all byte native: configure
-	$(SAVE) && oasis setup
+	oasis setup
 	ocaml setup.ml -build
-	$(RESTORE)
+	$(MAKE) restore
 
 configure: setup.data
 setup.data: setup.ml config.ml
-	$(SAVE) && oasis setup
+	oasis setup
 	ocaml $< -configure
-	$(RESTORE)
+	$(MAKE) restore
+
+# setup.ml modifies setup_t => not compatible with dyn mode for oasis ≤ 0.3
+.PHONY: restore
+restore:
+	oasis setup -setup-update dynamic
+	./clean.sh
 
 setup.ml: _oasis
 	oasis setup -setup-update dynamic
