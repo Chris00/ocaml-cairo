@@ -92,6 +92,13 @@ Executable test_for_stream
   BuildTools:     ocamlbuild
   Install:        false
 
+Executable test_finish
+  Path:           tests/
+  MainIs:         test_finish.ml
+  BuildDepends:   cairo2
+  BuildTools:     ocamlbuild
+  Install:        false
+
 # Examples
 ######################################################################
 Executable arcs
