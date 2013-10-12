@@ -1,6 +1,6 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: e96fb8846a864d01b6705a69f070b96b) *)
-This is the INSTALL file for the cairo distribution.
+(* DO NOT EDIT (digest: e7cdbc76054b015b8e2432dc07fd63ad) *)
+This is the INSTALL file for the cairo2 distribution.
 
 This package uses OASIS to generate its build system. See section OASIS for
 full information. 
@@ -39,10 +39,10 @@ installation: no additional library is required.
 Further configuration
 =====================
 
-To compile cairo_gtk, you will need the development files for lablgtk
-which are present in the Debian package liblablgtk2-ocaml-dev (or
-similar for other distributions).  If you do not want that module, use
-the flag --disable-lablgtk2 at the configure step.
+To compile cairo_gtk, you need to pass --enable-lablgtk2 to "ocaml
+setup.ml -configure" and to install the development files for lablgtk.
+These are present in the Debian package liblablgtk2-ocaml-dev (or
+similar for other distributions).
 
 The file 'config.ml' allows to set your own flags for the C libraries
 Cairo and Gtk+, bypassing pkg-config detection during configure.

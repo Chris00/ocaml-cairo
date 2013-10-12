@@ -21,7 +21,7 @@ all byte native: configure
 configure: setup.data
 setup.data: setup.ml config.ml
 	oasis setup
-	ocaml $< -configure
+	ocaml $< -configure --enable-lablgtk2
 	$(MAKE) restore
 
 # setup.ml modifies setup_t => not compatible with dyn mode for oasis ≤ 0.3

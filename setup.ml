@@ -134,8 +134,8 @@ let () =
   let configure t args =
     setup_t.BaseSetup.configure t args;
     (* One must define this variable after the standard configure for
-       the flag(lablgtk2) to be correctly set if --disable-lablgtk2
-       was present on the command line of configure. *)
+       the flag(lablgtk2) to be correctly set if --enable-lablgtk2
+       was not present on the command line of configure. *)
     let _ = BaseEnv.var_define "gtk_cflags" (fun () -> Lazy.force gtk_cflags) in
 
     (* Checks at the end of configure for early warnings.  [gtk_cflags]
