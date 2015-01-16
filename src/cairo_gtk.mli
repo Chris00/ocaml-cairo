@@ -36,11 +36,11 @@ val set_source_color : Cairo.context -> Gdk.color -> unit
 
 val rectangle : Cairo.context -> Gdk.Rectangle.t -> unit
   (** [rectangle cr r] adds the rectangle [r] to the current path
-      of [cr].  *)
+      ofÂ [cr].  *)
 
 val region : Cairo.context -> Gdk.region -> unit
   (** [region cr r] adds the region [r] to the current path
-      of [cr]. *)
+      ofÂ [cr]. *)
 
 val set_source_pixbuf : Cairo.context ->
   GdkPixbuf.pixbuf -> x:float -> y:float -> unit
