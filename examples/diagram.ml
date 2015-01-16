@@ -275,4 +275,3 @@ let () =
   diagram "showtext" 1.0 0.8 0.4;
   diagram "paint" 1.0 0.8 0.4;
   diagram "mask" 1.0 0.8 0.4
-

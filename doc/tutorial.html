@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html><head>
 
-  
+
   <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>Cairo OCaml Tutorial</title>
   <link rel="stylesheet" href="tutorial.css" type="text/css" />
   </head><body>
@@ -107,7 +107,7 @@ allowing you to build up a complex work as though painting on a canvas.</p>
 
 <h3 id="Source">Source</h3>
 
-<div class="tutright"><img src="source.png" alt=""></div> 
+<div class="tutright"><img src="source.png" alt=""></div>
 
 <p>The source
 is the "paint" you're about to work with. I show this as it
@@ -148,7 +148,7 @@ the context. The context is stored in cairo's central data type, called
 you create a cairo context, it must be tied to a specific surface-for
 example, an image surface if you want to create a PNG file.  There is
 also a data type for the surface, called
-<code><a href="html/Cairo.Surface.html#TYPEt">Cairo.Surface.t</a></code>. 
+<code><a href="html/Cairo.Surface.html#TYPEt">Cairo.Surface.t</a></code>.
 You can initialize your cairo context like this:</p>
 
 <pre><code>let surface = <a href="html/Cairo.Image.html#VALcreate">Cairo.Image.create</a> Cairo.Image.ARGB32 120 120

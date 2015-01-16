@@ -120,4 +120,3 @@ struct custom_operations caml_path_ops;
 
 
 #endif /* __CAIRO_OCAML_H__ */
-

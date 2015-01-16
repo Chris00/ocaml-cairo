@@ -21,4 +21,3 @@ let () =
   Cairo.stroke cr;
 
   Cairo.Surface.finish surface
-

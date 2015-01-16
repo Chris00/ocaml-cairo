@@ -6,7 +6,7 @@ Synopsis:    Binding to Cairo, a 2D Vector Graphics Library.
 Description: This is a binding to Cairo, a 2D graphics library with
   support for multiple output devices.  Currently supported output targets
   include the X Window System, Quartz, Win32, image buffers, PostScript,
-  PDF, and SVG file output. 
+  PDF, and SVG file output.
 Authors:     Christophe Troestler <Christophe.Troestler@umons.ac.be>,
   Pierre Hauweele <antegallya@gmail.com>
 License:     LGPL-3.0 with OCaml linking exception

@@ -3,7 +3,7 @@
 This is the INSTALL file for the cairo distribution.
 
 This package uses OASIS to generate its build system. See section OASIS for
-full information. 
+full information.
 
 Dependencies
 ============
@@ -24,7 +24,7 @@ Installing
 Uninstalling
 ============
 
-1. Go to the root of the package 
+1. Go to the root of the package
 2. Run 'ocaml setup.ml -uninstall'
 
 OASIS
@@ -57,7 +57,7 @@ whose path contains NO space but you will have to specify them with
 environment variable.  To use Cairo with GTK+, please also install
 lablgtk2 [2].
 
-[1] http://www.gtk.org/download-windows.html 
+[1] http://www.gtk.org/download-windows.html
 [2] http://wwwfun.kurims.kyoto-u.ac.jp/soft/olabl/lablgtk.html
 
 

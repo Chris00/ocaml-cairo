@@ -32,4 +32,3 @@ let () =
 
   w#show();
   GMain.main()
-

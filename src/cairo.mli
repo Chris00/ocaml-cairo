@@ -2709,4 +2709,3 @@ external device_to_user_distance :
       from device space to user space.  This function is similar to
       {!Cairo.device_to_user} except that the translation components
       of the inverse CTM will be ignored when transforming ([dx],[dy]). *)
-
