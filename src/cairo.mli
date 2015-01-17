@@ -2548,7 +2548,7 @@ external arc_negative : context ->
 external curve_to : context ->
   x1:float -> y1:float -> x2:float -> y2:float -> x3:float -> y3:float -> unit
   = "caml_cairo_curve_to_bc" "caml_cairo_curve_to"
-  (** Adds a cubic Bézier spline to the path from the current point to
+  (** Adds a cubic BÃ©zier spline to the path from the current point to
       position (x3, y3) in user-space coordinates, using (x1, y1) and
       (x2, y2) as the control points.  After this call the current
       point will be (x3, y3).
@@ -2589,7 +2589,7 @@ external rel_curve_to : context ->
   x1:float -> y1:float -> x2:float -> y2:float -> x3:float -> y3:float -> unit
   = "caml_cairo_rel_curve_to_bc" "caml_cairo_rel_curve_to"
   (** Relative-coordinate version of {!Cairo.curve_to}.  All offsets
-      are relative to the current point.  Adds a cubic Bézier spline
+      are relative to the current point.  Adds a cubic BÃ©zier spline
       to the path from the current point to a point offset from the
       current point by (dx3, dy3), using points offset by (dx1, dy1)
       and (dx2, dy2) as the control points.  After this call the
@@ -2709,4 +2709,3 @@ external device_to_user_distance :
       from device space to user space.  This function is similar to
       {!Cairo.device_to_user} except that the translation components
       of the inverse CTM will be ignored when transforming ([dx],[dy]). *)
-

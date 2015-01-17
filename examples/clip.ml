@@ -1,4 +1,4 @@
-(* Example by Øyvind Kolås taken from http://cairographics.org/samples/ *)
+(* Example by Ã˜yvind KolÃ¥s taken from http://cairographics.org/samples/ *)
 
 let pi = 4. *. atan 1.
 
@@ -21,4 +21,3 @@ let () =
   Cairo.stroke cr;
 
   Cairo.Surface.finish surface
-

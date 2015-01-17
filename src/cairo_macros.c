@@ -182,7 +182,7 @@ value * caml_cairo_Unavailable = NULL;
       caml_cairo_Unavailable = caml_named_value("Cairo.Unavailable");   \
     caml_raise_constant(* caml_cairo_Unavailable);                      \
   }                                                                     \
-  
+
 #define UNAVAILABLE1(name) RAISE_UNAVAILABLE(name, value v1)
 #define UNAVAILABLE2(name) RAISE_UNAVAILABLE(name, value v1, value v2)
 #define UNAVAILABLE3(name) RAISE_UNAVAILABLE(name, value v1, value v2, value v3)
@@ -190,4 +190,3 @@ value * caml_cairo_Unavailable = NULL;
                                              value v3, value v4)
 #define UNAVAILABLE5(name) RAISE_UNAVAILABLE(name, value v1, value v2,  \
                                              value v3, value v4, value v5)
-

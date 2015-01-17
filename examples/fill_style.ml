@@ -1,4 +1,4 @@
-(* Example by Øyvind Kolås taken from http://cairographics.org/samples/ *)
+(* Example by Ã˜yvind KolÃ¥s taken from http://cairographics.org/samples/ *)
 
 open Cairo
 
