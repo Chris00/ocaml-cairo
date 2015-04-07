@@ -36,6 +36,7 @@ AUTHORS.txt
 INSTALL.txt
 src/*.mllib
 src/*.clib
+src/*.mldylib
 *.native
 *.byte
 setup.log
