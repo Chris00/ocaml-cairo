@@ -5,3 +5,4 @@
 <src/*.c>: use_libcairo_c
 <src/cairo2.{cma,cmxa,cmxs}>: use_libcairo_c
 <src/cairo_gtk_stubs.c>: use_libgtk_c
+true: safe_string
