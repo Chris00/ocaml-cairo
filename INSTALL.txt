@@ -1,5 +1,6 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: e7cdbc76054b015b8e2432dc07fd63ad) *)
+(* DO NOT EDIT (digest: 5dbb205f7ea23e86f0f9d7064a6ff56b) *)
+
 This is the INSTALL file for the cairo2 distribution.
 
 This package uses OASIS to generate its build system. See section OASIS for
@@ -9,6 +10,7 @@ Dependencies
 ============
 
 In order to compile this package, you will need:
+
 * ocaml for all, doc API
 * findlib
 * lablgtk2 for library cairo_gtk, executable gtk_demo
