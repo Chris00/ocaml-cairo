@@ -37,13 +37,20 @@ open Printf;;
 #load "unix.cma";;
 #use "config.ml";;
 
+let () =
+  try let v = OASISExec.run_read_one_line ~ctxt:!BaseContext.default
+                                          "pkg-config" ["--version"] in
+      printf "Found pkg-config %s\n" v;
+  with Failure _ ->
+    printf "Please install \"pkg-config\".\n";
+    exit 1
+
 let pkg_config lib args =
   try
     OASISExec.run_read_one_line ~ctxt:!BaseContext.default
                                 "pkg-config" (lib :: args)
   with Failure _ ->
-    printf "Please install \"pkg-config\" and the development files for \
-      the C library %S.\n" lib;
+    printf "Please install the development files for the C library %S.\n" lib;
     exit 1
 
 let rec split_on is_delim s i0 i i1 =
