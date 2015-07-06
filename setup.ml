@@ -40,9 +40,11 @@ open Printf;;
 let () =
   try let v = OASISExec.run_read_one_line ~ctxt:!BaseContext.default
                                           "pkg-config" ["--version"] in
-      printf "Found pkg-config %s\n" v;
+      OASISMessage.info ~ctxt:!OASISContext.default
+                        "Found pkg-config %s\n%!" v;
   with Failure _ ->
-    printf "Please install \"pkg-config\".\n";
+    OASISMessage.error ~ctxt:!OASISContext.default
+                       "Please install \"pkg-config\".\n%!";
     exit 1
 
 let pkg_config lib args =
