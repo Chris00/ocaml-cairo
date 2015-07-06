@@ -1163,7 +1163,11 @@ sig
       (** Get the height of the image surface in pixels. *)
 
   external get_stride : Surface.t -> int = "caml_cairo_image_surface_get_stride"
-      (** Get the stride of the image surface in bytes. *)
+  (** Get the stride of the image surface in bytes.  Note that in
+      order to convert this stride in bytes to a stride in the
+      bigarray indices, the type of the surface has to be taken into
+      account: for [ARGB32] and [RGB24], the stride has to be divided
+      by 4. *)
 
   val output_ppm : out_channel -> ?width:int -> ?height:int -> data32 -> unit
     (** Convenience function to write the subarray of size ([width],
