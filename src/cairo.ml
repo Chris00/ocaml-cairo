@@ -670,16 +670,9 @@ struct
     = "caml_cairo_image_surface_get_format"
   external get_width : Surface.t -> int = "caml_cairo_image_surface_get_width"
   external get_height : Surface.t -> int = "caml_cairo_image_surface_get_height"
-  external get_c_stride : Surface.t -> int = "caml_cairo_image_surface_get_stride"
+  external get_stride : Surface.t -> int = "caml_cairo_image_surface_get_stride"
 
-  let get_stride t =
-    let c_stride = get_c_stride t in
-    assert (c_stride mod 4 = 0);
-    match get_format t with
-    | ARGB32 | RGB24 -> c_stride / 4
-    | A8 | A1 -> c_stride
-
-  external c_stride_for_width : format -> width:int -> int
+  external stride_for_width : format -> width:int -> int
     = "caml_cairo_format_stride_for_width" "noalloc"
 
   open Bigarray
@@ -700,7 +693,7 @@ struct
     if width <= 0 then invalid_arg "Cairo.Image.create_for_data8: width <= 0";
     if height <= 0 then invalid_arg "Cairo.Image.create_for_data8: height <= 0";
     let stride = match stride with
-      | None -> c_stride_for_width format width
+      | None -> stride_for_width format width
       | Some s ->
           if s < width (* thus if s <= 0 *) then raise(Error INVALID_STRIDE);
           s in
