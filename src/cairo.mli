@@ -1121,7 +1121,13 @@ sig
         contents of buffer will be used as the initial image contents;
         you must explicitly clear the buffer, using, for example,
         {!Cairo.rectangle} and {!Cairo.fill} if you want it
-        cleared. *)
+        cleared.
+
+        @param stride the number of bytes between the start of rows in
+        the buffer as allocated. This value should always be computed
+        by {!stride_for_width} before allocating the data buffer.
+        (that's what this function does if the argument is not
+        provided).  *)
 
   val create_for_data32 : ?width:int -> ?height:int -> ?alpha:bool ->
     data32 -> Surface.t
@@ -1168,6 +1174,12 @@ sig
       bigarray indices, the type of the surface has to be taken into
       account: for [ARGB32] and [RGB24], the stride has to be divided
       by 4. *)
+
+  external stride_for_width : format -> width:int -> int
+    = "caml_cairo_format_stride_for_width" "noalloc"
+  (** [stride_for_width format width] a stride value that will respect
+      all alignment requirements of the accelerated image-rendering code
+      within cairo.  See {!create_for_data8}.  *)
 
   val output_ppm : out_channel -> ?width:int -> ?height:int -> data32 -> unit
     (** Convenience function to write the subarray of size ([width],
