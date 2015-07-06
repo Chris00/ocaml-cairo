@@ -68,6 +68,7 @@ Executable image_create
   Path:           tests/
   MainIs:         image_create.ml
   BuildDepends:   cairo2
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -75,6 +76,7 @@ Executable matrix_set
   Path:           tests/
   MainIs:         matrix_set.ml
   BuildDepends:   cairo2
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -82,6 +84,7 @@ Executable surface_gc
   Path:           tests/
   MainIs:         surface_gc.ml
   BuildDepends:   cairo2
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -89,6 +92,7 @@ Executable test_for_stream
   Path:           tests/
   MainIs:         test_for_stream.ml
   BuildDepends:   cairo2
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -96,6 +100,7 @@ Executable test_finish
   Path:           tests/
   MainIs:         test_finish.ml
   BuildDepends:   cairo2
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -106,6 +111,7 @@ Executable arcs
   MainIs:         arcs.ml
   BuildDepends:   cairo2
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -114,6 +120,7 @@ Executable clip
   MainIs:         clip.ml
   BuildDepends:   cairo2
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -122,6 +129,7 @@ Executable curve_to
   MainIs:         curve_to.ml
   BuildDepends:   cairo2
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -130,6 +138,7 @@ Executable dash
   MainIs:         dash.ml
   BuildDepends:   cairo2
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -138,6 +147,7 @@ Executable fill_stroke
   MainIs:         fill_stroke.ml
   BuildDepends:   cairo2
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -146,6 +156,7 @@ Executable fill_style
   MainIs:         fill_style.ml
   BuildDepends:   cairo2
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -154,6 +165,7 @@ Executable gradient
   MainIs:         gradient.ml
   BuildDepends:   cairo2
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -162,6 +174,7 @@ Executable set_line_cap
   MainIs:         set_line_cap.ml
   BuildDepends:   cairo2
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -170,6 +183,7 @@ Executable set_line_join
   MainIs:         set_line_join.ml
   BuildDepends:   cairo2
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -178,6 +192,7 @@ Executable text
   MainIs:         text.ml
   BuildDepends:   cairo2
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -186,6 +201,7 @@ Executable text_align_center
   MainIs:         text_align_center.ml
   BuildDepends:   cairo2
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -194,6 +210,7 @@ Executable text_extents
   MainIs:         text_extents.ml
   BuildDepends:   cairo2
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -202,6 +219,7 @@ Executable text_rotate
   MainIs:         text_rotate.ml
   BuildDepends:   cairo2
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -213,6 +231,7 @@ Executable gtk_demo
   MainIs:         gtk_demo.ml
   BuildDepends:   cairo2, cairo2.lablgtk2, lablgtk2
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -221,6 +240,7 @@ Executable graphics_demo
   MainIs:         graphics_demo.ml
   BuildDepends:   cairo2, graphics
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -229,6 +249,7 @@ Executable cloud
   MainIs:         run.ml
   BuildDepends:   cairo2
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -237,6 +258,7 @@ Executable recording
   MainIs:         recording.ml
   BuildDepends:   cairo2
   CompiledObject: best
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -247,6 +269,7 @@ Executable stroke
   MainIs:         stroke.ml
   BuildDepends:   cairo2
   CompiledObject: byte
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -255,6 +278,7 @@ Executable fill
   MainIs:         fill.ml
   BuildDepends:   cairo2
   CompiledObject: byte
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -263,6 +287,7 @@ Executable showtext
   MainIs:         showtext.ml
   BuildDepends:   cairo2
   CompiledObject: byte
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -271,6 +296,7 @@ Executable paint
   MainIs:         paint.ml
   BuildDepends:   cairo2
   CompiledObject: byte
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -279,6 +305,7 @@ Executable mask
   MainIs:         mask.ml
   BuildDepends:   cairo2
   CompiledObject: byte
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -287,6 +314,7 @@ Executable setsourcergba
   MainIs:         setsourcergba.ml
   BuildDepends:   cairo2
   CompiledObject: byte
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -295,6 +323,7 @@ Executable setsourcegradient
   MainIs:         setsourcegradient.ml
   BuildDepends:   cairo2
   CompiledObject: byte
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -303,6 +332,7 @@ Executable path_close
   MainIs:         path_close.ml
   BuildDepends:   cairo2
   CompiledObject: byte
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -311,6 +341,7 @@ Executable textextents
   MainIs:         textextents.ml
   BuildDepends:   cairo2
   CompiledObject: byte
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -319,6 +350,7 @@ Executable diagram
   MainIs:         diagram.ml
   BuildDepends:   cairo2
   CompiledObject: byte
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -327,6 +359,7 @@ Executable draw
   MainIs:         draw.ml
   BuildDepends:   cairo2
   CompiledObject: byte
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -335,6 +368,7 @@ Executable tips_ellipse
   MainIs:         tips_ellipse.ml
   BuildDepends:   cairo2
   CompiledObject: byte
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -343,6 +377,7 @@ Executable tips_letter
   MainIs:         tips_letter.ml
   BuildDepends:   cairo2
   CompiledObject: byte
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false
 
@@ -351,5 +386,6 @@ Executable tips_font
   MainIs:         tips_font.ml
   BuildDepends:   cairo2
   CompiledObject: byte
+  Build$:         flag(tests)
   BuildTools:     ocamlbuild
   Install:        false

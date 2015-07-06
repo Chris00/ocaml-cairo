@@ -18,7 +18,7 @@ all byte native: configure
 
 configure: setup.data
 setup.data: setup.ml config.ml
-	ocaml $< -configure --enable-lablgtk2
+	ocaml $< -configure --enable-lablgtk2 --enable-tests
 
 setup.ml: _oasis
 	oasis setup -setup-update dynamic
