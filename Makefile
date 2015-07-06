@@ -14,21 +14,11 @@ DISTFILES = AUTHORS.txt INSTALL.txt README.txt _oasis _opam _tags \
 .PHONY: all byte native configure doc install uninstall reinstall upload-doc
 
 all byte native: configure
-	oasis setup
 	ocaml setup.ml -build
-	$(MAKE) restore
 
 configure: setup.data
 setup.data: setup.ml config.ml
-	oasis setup
 	ocaml $< -configure --enable-lablgtk2
-	$(MAKE) restore
-
-# setup.ml modifies setup_t => not compatible with dyn mode for oasis ≤ 0.3
-.PHONY: restore
-restore:
-	oasis setup -setup-update dynamic
-	./clean.sh
 
 setup.ml: _oasis
 	oasis setup -setup-update dynamic
