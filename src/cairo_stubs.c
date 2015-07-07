@@ -427,7 +427,7 @@ CAMLexport value caml_cairo_path_of_array(value varray)
   int length = Wosize_val(varray);
   cairo_path_t* path;
   cairo_path_data_t *data;
-  int i, num_data;
+  int i, j, num_data;
 
   SET_MALLOC(path, 1, cairo_path_t);
   path->status = CAIRO_STATUS_SUCCESS;
@@ -465,15 +465,15 @@ CAMLexport value caml_cairo_path_of_array(value varray)
   data->header.type = CAIRO_PATH_CLOSE_PATH;    \
   data->header.length = 1;
 
-  SET_MALLOC(path->data, num_data, cairo_path_data_t);
+  path->data = malloc(num_data * sizeof(cairo_path_data_t));
   if (path->data == NULL) {
     free(path); /* free previously allocated memory */
     caml_raise_out_of_memory();
   }
-  for(i = 0; i < num_data; i += data->header.length) {
+  for(i = 0, j = 0; j < num_data; i++, j += data->header.length) {
     vdata = Field(varray, i);
-    data = &path->data[i];
-    SWITCH_PATH_DATA(vdata,MOVE, LINE, CURVE, CLOSE);
+    data = &path->data[j];
+    SWITCH_PATH_DATA(vdata, MOVE, LINE, CURVE, CLOSE);
   }
   PATH_ASSIGN(vpath, path); /* vpath points to path */
   CAMLreturn(vpath);
