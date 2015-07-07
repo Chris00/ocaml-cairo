@@ -97,12 +97,11 @@ exception Unavailable
       not available in the installed Cairo library. *)
 
 type context
-  (** The cairo drawing context.  This is the main object used when
-      drawing with cairo.  To draw with cairo, you create a [t], set
-      the target surface, and drawing options for the [t], create
-      shapes with functions like {!Cairo.move_to} and
-      {!Cairo.line_to}, and then draw shapes with {!Cairo.stroke} or
-      {!Cairo.fill}.  *)
+(** The cairo drawing context.  This is the main object used when
+    drawing with cairo.  To draw with cairo, you create a [Surface.t],
+    {!create} a [context] from it and create shapes with functions
+    such as {!Cairo.move_to} and {!Cairo.line_to}, and then actually
+    draw them with {!Cairo.stroke} or {!Cairo.fill}.  *)
 
 (* ---------------------------------------------------------------------- *)
 (** {2:matrix  Generic matrix operations} *)
@@ -163,7 +162,7 @@ sig
         original value.  Not all transformation matrices have
         inverses; if the matrix collapses points together (it is
         degenerate), then it has no inverse and this function will
-        fail. *)
+        raise [Error INVALID_MATRIX]. *)
 
   val multiply : t -> t -> t
     (** [multiply a b] multiplies the affine transformations in [a]
@@ -1042,7 +1041,7 @@ sig
           after the emission.
 
           There is a convenience function for this that takes a
-          {Cairo.context}, namely {!Cairo.copy_page}. *)
+          {!Cairo.context}, namely {!Cairo.copy_page}. *)
 
   external show_page : t -> unit = "caml_cairo_surface_show_page"
       (** Emits and clears the current page for backends that support
