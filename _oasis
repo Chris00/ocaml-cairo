@@ -104,6 +104,15 @@ Executable test_finish
   BuildTools:     ocamlbuild
   Install:        false
 
+Executable test_path
+  Path:           tests/
+  MainIs:         test_path.ml
+  BuildDepends:   cairo2
+  Build$:         flag(tests)
+  BuildTools:     ocamlbuild
+  Custom:         true
+  Install:        false
+
 # Examples
 ######################################################################
 Executable arcs
