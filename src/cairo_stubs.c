@@ -445,22 +445,22 @@ CAMLexport value caml_cairo_path_of_array(value varray)
 #define MOVE(x1,y1)                             \
   data->header.type = CAIRO_PATH_MOVE_TO;       \
   data->header.length = 2;                      \
-  data[1].point.x = caml_copy_double(x1);       \
-  data[1].point.y = caml_copy_double(y1)
+  data[1].point.x = Double_val(x1);             \
+  data[1].point.y = Double_val(y1)
 #define LINE(x1,y1)                             \
   data->header.type = CAIRO_PATH_LINE_TO;       \
   data->header.length = 2;                      \
-  data[1].point.x = caml_copy_double(x1);       \
-  data[1].point.y = caml_copy_double(y1)
+  data[1].point.x = Double_val(x1);             \
+  data[1].point.y = Double_val(y1)
 #define CURVE(x1,y1, x2,y2, x3,y3)              \
   data->header.type = CAIRO_PATH_CURVE_TO;      \
   data->header.length = 4;                      \
-  data[1].point.x = caml_copy_double(x1);       \
-  data[1].point.y = caml_copy_double(y1);       \
-  data[2].point.x = caml_copy_double(x2);       \
-  data[2].point.y = caml_copy_double(y2);       \
-  data[3].point.x = caml_copy_double(x3);       \
-  data[3].point.y = caml_copy_double(y3)
+  data[1].point.x = Double_val(x1);             \
+  data[1].point.y = Double_val(y1);             \
+  data[2].point.x = Double_val(x2);             \
+  data[2].point.y = Double_val(y2);             \
+  data[3].point.x = Double_val(x3);             \
+  data[3].point.y = Double_val(y3)
 #define CLOSE                                   \
   data->header.type = CAIRO_PATH_CLOSE_PATH;    \
   data->header.length = 1;

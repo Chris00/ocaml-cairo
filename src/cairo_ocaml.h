@@ -114,7 +114,7 @@ struct custom_operations caml_path_ops;
             Field(v,4), Field(v,5));                    \
       break;                                            \
     default:                                            \
-      caml_failwith("C bindings: SWITCH_PATH_DATA");    \
+      caml_failwith(__FILE__ ": SWITCH_PATH_DATA");     \
     }
 
 
