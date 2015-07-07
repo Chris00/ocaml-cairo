@@ -271,6 +271,15 @@ Executable recording
   BuildTools:     ocamlbuild
   Install:        false
 
+Executable pythagoras_tree
+  Path:           examples
+  MainIs:         pythagoras_tree.ml
+  BuildDepends:   cairo2
+  CompiledObject: best
+  Build$:         flag(tests)
+  BuildTools:     ocamlbuild
+  Install:        false
+
 # Tutorial sources
 ######################################################################
 Executable stroke
