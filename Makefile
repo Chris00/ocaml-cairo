@@ -13,6 +13,8 @@ DISTFILES = AUTHORS.txt INSTALL.txt README.txt _oasis _opam _tags \
 
 .PHONY: all byte native configure doc install uninstall reinstall upload-doc
 
+default: opam/opam all
+
 all byte native: configure
 	ocaml setup.ml -build
 
@@ -28,6 +30,9 @@ doc install uninstall reinstall: setup.data
 
 upload-doc: doc
 	scp -C -r _build/src/API.docdir/ $(WEB)/API
+
+opam/%: _oasis
+	oasis2opam --local -y
 
 # Make a tarball
 .PHONY: dist tar
