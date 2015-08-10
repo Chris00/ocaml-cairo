@@ -7,7 +7,7 @@ IMAGES=$(shell grep .png tutorial.html | sed "s/.*\"\(.*\.png\).*/\1/")
 
 .PHONY: web  web-html tutorial
 web-html:
-	cd html/ && scp *.html *.css $(TUTORIAL)
+	cd ../API.docdir/ && scp *.html *.css $(TUTORIAL)
 # Tutorial
 	sed -e 's/html\///' tutorial.html | sed -e 's/\.\.\/examples\///' \
 	> index.html && \
