@@ -1194,7 +1194,13 @@ sig
 end
 
 (** The PDF surface is used to render cairo graphics to Adobe PDF
-    files and is a multi-page vector surface backend. *)
+    files and is a multi-page vector surface backend.
+
+    To create a cairo context [cr] that will write the the PDF file
+    [fname] with dimensions [w]×[h] points, do [let cr =
+    Cairo.create(Cairo.PDF.create fname w h)].  Do not forget to call
+    [Surface.finish(get_target cr)] when you are done drawing because
+    the file may not be fully written before. *)
 module PDF :
 sig
   val create : fname:string -> width:float -> height:float -> Surface.t
@@ -1231,7 +1237,15 @@ sig
 end
 
 (** The PNG functions allow reading PNG images into image surfaces,
-    and writing any surface to a PNG file.  *)
+    and writing any surface to a PNG file.
+
+    To create a new PNG file, start by creating an image surface,
+    providing its [format] (see {!Image.format}) and dimensions
+    [w]×[h] with [let surface = Cairo.Image.create format w h].  From
+    this you can create a Cairo context to do your drawing: [let cr =
+    Cairo.create surface].  Then, when you are done, call
+    [Cairo.PNG.write surface fname] to write the surface to the PNG
+    file [fname]. *)
 module PNG :
 sig
   external create : string -> Surface.t
@@ -1258,7 +1272,13 @@ sig
 end
 
 (** The PostScript surface is used to render cairo graphics to Adobe
-    PostScript files and is a multi-page vector surface backend.  *)
+    PostScript files and is a multi-page vector surface backend.
+
+    To create a cairo context [cr] that will write the the PS file
+    [fname] with dimensions [w]×[h] points, do [let cr =
+    Cairo.create(Cairo.PS.create fname w h)].  Do not forget to call
+    [Surface.finish(get_target cr)] when you are done drawing because
+    the file may not be fully written before.  *)
 module PS :
 sig
   external create : fname:string -> width:float -> height:float -> Surface.t
@@ -1449,7 +1469,13 @@ sig
 end
 
 (** The SVG surface is used to render cairo graphics to SVG files and
-    is a multi-page vector surface backend.  *)
+    is a multi-page vector surface backend.
+
+    To create a cairo context [cr] that will write the the SVG file
+    [fname] with dimensions [w]×[h] points, do [let cr =
+    Cairo.create(Cairo.SVG.create fname w h)].  Do not forget to call
+    [Surface.finish(get_target cr)] when you are done drawing because
+    the file may not be fully written before. *)
 module SVG :
 sig
   external create : fname:string -> width:float -> height:float -> Surface.t
