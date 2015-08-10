@@ -16,13 +16,22 @@ install the package ``libcairo2-dev``) and the OCaml package
 Compilation & Installation
 --------------------------
 
-This library uses [OASIS](http://oasis.forge.ocamlcore.org/), so
-compiling is as simple as:
+The easier way to install this library — once the perquisites are set
+up — is to use [opam](http://opam.ocaml.org/):
+
+    opam install cairo2
+
+If you would like to compile from the sources, install
+[OASIS](http://oasis.forge.ocamlcore.org/):
+
+    opam install oasis
+
+and do:
 
     ocaml setup.ml -configure
 	ocaml setup.ml -build
 
-You can then install with:
+You can then install it with:
 
 	ocaml setup.ml -install
 
@@ -33,5 +42,7 @@ Examples
 You can read a version of the
 [Cairo tutorial](http://cairo.forge.ocamlcore.org/tutorial/) using
 this module.  The code of this tutorial is available in the
-``examples/`` directory.  They will be compiled with the above
-commands (but will not installed).
+``examples/`` directory.  To compile it, you must configure the
+project with
+
+    ocaml setup.ml -configure --enable-examples
