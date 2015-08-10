@@ -16,7 +16,7 @@ install the package ``libcairo2-dev``) and the OCaml package
 Compilation & Installation
 --------------------------
 
-The easier way to install this library — once the perquisites are set
+The easier way to install this library — once the prerequisites are set
 up — is to use [opam](http://opam.ocaml.org/):
 
     opam install cairo2
