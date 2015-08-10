@@ -11,7 +11,8 @@ Authors:     Christophe Troestler <Christophe.Troestler@umons.ac.be>,
   Pierre Hauweele <pierre@hauweele.net>
 License:     LGPL-3.0 with OCaml linking exception
 Maintainers: Christophe Troestler <Christophe.Troestler@umons.ac.be>
-Homepage:    http://forge.ocamlcore.org/projects/cairo/
+Homepage:    https://github.com/Chris00/ocaml-cairo
+# BugReports: https://github.com/Chris00/ocaml-cairo/issues
 Plugins:     META (0.4), StdFiles (0.4)
 
 Flag lablgtk2
@@ -411,3 +412,9 @@ Executable tips_font
   Build$:         flag(examples)
   BuildTools:     ocamlbuild
   Install:        false
+
+
+SourceRepository master
+  Type:     git
+  Location: https://github.com/Chris00/ocaml-cairo.git
+  Browser:  https://github.com/Chris00/ocaml-cairo
