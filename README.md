@@ -5,8 +5,8 @@ This is an OCaml binding for the
 [Cairo](http://www.cairographics.org/) library, a 2D graphics library
 with support for multiple output devices.
 
-Perquisites
------------
+Prerequisites
+-------------
 
 You need the development file of Cairo (e.g. on Debian, you must
 install the package ``libcairo2-dev``) and the OCaml package
