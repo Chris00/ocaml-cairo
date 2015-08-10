@@ -35,7 +35,8 @@ depopts: [
   "lablgtk"
 ]
 conflicts: [
-  "cairo" {(= "0.4.2") & (= "0.4.1")}
+  "cairo" {= "0.4.2"}
+  "cairo" {= "0.4.1"}
 ]
 depexts: [
   [ ["mageia"] ["libcairo-devel"] ]
