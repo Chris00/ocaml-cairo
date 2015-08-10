@@ -1757,7 +1757,7 @@ end
 (* ---------------------------------------------------------------------- *)
 (** {2:cairo_t The cairo drawing context functions} *)
 
-external create : Surface.t -> context = "caml_cairo_create"
+val create : Surface.t -> context
   (** [create target] creates a new context with all graphics state
       parameters set to default values and with [target] as a target
       surface. The target surface should be constructed with a
