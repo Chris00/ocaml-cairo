@@ -95,7 +95,7 @@ let compile_and_run_c =
   let cc, ccargs =
     match OASISString.nsplit(BaseStandardVar.bytecomp_c_compiler()) ' ' with
     | cc :: args -> cc, args
-    | _ -> printf "No C compiled detected!! Check ocamlc -config"; exit 1 in
+    | _ -> printf "No C compiler detected!! Check ocamlc -config"; exit 1 in
   (* On some platforms, the OCaml C headers are not in a the locations
      searched by the C compiler. *)
   let stdlib = "-I" ^ BaseStandardVar.standard_library() in
