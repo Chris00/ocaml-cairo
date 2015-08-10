@@ -5,8 +5,10 @@ This is an OCaml binding for the
 [Cairo](http://www.cairographics.org/) library, a 2D graphics library
 with support for multiple output devices.
 
-You can read the
-[API online](http://cairo.forge.ocamlcore.org/tutorial/Cairo.html).
+You can read the API of
+[Cairo](http://cairo.forge.ocamlcore.org/tutorial/Cairo.html) and
+[Cairo_gtk](http://cairo.forge.ocamlcore.org/tutorial/Cairo_gtk.html)
+online.
 
 Prerequisites
 -------------
