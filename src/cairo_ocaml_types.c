@@ -68,6 +68,7 @@ void caml_cairo_raise_Error(cairo_status_t status)
       /* First time around, look up by name */
       exn = caml_named_value("Cairo.Error");
     }
+    printf("*** %p\n", exn);
     if (status == CAIRO_STATUS_NO_MEMORY)
       caml_raise_out_of_memory();
     else
