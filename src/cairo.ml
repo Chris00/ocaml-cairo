@@ -50,6 +50,13 @@ type status =
   | INVALID_CLUSTERS
   | INVALID_SLANT
   | INVALID_WEIGHT
+  | INVALID_SIZE
+  | USER_FONT_NOT_IMPLEMENTED
+  | DEVICE_TYPE_MISMATCH
+  | DEVICE_ERROR
+  | INVALID_MESH_CONSTRUCTION
+  | DEVICE_FINISHED
+  | JBIG2_GLOBAL_MISSING
 
 exception Error of status
 let () = Callback.register_exception "Cairo.Error" (Error INVALID_RESTORE)
@@ -85,6 +92,13 @@ let error_of_status = function
   | INVALID_CLUSTERS       -> "Cairo.Error(INVALID_CLUSTERS)"
   | INVALID_SLANT          -> "Cairo.Error(INVALID_SLANT)"
   | INVALID_WEIGHT         -> "Cairo.Error(INVALID_WEIGHT)"
+  | INVALID_SIZE           -> "Cairo.Error(INVALID_SIZE)"
+  | USER_FONT_NOT_IMPLEMENTED -> "Cairo.Error(USER_FONT_NOT_IMPLEMENTED)"
+  | DEVICE_TYPE_MISMATCH   -> "Cairo.Error(DEVICE_TYPE_MISMATCH)"
+  | DEVICE_ERROR           -> "Cairo.Error(DEVICE_ERROR)"
+  | INVALID_MESH_CONSTRUCTION -> "Cairo.Error(INVALID_MESH_CONSTRUCTION)"
+  | DEVICE_FINISHED        -> "Cairo.Error(DEVICE_FINISHED)"
+  | JBIG2_GLOBAL_MISSING   -> "Cairo.Error(JBIG2_GLOBAL_MISSING)"
 
 let () =
   Printexc.register_printer (function

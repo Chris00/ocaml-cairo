@@ -84,6 +84,13 @@ type status =
   | INVALID_CLUSTERS
   | INVALID_SLANT
   | INVALID_WEIGHT
+  | INVALID_SIZE
+  | USER_FONT_NOT_IMPLEMENTED
+  | DEVICE_TYPE_MISMATCH
+  | DEVICE_ERROR
+  | INVALID_MESH_CONSTRUCTION
+  | DEVICE_FINISHED
+  | JBIG2_GLOBAL_MISSING
 
 exception Error of status
   (** [Error status]: raised by functions of this module to indicate
