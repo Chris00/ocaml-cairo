@@ -86,9 +86,9 @@ on images in the [tutorial](http://cairo.forge.ocamlcore.org/tutorial/).
 
   ![text](http://cairo.forge.ocamlcore.org/tutorial/textextents.png)
 
-- [text_extents.ml](examples/text_extents.ml) exemplifies drawing subsequent
-  UTF-8 strings in a PDF file.  Some helping lines are also added to
-  show the text extents.
+- [text_extents.ml](examples/text_extents.ml) exemplifies drawing
+  consecutive UTF-8 strings in a PDF file.  Some helping lines are
+  also added to show the text extents.
 
 - [tips_ellipse.ml](examples/tips_ellipse.ml) shows the action of
   dilation on the line width and how to properly draw ellipses.
