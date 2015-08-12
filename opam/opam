@@ -1,6 +1,6 @@
 opam-version: "1.2"
 name: "cairo2"
-version: "0.4.6"
+version: "0.5"
 maintainer: "Christophe Troestler <Christophe.Troestler@umons.ac.be>"
 authors: [ "Christophe Troestler <Christophe.Troestler@umons.ac.be>"
            "Pierre Hauweele <pierre@hauweele.net>" ]
