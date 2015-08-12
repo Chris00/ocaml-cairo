@@ -41,6 +41,9 @@
     - {!PNG}: PNG Support -- Reading and writing PNG images.
     - {!PS}: PostScript Surfaces -- Rendering PostScript documents.
     - {!SVG}: SVG Surfaces -- Rendering SVG documents.
+
+    Surfaces that Cairo supports but for which no OCaml binding has
+    been created (yet, please contribute!):
     - {!XLib}: XLib Surfaces -- X Window System rendering using XLib.
     - {!Win32}: Win32 Surfaces -- Microsoft Windows surface support.
     - {!Quartz}: Quartz Surfaces -- Rendering to Quartz surfaces.
