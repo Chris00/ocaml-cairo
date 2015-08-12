@@ -96,7 +96,7 @@ exception Error of status
   (** [Error status]: raised by functions of this module to indicate
       a cause of failure. *)
 
-external status_to_string  : status -> string = "caml_cairo_status_to_string"
+val status_to_string  : status -> string
     (** Provides a human-readable description of a status. *)
 
 exception Unavailable
@@ -287,8 +287,7 @@ sig
     | BACKWARD (** The clusters in the cluster array map to glyphs in
                    the glyph array from end to start. *)
 
-  external extents : context -> t array -> text_extents
-    = "caml_cairo_glyph_extents"
+  val extents : context -> t array -> text_extents
     (** Gets the extents for an array of glyphs. The extents describe a
         user-space rectangle that encloses the "inked" portion of the
         glyphs (as they would be drawn by {!Cairo.Glyph.show}).
@@ -299,13 +298,13 @@ sig
         Note that whitespace glyphs do not contribute to the size of the
         rectangle (extents.width and extents.height). *)
 
-  external show : context -> t array -> unit = "caml_cairo_show_glyphs"
+  val show : context -> t array -> unit
     (** A drawing operator that generates the shape from an array of
         glyphs, rendered according to the current font face, font size (font
         matrix), and font options. *)
 
-  external show_text : context -> string -> t array -> cluster array ->
-    cluster_flags -> unit  = "caml_cairo_show_text_glyphs"
+  val show_text : context -> string -> t array -> cluster array ->
+                  cluster_flags -> unit
     (** [show_text cr utf8 glyphs clusters cluster_flags]: This
         operation has rendering effects similar to
         {!Cairo.Glyph.show} but, if the target surface supports it,
@@ -423,21 +422,21 @@ sig
         {!Cairo.Font_options.merge} should be used to copy or merge of
         [Cairo.Font_options.t] values. *)
 
-  external set : context -> t -> unit = "caml_cairo_set_font_options"
+  val set : context -> t -> unit
     (** [set_font_options cr opt] sets a set of custom font rendering
         options for [cr].  Rendering options are derived by merging
         these options with the options derived from underlying
         surface; if the value in options has a default value (like
         [ANTIALIAS_DEFAULT]), then the value from the surface is used.  *)
 
-  external get : context -> t = "caml_cairo_get_font_options"
+  val get : context -> t
     (** Retrieves font rendering options set via
         {!Cairo.Font_options.set}.  Note that the returned options do
         not include any options derived from the underlying surface;
         they are literally the options passed to
         {!Cairo.Font_options.set}. *)
 
-  external create : unit -> t = "caml_cairo_font_options_create"
+  val create : unit -> t
     (** Allocates a new font options object with all options initialized
         to default values.  *)
 
@@ -450,27 +449,24 @@ sig
         @param hint_metrics default: [HINT_METRICS_DEFAULT]
     *)
 
-  external copy : t -> t = "caml_cairo_font_options_copy"
+  val copy : t -> t
     (** [copy original] allocates a new font options object copying
         the option values from [original]. *)
 
-  external merge : t -> t -> unit = "caml_cairo_font_options_merge"
+  val merge : t -> t -> unit
     (** [merge options other] merges non-default options from other
         into options, replacing existing values.  This operation can
         be thought of as somewhat similar to compositing other onto
         options with the operation of [OVER] (see {!Cairo.operator}). *)
 
-  external set_antialias : t -> antialias -> unit
-    = "caml_cairo_font_options_set_antialias"
+  val set_antialias : t -> antialias -> unit
     (** Sets the antialiasing mode for the font options object.  This
         specifies the type of antialiasing to do when rendering text. *)
 
-  external get_antialias : t -> antialias
-    = "caml_cairo_font_options_get_antialias"
+  val get_antialias : t -> antialias
     (** Gets the antialiasing mode for the font options object. *)
 
-  external set_subpixel_order : t -> subpixel_order -> unit
-    = "caml_cairo_font_options_set_subpixel_order"
+  val set_subpixel_order : t -> subpixel_order -> unit
     (** Sets the subpixel order for the font options object.  The
         subpixel order specifies the order of color elements within
         each pixel on the display device when rendering with an
@@ -478,34 +474,29 @@ sig
         {!Cairo.antialias}).  See the documentation for
         {!Cairo.subpixel_order} for full details. *)
 
-  external get_subpixel_order : t -> subpixel_order
-    = "caml_cairo_font_options_get_subpixel_order"
+  val get_subpixel_order : t -> subpixel_order
     (** Gets the subpixel order for the font options object. See the
         documentation for {!Cairo.subpixel_order} for full details. *)
 
-  external set_hint_style : t -> hint_style -> unit
-    = "caml_cairo_font_options_set_hint_style"
+  val set_hint_style : t -> hint_style -> unit
     (** Sets the hint style for font outlines for the font options
         object. This controls whether to fit font outlines to the
         pixel grid, and if so, whether to optimize for fidelity or
         contrast.  See the documentation for {!Cairo.hint_style} for
         full details. *)
 
-  external get_hint_style : t -> hint_style
-    = "caml_cairo_font_options_get_hint_style"
+  val get_hint_style : t -> hint_style
     (** Gets the hint style for font outlines for the font options
         object. See the documentation for {!Cairo.hint_style} for full
         details. *)
 
-  external set_hint_metrics : t -> hint_metrics -> unit
-    = "caml_cairo_font_options_set_hint_metrics"
+  val set_hint_metrics : t -> hint_metrics -> unit
     (** Sets the metrics hinting mode for the font options
         object. This controls whether metrics are quantized to integer
         values in device units. See the documentation for
         {!Cairo.hint_metrics} for full details. *)
 
-  external get_hint_metrics : t -> hint_metrics
-    = "caml_cairo_font_options_get_hint_metrics"
+  val get_hint_metrics : t -> hint_metrics
     (** Gets the metrics hinting mode for the font options object. See
         the documentation for {!Cairo.hint_metrics} for full details. *)
 end
@@ -568,14 +559,14 @@ sig
         backend they use.  The type of a font face can be queried using
         {!Cairo.Font_face.get_type}.  *)
 
-  external set : context -> _ t -> unit = "caml_cairo_set_font_face"
+  val set : context -> _ t -> unit
       (** Replaces the current {!Cairo.Font_face.t} object in the
           {!Cairo.context} with font_face. *)
 
-  external get : context -> font_type t = "caml_cairo_get_font_face"
+  val get : context -> font_type t
       (** Gets the current font face for a {!Cairo.context}. *)
 
-  external get_type : 'a t -> font_type = "caml_cairo_font_face_get_type"
+  val get_type : 'a t -> font_type
       (** This function returns the type of the backend used to create a
           font face. See {!Cairo.font_type} for available types.  If ['a]
           contains a single variant, it will be the returned value. *)
@@ -592,16 +583,13 @@ sig
         The {!Cairo.select_font_face} function uses this to create font
         faces. See that function for limitations of toy font faces. *)
 
-  external get_family : [`Toy] t -> string
-    = "caml_cairo_toy_font_face_get_family"
+  val get_family : [`Toy] t -> string
     (** Gets the familly name of a toy font. *)
 
-  external get_slant : [`Toy] t -> slant
-    = "caml_cairo_toy_font_face_get_slant"
+  val get_slant : [`Toy] t -> slant
     (** Gets the slant a toy font. *)
 
-  external get_weight : [`Toy] t -> weight
-    = "caml_cairo_toy_font_face_get_weight"
+  val get_weight : [`Toy] t -> weight
     (** Gets the weight a toy font. *)
 end
 
@@ -662,14 +650,14 @@ sig
         backend they use.  The type of a scaled font can be queried
         using {!Cairo.Scaled_font.get_type}.  *)
 
-  external set : context -> _ t -> unit = "caml_cairo_set_scaled_font"
+  val set : context -> _ t -> unit
     (** Replaces the current font face, font matrix, and font options in
         the {Cairo.context} with those of the {!Cairo.Scaled_font.t}.  Except
         for some translation, the current CTM of the {!Cairo.context} should be
         the same as that of the {!Cairo.Scaled_font.t}, which can be
         accessed using {!Cairo.Scaled_font.get_ctm}. *)
 
-  external get : context -> 'a t = "caml_cairo_get_scaled_font"
+  val get : context -> 'a t
     (** Gets the current scaled font for a cairo_t. *)
 
   val create : 'a Font_face.t -> Matrix.t -> Matrix.t -> Font_options.t -> 'a t
@@ -678,11 +666,10 @@ sig
         describe the size of the font and the environment in which it
         will be used. *)
 
-  external extents : _ t -> font_extents = "caml_cairo_scaled_font_extents"
+  val extents : _ t -> font_extents
     (** [extents sf] gets the metrics for [sf]. *)
 
-  external text_extents : _ t -> string -> text_extents
-    = "caml_cairo_scaled_font_text_extents"
+  val text_extents : _ t -> string -> text_extents
       (** [text_extents scaled_font utf8] gets the [extents] for a string of
           text. The extents describe a user-space rectangle that encloses
           the "inked" portion of the text drawn at the origin (0,0) (as it
@@ -701,8 +688,7 @@ sig
           size of the rectangle, though they will affect the [x_advance]
           and [y_advance] values. *)
 
-  external glyph_extents : _ t -> Glyph.t array -> text_extents
-    = "caml_cairo_scaled_font_glyph_extents"
+  val glyph_extents : _ t -> Glyph.t array -> text_extents
     (** [glyph_extents scaled_font glyphs] gets the [extents] for an
         array of glyphs. The extents describe a user-space rectangle
         that encloses the "inked" portion of the glyphs (as they
@@ -715,47 +701,42 @@ sig
         Note that whitespace glyphs do not contribute to the size of the
         rectangle ([extents.width] and [extents.height]). *)
 
-  external text_to_glyphs : _ t -> x:float -> y:float -> string
+  val text_to_glyphs : _ t -> x:float -> y:float -> string
     -> Glyph.t array * Glyph.cluster array * Glyph.cluster_flags
-    = "caml_cairo_scaled_font_text_to_glyphs"
     (** [text_to_glyphs scaled_font x y utf8] converts UTF-8 text to
         an array of glyphs, optionally with cluster mapping, that can
         be used to render later using [scaled_font].
         See {!Cairo.Glyph.show_text}. *)
 
-  external get_font_face : 'a t -> 'a Font_face.t
-    = "caml_cairo_scaled_font_get_font_face"
+  val get_font_face : 'a t -> 'a Font_face.t
     (** Gets the font face that this scaled font was created for. *)
 
-  external get_font_options : _ t -> Font_options.t
-    = "caml_cairo_scaled_font_get_font_options"
+  val get_font_options : _ t -> Font_options.t
     (** [get_font_options scaled_font] returns the font options with
         which [scaled_font] was created.  *)
 
-  external get_font_matrix : _ t -> Matrix.t
-    = "caml_cairo_scaled_font_get_font_matrix"
+  val get_font_matrix : _ t -> Matrix.t
     (** [get_font_matrix scaled_font] return the font matrix with
         which [scaled_font] was created. *)
 
-  external get_ctm : _ t -> Matrix.t = "caml_cairo_scaled_font_get_ctm"
+  val get_ctm : _ t -> Matrix.t
     (** [get_ctm scaled_font] returns the CTM with which [scaled_font]
         was created. *)
 
-  external get_scale_matrix : _ t -> Matrix.t
-    = "caml_cairo_scaled_font_get_scale_matrix"
+  val get_scale_matrix : _ t -> Matrix.t
     (** [get_scale_matrix scaled_font] returns the scale matrix of
         [scaled_font].  The scale matrix is product of the font matrix
         and the ctm associated with the scaled font, and hence is the
         matrix mapping from font space to device space. *)
 
-  external get_type : 'a t -> font_type = "caml_cairo_scaled_font_get_type"
+  val get_type : 'a t -> font_type
     (** This function returns the type of the backend used to create a
         scaled font.  See {!Cairo.font_type} for available types. *)
 end
 
 
 val select_font_face : context -> ?slant:slant -> ?weight:weight -> string ->
-  unit
+                       unit
   (** [select_font_face cr family ?slant ?weight] selects a family
       and style of font from a simplified description as a family
       name, slant and weight. Cairo provides no operation to list
@@ -790,8 +771,7 @@ val select_font_face : context -> ?slant:slant -> ?weight:weight -> string ->
       "sans-serif".  Default slant is [Upright], and default weight is
       [Normal].  *)
 
-external set_font_size : context -> float -> unit
-  = "caml_cairo_set_font_size"
+val set_font_size : context -> float -> unit
   (** [set_font_size cr size] sets the current font matrix to a
       scale by a factor of size, replacing any font matrix previously
       set with [set_font_size] or {!Cairo.set_font_matrix}.  This
@@ -803,8 +783,7 @@ external set_font_size : context -> float -> unit
       {!Cairo.set_font_matrix}, nor {!Cairo.Scaled_font.set}),
       the default font size is 10.0. *)
 
-external set_font_matrix : context -> Matrix.t -> unit
-  = "caml_cairo_set_font_matrix"
+val set_font_matrix : context -> Matrix.t -> unit
   (** [set_font_matrix cr matrix] sets the current font matrix to
       [matrix].  The font matrix gives a transformation from the
       design space of the font (in this space, the em-square is 1
@@ -813,10 +792,10 @@ external set_font_matrix : context -> Matrix.t -> unit
       matrix can be used to shear the font or stretch it unequally
       along the two axes.  *)
 
-external get_font_matrix : context -> Matrix.t = "caml_cairo_get_font_matrix"
+val get_font_matrix : context -> Matrix.t
   (** Returns the current font matrix.  See {!Cairo.set_font_matrix}. *)
 
-external show_text : context -> string -> unit = "caml_cairo_show_text"
+val show_text : context -> string -> unit
   (** A drawing operator that generates the shape from a string of
       UTF-8 characters, rendered according to the current [font_face],
       [font_size] (font_matrix), and [font_options].
@@ -833,12 +812,10 @@ external show_text : context -> string -> unit = "caml_cairo_show_text"
       glyph offset by its advance values. This allows for easy display
       of a single logical string with multiple calls to [show_text].  *)
 
-external font_extents : context -> font_extents
-  = "caml_cairo_font_extents"
+val font_extents : context -> font_extents
   (** Gets the font extents for the currently selected font. *)
 
-external text_extents : context -> string -> text_extents
-  = "caml_cairo_text_extents"
+val text_extents : context -> string -> text_extents
   (** [text_extents cr utf8] gets the extents for a string of text.
       The extents describe a user-space rectangle that encloses the
       "inked" portion of the text (as it would be drawn by
@@ -890,8 +867,7 @@ sig
         creates a bitmap image in memory.  The type of a surface can
         be queried with {!Cairo.Surface.get_type}.  *)
 
-  external create_similar : t -> content -> width:int -> height:int -> t
-    = "caml_cairo_surface_create_similar"
+  val create_similar : t -> content -> width:int -> height:int -> t
       (** [create_similar other content width height] create a new
           surface that is as compatible as possible with the existing
           surface [other].  For example the new surface will have the
@@ -904,7 +880,7 @@ sig
           Initially the surface contents are all 0 (transparent if
           contents have transparency, black otherwise.) *)
 
-  external finish : t -> unit = "caml_cairo_surface_finish"
+  val finish : t -> unit
       (** This function finishes the surface and drops all references
           to external resources. For example, for the Xlib backend it
           means that cairo will no longer access the drawable.  After
@@ -913,7 +889,7 @@ sig
           the surface will not affect the surface but will instead
           raise [Error(SURFACE_FINISHED)].  *)
 
-  external flush : t -> unit = "caml_cairo_surface_flush"
+  val flush : t -> unit
       (** Do any pending drawing for the surface and also restore any
           temporary modification's cairo has made to the surface's
           state.  This function must be called before switching from
@@ -921,8 +897,7 @@ sig
           with native APIs.  If the surface doesn't support direct
           access, then this function does nothing.  *)
 
-  external get_font_options : t -> Font_options.t
-    = "caml_cairo_surface_get_font_options"
+  val get_font_options : t -> Font_options.t
       (** [get_font_options surface] retrieves the default font
           rendering options for the [surface].  This allows display
           surfaces to report the correct subpixel order for rendering
@@ -930,20 +905,19 @@ sig
           forth.  The result can then be used with
           {!Cairo.Scaled_font.create}. *)
 
-  external get_content : t -> content = "caml_cairo_surface_get_content"
+  val get_content : t -> content
       (** This function returns the content type of surface which
           indicates whether the surface contains color and/or alpha
           information. See {!Cairo.content}. *)
 
-  external mark_dirty : t -> unit = "caml_cairo_surface_mark_dirty"
+  val mark_dirty : t -> unit
       (** Tells cairo that drawing has been done to surface using
           means other than cairo, and that cairo should reread any
           cached areas.  Note that you must call {!Cairo.Surface.flush}
           before doing such drawing.  *)
 
-  external mark_dirty_rectangle : t ->
-    x:int -> y:int -> w:int -> h:int -> unit
-    = "caml_cairo_surface_mark_dirty_rectangle"
+  val mark_dirty_rectangle : t ->
+                             x:int -> y:int -> w:int -> h:int -> unit
       (** Like {!Cairo.Surface.mark_dirty}, but drawing has been done
           only to the specified rectangle, so that cairo can retain cached
           contents for other parts of the surface.
@@ -952,8 +926,7 @@ sig
           function, to make sure that future cairo calls have the clip
           set that they expect. *)
 
-  external set_device_offset : t -> x:float -> y:float -> unit
-    = "caml_cairo_surface_set_device_offset"
+  val set_device_offset : t -> x:float -> y:float -> unit
       (** Sets an offset that is added to the device coordinates
           determined by the CTM when drawing to surface. One use case for
           this function is when we want to create a {!Cairo.Surface.t} that
@@ -969,13 +942,11 @@ sig
           @param x the offset in the X direction, in device units.
           @param y the offset in the Y direction, in device units. *)
 
-  external get_device_offset : t -> float * float
-    = "caml_cairo_surface_get_device_offset"
+  val get_device_offset : t -> float * float
       (** This function returns the previous device offset set by
           {!Cairo.Surface.set_device_offset}. *)
 
-  external set_fallback_resolution : t -> x:float -> y:float -> unit
-    = "caml_cairo_surface_set_fallback_resolution"
+  val set_fallback_resolution : t -> x:float -> y:float -> unit
       (** [set_fallback_resolution surface x_pixels_per_inch
           y_pixels_per_inch] sets the horizontal and vertical
           resolution for image fallbacks.
@@ -1004,8 +975,7 @@ sig
           The default fallback resoultion is 300 pixels per inch in
           both dimensions. *)
 
-  external get_fallback_resolution : t -> float * float
-    = "caml_cairo_surface_get_fallback_resolution"
+  val get_fallback_resolution : t -> float * float
       (** This function returns the previous fallback resolution set
           by {!Cairo.Surface.set_fallback_resolution}, or default fallback
           resolution if never set. *)
@@ -1036,11 +1006,11 @@ sig
       | `Recording
       ]
 
-  external get_type : t -> kind = "caml_cairo_surface_get_type"
+  val get_type : t -> kind
       (** This function returns the type of the backend used to create
           a surface.  See {!Cairo.Surface.kind} for available types. *)
 
-  external copy_page : t -> unit = "caml_cairo_surface_copy_page"
+  val copy_page : t -> unit
       (** Emits the current page for backends that support multiple
           pages, but doesn't clear it, so that the contents of the
           current page will be retained for the next page.  Use
@@ -1050,7 +1020,7 @@ sig
           There is a convenience function for this that takes a
           {!Cairo.context}, namely {!Cairo.copy_page}. *)
 
-  external show_page : t -> unit = "caml_cairo_surface_show_page"
+  val show_page : t -> unit
       (** Emits and clears the current page for backends that support
           multiple pages.  Use {!Cairo.Surface.copy_page} if you don't
           want to clear the page.
@@ -1058,8 +1028,7 @@ sig
           There is a convenience function for this that takes a
           {!Cairo.context}, namely {!Cairo.show_page}.  *)
 
-  external has_show_text_glyphs : t -> bool
-    = "caml_cairo_surface_has_show_text_glyphs"
+  val has_show_text_glyphs : t -> bool
       (** Returns whether the surface supports sophisticated
           {!Cairo.Glyph.show_text} operations.  That is, whether it
           actually uses the provided text and cluster data to a
@@ -1103,8 +1072,7 @@ sig
              the uppermost bit, on a little-endian machine the first
              pixel is in the least-significant bit. *)
 
-  external create : format -> width:int -> height:int -> Surface.t
-    = "caml_cairo_image_surface_create"
+  val create : format -> width:int -> height:int -> Surface.t
       (** Creates an image surface of the specified format and
           dimensions. Initially the surface contents are all 0.
           (Specifically, within each pixel, each color or alpha
@@ -1164,25 +1132,23 @@ sig
         [RGB24] because the array dimensions would not reflect the
         image coordinates.  *)
 
-  external get_format : Surface.t -> format
-    = "caml_cairo_image_surface_get_format"
-    (** Get the format of the surface. *)
+  val get_format : Surface.t -> format
+  (** Get the format of the image surface. *)
 
-  external get_width : Surface.t -> int = "caml_cairo_image_surface_get_width"
+  val get_width : Surface.t -> int
       (** Get the width of the image surface in pixels. *)
 
-  external get_height : Surface.t -> int = "caml_cairo_image_surface_get_height"
+  val get_height : Surface.t -> int
       (** Get the height of the image surface in pixels. *)
 
-  external get_stride : Surface.t -> int = "caml_cairo_image_surface_get_stride"
+  val get_stride : Surface.t -> int
   (** Get the stride of the image surface in bytes.  Note that in
       order to convert this stride in bytes to a stride in the
       bigarray indices, the type of the surface has to be taken into
       account: for [ARGB32] and [RGB24], the stride has to be divided
       by 4. *)
 
-  external stride_for_width : format -> width:int -> int
-    = "caml_cairo_format_stride_for_width" "noalloc"
+  val stride_for_width : format -> width:int -> int
   (** [stride_for_width format width] a stride value that will respect
       all alignment requirements of the accelerated image-rendering code
       within cairo.  See {!create_for_data8}.  *)
@@ -1222,8 +1188,7 @@ sig
         @param height height of the surface, in points (1 point = 1/72.0 inch)
     *)
 
-  external set_size : Surface.t -> width:float -> height:float -> unit
-    = "caml_cairo_pdf_surface_set_size" "noalloc"
+  val set_size : Surface.t -> width:float -> height:float -> unit
     (** Changes the size of a PDF surface for the current (and
         subsequent) pages.
         @param width width of the surface, in points (1 point = 1/72.0 inch)
@@ -1248,26 +1213,22 @@ end
     file [fname]. *)
 module PNG :
 sig
-  external create : string -> Surface.t
-    = "caml_cairo_image_surface_create_from_png"
+  val create : string -> Surface.t
     (** [create filename] creates a new image surface and initializes
         the contents to the given PNG file. *)
 
-  external create_from_stream : input:(string -> int -> unit) -> Surface.t
-    = "caml_cairo_image_surface_create_from_png_stream"
+  val create_from_stream : input:(string -> int -> unit) -> Surface.t
     (** Creates a new image surface from PNG data read incrementally
         via the [input] function.  The [input s l] function receives a
         string [s] whose first [l] bytes must be filled with PNG data.
         Any exception raised by [input] is considered as a read
         error.  *)
 
-  external write : Surface.t -> string -> unit
-    = "caml_cairo_surface_write_to_png"
+  val write : Surface.t -> string -> unit
     (** [write surface filename] writes the contents of [surface] to a
         new file [filename] as a PNG image. *)
 
-  external write_to_stream : Surface.t -> output:(string -> unit) -> unit
-    = "caml_cairo_surface_write_to_png_stream"
+  val write_to_stream : Surface.t -> output:(string -> unit) -> unit
     (** Writes the image surface using the [output] function. *)
 end
 
@@ -1281,17 +1242,15 @@ end
     the file may not be fully written before.  *)
 module PS :
 sig
-  external create : fname:string -> width:float -> height:float -> Surface.t
-    = "caml_cairo_ps_surface_create"
+  val create : fname:string -> width:float -> height:float -> Surface.t
     (** Creates a PostScript surface of the specified size in points
         to be written to [fname].
         @param width width of the surface, in points (1 point = 1/72.0 inch)
         @param height height of the surface, in points (1 point = 1/72.0 inch)
     *)
 
-  external create_for_stream : output:(string -> unit) ->
+  val create_for_stream : output:(string -> unit) ->
     width:float -> height:float -> Surface.t
-    = "caml_cairo_ps_surface_create_for_stream"
     (** Creates a PostScript surface of the specified size in points to be
         written incrementally to the stream represented by [output].
         Any exception that [output] raises is considered as a write
@@ -1305,8 +1264,7 @@ sig
       that a generated PostScript file will conform to. *)
   type level = LEVEL_2 | LEVEL_3
 
-  external restrict_to_level : Surface.t -> level -> unit
-    = "caml_cairo_ps_surface_restrict_to_level"
+  val restrict_to_level : Surface.t -> level -> unit
       (** [restrict_to_level level] restricts the generated PostSript
           file to [level].  See {!Cairo.PS.get_levels} for a list of
           available level values that can be used here.
@@ -1316,16 +1274,14 @@ sig
           simplest way to do this is to call this function immediately
           after creating the surface.  *)
 
-  external get_levels : unit -> level list
-    = "caml_cairo_ps_get_levels"
+  val get_levels : unit -> level list
       (** Retrieves the list of supported levels. *)
 
-  external level_to_string : level -> string = "caml_cairo_ps_level_to_string"
+  val level_to_string : level -> string
       (** [level_to_string level] return the string representation of
           the given [level] id. *)
 
-  external set_eps : Surface.t -> eps:bool -> unit
-    = "caml_cairo_ps_surface_set_eps"
+  val set_eps : Surface.t -> eps:bool -> unit
       (** If [eps] is [true], the PostScript surface will output
           Encapsulated PostScript.
 
@@ -1335,12 +1291,11 @@ sig
           after creating the surface. An Encapsulated PostScript file
           should never contain more than one page. *)
 
-  external get_eps : Surface.t -> bool = "caml_cairo_ps_surface_get_eps"
+  val get_eps : Surface.t -> bool
       (** Check whether the PostScript surface will output
           Encapsulated PostScript.  *)
 
-  external set_size : Surface.t -> width:float -> height:float -> unit
-    = "caml_cairo_ps_surface_set_size"
+  val set_size : Surface.t -> width:float -> height:float -> unit
       (** Changes the size of a PostScript surface for the current
           (and subsequent) pages.
 
@@ -1353,8 +1308,7 @@ sig
   (** PostScript comments. *)
   module Dsc :
   sig
-    external begin_setup : Surface.t -> unit
-      = "caml_cairo_ps_surface_dsc_begin_setup"
+    val begin_setup : Surface.t -> unit
       (** This function indicates that subsequent calls to
           {!Cairo.PS.Dsc.comment} should direct comments to the Setup
           section of the PostScript output.
@@ -1366,8 +1320,7 @@ sig
 
           See {!Cairo.PS.Dsc.comment} for more details. *)
 
-    external begin_page_setup : Surface.t -> unit
-      = "caml_cairo_ps_surface_dsc_begin_page_setup"
+    val begin_page_setup : Surface.t -> unit
       (** This function indicates that subsequent calls to
           {!Cairo.PS.Dsc.comment} should direct comments to the
           PageSetup section of the PostScript output.
@@ -1379,8 +1332,7 @@ sig
 
           See {!Cairo.PS.Dsc.comment} for more details. *)
 
-    external comment : Surface.t -> string -> unit
-      = "caml_cairo_ps_surface_dsc_comment"
+    val comment : Surface.t -> string -> unit
       (** Emit a comment into the PostScript output for the given surface.
 
           The comment is expected to conform to the PostScript
@@ -1478,17 +1430,15 @@ end
     the file may not be fully written before. *)
 module SVG :
 sig
-  external create : fname:string -> width:float -> height:float -> Surface.t
-    = "caml_cairo_svg_surface_create"
+  val create : fname:string -> width:float -> height:float -> Surface.t
     (** Creates a SVG surface of the specified size in points to be
         written to [fname].
         @param width width of the surface, in points (1 point = 1/72.0 inch)
         @param height height of the surface, in points (1 point = 1/72.0 inch)
     *)
 
-  external create_for_stream : output:(string -> unit) ->
-                               width:float -> height:float -> Surface.t
-    = "caml_cairo_svg_surface_create_for_stream"
+  val create_for_stream : output:(string -> unit) ->
+                          width:float -> height:float -> Surface.t
     (** Creates a SVG surface of the specified size in points to be
         written incrementally to the stream represented by [output].
         Any exception that [output] raises is considered as a write
@@ -1502,8 +1452,7 @@ sig
       file will conform to. *)
   type version = VERSION_1_1 | VERSION_1_2
 
-  external restrict_to_version : Surface.t -> version -> unit
-    = "caml_cairo_svg_surface_restrict_to_version"
+  val restrict_to_version : Surface.t -> version -> unit
       (** Restricts the generated SVG file to version. See
           {!Cairo.SVG.get_versions} for a list of available version
           values that can be used here.
@@ -1513,12 +1462,10 @@ sig
           simplest way to do this is to call this function immediately
           after creating the surface. *)
 
-  external get_versions : unit -> version list
-    = "caml_cairo_svg_get_versions"
+  val get_versions : unit -> version list
       (** Retrieve the list of supported versions.  *)
 
-  external version_to_string : version -> string
-    = "caml_cairo_svg_version_to_string"
+  val version_to_string : version -> string
       (** Get the string representation of the given version id. *)
 end
 
@@ -1531,8 +1478,7 @@ end
     implicit constraint on the size of the drawing surface.  *)
 module Recording :
 sig
-  external create : ?extents:rectangle -> content -> Surface.t
-    = "caml_cairo_recording_surface_create"
+  val create : ?extents:rectangle -> content -> Surface.t
   (** Creates a recording surface with the specified [content].  It
       can record all drawing operations at the highest level (that is,
       the level of {!paint}, {!mask}, {!stroke}, {!fill} and
@@ -1543,8 +1489,7 @@ sig
       required) if the extents are specified when the recording
       surface is created. *)
 
-  external ink_extents : Surface.t -> rectangle
-    = "caml_cairo_recording_surface_ink_extents"
+  val ink_extents : Surface.t -> rectangle
   (** Measures the extents of the operations stored within the recording
       surface.  This is useful to compute the required size of another
       drawing surface into which to replay the full sequence of drawing
@@ -1611,8 +1556,7 @@ sig
         making sharp color transitions instead of the typical
         blend.  *)
 
-  external get_color_stop_count : [> `Gradient] t -> int
-    = "caml_cairo_pattern_get_color_stop_count"
+  val get_color_stop_count : [> `Gradient] t -> int
     (** Return the number of color stops specified in the given
         gradient pattern. *)
 
@@ -1624,36 +1568,31 @@ sig
 
           @return (offset, red, green, blue, alpha) *)
 
-  external create_rgb : r:float -> g:float -> b:float -> [`Solid] t
-    = "caml_cairo_pattern_create_rgb"
+  val create_rgb : r:float -> g:float -> b:float -> [`Solid] t
     (** Creates a new {!Cairo.Pattern.t} corresponding to an opaque
         color. The color components are floating point numbers in the
         range 0 to 1. If the values passed in are outside that range,
         they will be clamped. *)
 
-  external create_rgba : r:float -> g:float -> b:float -> a:float -> [`Solid] t
-    = "caml_cairo_pattern_create_rgba"
+  val create_rgba : r:float -> g:float -> b:float -> a:float -> [`Solid] t
     (** Creates a new {!Cairo.Pattern.t} corresponding to a
         translucent color.  The color components are floating point
         numbers in the range 0 to 1.  If the values passed in are
         outside that range, they will be clamped. *)
 
-  external get_rgba : [> `Solid] t -> float * float * float * float
-    = "caml_cairo_pattern_get_rgba"
+  val get_rgba : [> `Solid] t -> float * float * float * float
     (** Return the solid color for a solid color pattern.
 
     @return (red, green, blue, alpha) *)
 
-  external create_for_surface : Surface.t -> [`Surface] t
-    = "caml_cairo_pattern_create_for_surface"
+  val create_for_surface : Surface.t -> [`Surface] t
     (** Create a new {!Cairo.Pattern.t} for the given surface. *)
 
-  external get_surface : [`Surface] t -> Surface.t
-    = "caml_cairo_pattern_get_surface"
+  val get_surface : [`Surface] t -> Surface.t
     (** Gets the surface of a surface pattern.  *)
 
-  external create_linear : x0:float -> y0:float -> x1:float -> y1:float ->
-    [`Linear | `Gradient] t = "caml_cairo_pattern_create_linear"
+  val create_linear : x0:float -> y0:float -> x1:float -> y1:float ->
+                      [`Linear | `Gradient] t
       (** Create a new linear gradient {!Cairo.Pattern.t} along the
           line defined by (x0, y0) and (x1, y1).  Before using the
           gradient pattern, a number of color stops should be defined
@@ -1665,14 +1604,14 @@ sig
           relationship between the spaces can be changed with
           {!Cairo.Pattern.set_matrix}.  *)
 
-  external get_linear_points : [> `Linear|`Gradient] t
-    -> float * float * float * float = "caml_cairo_pattern_get_linear_points"
+  val get_linear_points : [> `Linear|`Gradient] t
+                          -> float * float * float * float
     (** Gets the gradient endpoints for a linear gradient.
         @return (x0, y0, x1, y1). *)
 
-  external create_radial : x0:float -> y0:float -> r0:float ->
+  val create_radial :
+    x0:float -> y0:float -> r0:float ->
     x1:float -> y1:float -> r1:float -> [`Radial | `Gradient] t
-    = "caml_cairo_pattern_create_radial_bc" "caml_cairo_pattern_create_radial"
     (** Creates a new radial gradient {!Cairo.Pattern.t} between the
         two circles defined by (cx0, cy0, radius0) and (cx1, cy1,
         radius1). Before using the gradient pattern, a number of color
@@ -1684,9 +1623,8 @@ sig
         relationship between the spaces can be changed with
         {!Cairo.Pattern.set_matrix}. *)
 
-  external get_radial_circles : [> `Radial|`Gradient] t ->
-    float * float * float * float * float * float
-    = "caml_cairo_pattern_get_radial_circles"
+  val get_radial_circles : [> `Radial|`Gradient] t ->
+                           float * float * float * float * float * float
       (** Gets the gradient endpoint circles for a radial gradient,
           each specified as a center coordinate and a radius.
           @return (x0, y0, r0, x1, y1, r1).      *)
@@ -1702,8 +1640,7 @@ sig
     | PAD (** pixels outside of the pattern copy the closest pixel
               from the source. *)
 
-  external set_extend : 'a t -> extend -> unit
-    = "caml_cairo_pattern_set_extend" "noalloc"
+  val set_extend : 'a t -> extend -> unit
     (** Sets the mode to be used for drawing outside the area of a
         pattern.  See {!Cairo.Pattern.extend} for details on the
         semantics of each extend strategy.
@@ -1711,7 +1648,7 @@ sig
         The default extend mode is [NONE] for surface patterns and
         [PAD] for gradient patterns. *)
 
-  external get_extend : 'a t -> extend = "caml_cairo_pattern_get_extend"
+  val get_extend : 'a t -> extend
     (** Gets the current extend mode for a pattern. See
         {!Cairo.Pattern.extend} for details on the semantics of each
         extend strategy. *)
@@ -1730,8 +1667,7 @@ sig
     | BILINEAR (** Linear interpolation in two dimensions *)
     (* | GAUSSIAN *)
 
-  external set_filter : 'a t -> filter -> unit
-    = "caml_cairo_pattern_set_filter" "noalloc"
+  val set_filter : 'a t -> filter -> unit
     (** Sets the filter to be used for resizing when using this
         pattern. See {!Cairo.Pattern.filter} for details on each
         filter.
@@ -1746,12 +1682,11 @@ sig
         Cairo.Pattern.set_filter (Cairo.get_source cr) Cairo.Pattern.NEAREST;
         ]} *)
 
-  external get_filter : 'a t -> filter = "caml_cairo_pattern_get_filter"
+  val get_filter : 'a t -> filter
     (** Gets the current filter for a pattern.  See
         {!Cairo.Pattern.filter} for details on each filter. *)
 
-  external set_matrix : 'a t -> Matrix.t -> unit
-    = "caml_cairo_pattern_set_matrix" "noalloc"
+  val set_matrix : 'a t -> Matrix.t -> unit
     (** Sets the pattern's transformation matrix to matrix. This
         matrix is a transformation from user space to pattern space.
 
@@ -1773,7 +1708,7 @@ sig
         Cairo.Pattern.set_matrix pattern matrix;
         ]} *)
 
-  external get_matrix : 'a t -> Matrix.t = "caml_cairo_pattern_get_matrix"
+  val get_matrix : 'a t -> Matrix.t
     (** Returns the pattern's transformation matrix.  *)
 
   (* FIXME: is get_type needed ? *)
@@ -1794,18 +1729,18 @@ val create : Surface.t -> context
 
       @raise Out_of_memory if the context could not be allocated. *)
 
-external save : context -> unit = "caml_cairo_save"
+val save : context -> unit
   (** [save cr] makes a copy of the current state of [cr] and saves it
       on an internal stack of saved states for [cr].  When [restore]
       is called, [cr] will be restored to the saved state.  Multiple
       calls to [save] and [restore] can be nested; each call to
       [restore] restores the state from the matching paired [save].  *)
-external restore : context -> unit = "caml_cairo_restore"
+val restore : context -> unit
   (** [restore cr] restores [cr] to the state saved by a preceding
       call to [save] and removes that state from the stack of saved
       states. *)
 
-external get_target : context -> Surface.t = "caml_cairo_get_target"
+val get_target : context -> Surface.t
   (** Gets the target surface for the cairo context as passed to [create]. *)
 
 (** Temporary redirection of drawing commands to intermediate
@@ -1838,7 +1773,7 @@ sig
         intermediate group will have a content type of [COLOR_ALPHA]
         (see {!Cairo.content}).  *)
 
-  external pop : context -> Pattern.any = "caml_cairo_pop_group"
+  val pop : context -> Pattern.any
     (** Terminates the redirection begun by a call to
         {!Cairo.Group.push} and returns a new pattern containing the
         results of all drawing operations performed to the group.
@@ -1851,7 +1786,7 @@ sig
         @return a newly created (surface) pattern containing the results
         of all drawing operations performed to the group.  *)
 
-  external pop_to_source : context -> unit = "caml_cairo_pop_group_to_source"
+  val pop_to_source : context -> unit
     (** Terminates the redirection begun by a call to [Group.push] and
         installs the resulting pattern as the source pattern in the
         given cairo context.
@@ -1864,15 +1799,14 @@ sig
         ]}
     *)
 
-  external get_target : context -> Surface.t = "caml_cairo_get_group_target"
+  val get_target : context -> Surface.t
     (** Gets the current destination surface for the context.  This is
         either the original target surface as passed to [create] or
         the target surface for the current group as started by the most
         recent call to [Group.push]. *)
 end
 
-external set_source_rgb : context -> r:float -> g:float -> b:float -> unit
-  = "caml_cairo_set_source_rgb"
+val set_source_rgb : context -> r:float -> g:float -> b:float -> unit
   (** [set_source_rgb cr r g b] sets the source pattern within [cr] to
       an opaque color.  This opaque color will then be used for any
       subsequent drawing operation until a new source pattern is set.
@@ -1884,9 +1818,8 @@ external set_source_rgb : context -> r:float -> g:float -> b:float -> unit
       The default source pattern is opaque black (that is, it is
       equivalent to [set_source_rgb cr 0. 0. 0.]). *)
 
-external set_source_rgba : context ->
-  r:float -> g:float -> b:float -> a:float -> unit
-  = "caml_cairo_set_source_rgba"
+val set_source_rgba : context ->
+                      r:float -> g:float -> b:float -> a:float -> unit
   (** [set_source_rgba cr r g b a] sets the source pattern within [cr]
       to a translucent color.  This color will then be used for any
       subsequent drawing operation until a new source pattern is set.
@@ -1898,7 +1831,7 @@ external set_source_rgba : context ->
       The default source pattern is opaque black (that is, it is
       equivalent to [set_source_rgba cr 0. 0. 0. 1.0]). *)
 
-external set_source : context -> 'a Pattern.t -> unit = "caml_cairo_set_source"
+val set_source : context -> 'a Pattern.t -> unit
   (** [set_source cr source] sets the source pattern within [cr] to
       [source].  This pattern will then be used for any subsequent
       drawing operation until a new source pattern is set.
@@ -1911,8 +1844,7 @@ external set_source : context -> 'a Pattern.t -> unit = "caml_cairo_set_source"
       The default source pattern is a solid pattern that is opaque
       black (that is, it is equivalent to [set_source_rgb cr 0. 0. 0.]). *)
 
-external set_source_surface : context -> Surface.t -> x:float -> y:float -> unit
-  = "caml_cairo_set_source_surface"
+val set_source_surface : context -> Surface.t -> x:float -> y:float -> unit
   (** [set_source_surface cr surface x y] is a convenience for
       creating a pattern from surface and setting it as the source in [cr]
       with [set_source].
@@ -1930,11 +1862,10 @@ external set_source_surface : context -> Surface.t -> x:float -> y:float -> unit
       that these attributes can be modified if desired (e.g. to create
       a repeating pattern with {!Cairo.Pattern.set_extend}). *)
 
-external get_source : context -> Pattern.any = "caml_cairo_get_source"
+val get_source : context -> Pattern.any
   (** [get_source cr] gets the current source pattern for [cr]. *)
 
-external set_antialias : context -> antialias -> unit
-  = "caml_cairo_set_antialias"
+val set_antialias : context -> antialias -> unit
     (** Set the antialiasing mode of the rasterizer used for drawing
         shapes.  This value is a hint, and a particular backend may or
         may not support a particular value.  At the current time, no
@@ -1943,7 +1874,7 @@ external set_antialias : context -> antialias -> unit
         Note that this option does not affect text rendering, instead
         see {!Cairo.Font_options.set_antialias}. *)
 
-external get_antialias : context -> antialias = "caml_cairo_get_antialias"
+val get_antialias : context -> antialias
   (** Gets the current shape antialiasing mode, as set by
       {!Cairo.set_antialias}. *)
 
@@ -1968,7 +1899,7 @@ val set_dash : context -> ?ofs:float -> float array -> unit
       the time of stroking.  This is not necessarily the same as the
       user space at the time of [set_dash].  *)
 
-external get_dash : context -> float array * float = "caml_cairo_get_dash"
+val get_dash : context -> float array * float
   (** Gets the current dash array ([( [| |], 0.)] if dashing is not
       currently in effect). *)
 
@@ -1995,8 +1926,7 @@ type fill_rule =
                  total number of intersections is odd, the point will
                  be filled. *)
 
-external set_fill_rule : context -> fill_rule -> unit
-  = "caml_cairo_set_fill_rule"
+val set_fill_rule : context -> fill_rule -> unit
     (** [set_fill_rule cr fill_rule] sets the current fill rule within
         the cairo context [cr].  The fill rule is used to determine
         which regions are inside or outside a complex (potentially
@@ -2004,7 +1934,7 @@ external set_fill_rule : context -> fill_rule -> unit
         {!Cairo.fill} and {!Cairo.clip}.  See {!Cairo.fill_rule} for
         details on the semantics of each available fill rule.  *)
 
-external get_fill_rule : context -> fill_rule = "caml_cairo_get_fill_rule"
+val get_fill_rule : context -> fill_rule
     (** Gets the current fill rule, as set by [set_fill_rule]. *)
 
 
@@ -2015,7 +1945,7 @@ type line_cap =
   | ROUND (** use a round ending, the center of the circle is the end point *)
   | SQUARE (** use squared ending, the center of the square is the end point *)
 
-external set_line_cap : context -> line_cap -> unit = "caml_cairo_set_line_cap"
+val set_line_cap : context -> line_cap -> unit
     (** [set_line_cap cr line_cap] sets the current line cap style
         within the cairo context [cr].  See {!Cairo.line_cap} for
         details about how the available line cap styles are drawn.
@@ -2027,7 +1957,7 @@ external set_line_cap : context -> line_cap -> unit = "caml_cairo_set_line_cap"
 
         The default line cap style is [BUTT].  *)
 
-external get_line_cap : context -> line_cap = "caml_cairo_get_line_cap"
+val get_line_cap : context -> line_cap
     (** Gets the current line cap style, as set by {!Cairo.set_line_cap}. *)
 
 
@@ -2040,8 +1970,7 @@ type line_join =
   | JOIN_BEVEL (** use a cut-off join, the join is cut off at half the line
                    width from the joint point *)
 
-external set_line_join : context -> line_join -> unit
-  = "caml_cairo_set_line_join"
+val set_line_join : context -> line_join -> unit
     (** Sets the current line join style within the cairo context.
         See {!Cairo.line_join} for details about how the available
         line join styles are drawn.
@@ -2052,11 +1981,11 @@ external set_line_join : context -> line_join -> unit
         during path construction.
 
         The default line join style is [MITER]. *)
-external get_line_join : context -> line_join = "caml_cairo_get_line_join"
+val get_line_join : context -> line_join
     (** Gets the current line join style, as set by {!Cairo.set_line_join}. *)
 
 
-external set_line_width : context -> float -> unit = "caml_cairo_set_line_width"
+val set_line_width : context -> float -> unit
     (** Sets the current line width within the cairo context. The line
         width value specifies the diameter of a pen that is circular in
         user space (though device-space pen may be an ellipse in general
@@ -2078,14 +2007,13 @@ external set_line_width : context -> float -> unit = "caml_cairo_set_line_width"
 
         The default line width value is [2.0].  *)
 
-external get_line_width : context -> float = "caml_cairo_get_line_width"
+val get_line_width : context -> float
     (** This function returns the current line width value exactly as
         set by {!Cairo.set_line_width}.  Note that the value is
         unchanged even if the CTM has changed between the calls to
         [set_line_width] and [get_line_width]. *)
 
-external set_miter_limit : context -> float -> unit
-  = "caml_cairo_set_miter_limit"
+val set_miter_limit : context -> float -> unit
     (** Sets the current miter limit within the cairo context.
 
         If the current line join style is set to [MITER] (see
@@ -2109,7 +2037,7 @@ external set_miter_limit : context -> float -> unit
         A miter limit for a desired angle can be computed as: miter
         limit = 1/sin(angle/2).  *)
 
-external get_miter_limit : context -> float = "caml_cairo_get_miter_limit"
+val get_miter_limit : context -> float
     (** Gets the current miter limit, as set by {!Cairo.set_miter_limit}. *)
 
 
@@ -2150,17 +2078,17 @@ type operator =
   | SATURATE (** like over, but assuming source and dest are
                  disjoint geometries *)
 
-external set_operator : context -> operator -> unit = "caml_cairo_set_operator"
+val set_operator : context -> operator -> unit
     (** Sets the compositing operator to be used for all drawing
         operations.  See {!Cairo.operator} for details on the
         semantics of each available compositing operator.
 
         The default operator is [OVER]. *)
 
-external get_operator : context -> operator = "caml_cairo_get_operator"
+val get_operator : context -> operator
     (** Gets the current compositing operator for a cairo context.  *)
 
-external set_tolerance : context -> float -> unit = "caml_cairo_set_tolerance"
+val set_tolerance : context -> float -> unit
     (** Sets the tolerance used when converting paths into trapezoids.
         Curved segments of the path will be subdivided until the
         maximum deviation between the original path and the polygonal
@@ -2169,11 +2097,11 @@ external set_tolerance : context -> float -> unit = "caml_cairo_set_tolerance"
         value, better appearance.  (Reducing the value from the
         default value of [0.1] is unlikely to improve appearance
         significantly.)  *)
-external get_tolerance : context -> float = "caml_cairo_get_tolerance"
+val get_tolerance : context -> float
     (** Gets the current tolerance value, as set by {!Cairo.set_tolerance}. *)
 
 
-external clip : context -> unit = "caml_cairo_clip"
+val clip : context -> unit
   (** Establishes a new clip region by intersecting the current clip
       region with the current path as it would be filled by
       {!Cairo.fill} and according to the current fill rule (see
@@ -2189,7 +2117,7 @@ external clip : context -> unit = "caml_cairo_clip"
       {!Cairo.restore} pair. The only other means of increasing the
       size of the clip region is {!Cairo.clip_reset}.  *)
 
-external clip_preserve : context -> unit = "caml_cairo_clip_preserve"
+val clip_preserve : context -> unit
   (** Establishes a new clip region by intersecting the current clip
       region with the current path as it would be filled by
       {!Cairo.fill} and according to the current fill rule (see
@@ -2205,11 +2133,11 @@ external clip_preserve : context -> unit = "caml_cairo_clip_preserve"
       increasing the size of the clip region is
       {!Cairo.clip_reset}.  *)
 
-external clip_extents : context -> rectangle = "caml_cairo_clip_extents"
+val clip_extents : context -> rectangle
   (** Computes a bounding box in user coordinates covering the area
       inside the current clip.  *)
 
-external clip_reset : context -> unit = "caml_cairo_reset_clip"
+val clip_reset : context -> unit
   (** Reset the current clip region to its original, unrestricted
       state.  That is, set the clip region to an infinitely large
       shape containing the target surface.  Equivalently, if infinity is too
@@ -2220,10 +2148,11 @@ external clip_reset : context -> unit = "caml_cairo_reset_clip"
       as it will cause results unexpected by higher-level code which
       calls {!Cairo.clip}.  Consider using {!Cairo.save} and
       {!Cairo.restore} around {!Cairo.clip} as a more robust means of
-      temporarily restricting the clip region. *)
+      temporarily restricting the clip region.
 
-external clip_rectangle_list : context -> rectangle list
-  = "caml_cairo_copy_clip_rectangle_list"
+      (This function binds Cairo [cairo_reset_clip].) *)
+
+val clip_rectangle_list : context -> rectangle list
   (** Gets the current clip region as a list of rectangles in user
       coordinates.
 
@@ -2231,7 +2160,7 @@ external clip_rectangle_list : context -> rectangle list
       region cannot be represented as a list of user-space rectangles.  *)
 
 
-external fill : context -> unit = "caml_cairo_fill"
+val fill : context -> unit
   (** A drawing operator that fills the current path according to the
       current fill rule (each sub-path is implicitly closed before
       being filled).  After [fill], the current path will be cleared
@@ -2239,7 +2168,7 @@ external fill : context -> unit = "caml_cairo_fill"
 
       See also {!Cairo.set_fill_rule}. *)
 
-external fill_preserve : context -> unit = "caml_cairo_fill_preserve"
+val fill_preserve : context -> unit
   (** A drawing operator that fills the current path according to
       the current fill rule (each sub-path is implicitly closed
       before being filled).  Unlike {!Cairo.fill}, [fill_preserve]
@@ -2247,7 +2176,7 @@ external fill_preserve : context -> unit = "caml_cairo_fill_preserve"
 
       See also {!Cairo.set_fill_rule}. *)
 
-external fill_extents : context -> rectangle = "caml_cairo_fill_extents"
+val fill_extents : context -> rectangle
   (** Computes a bounding box in user coordinates covering the area
       that would be affected (the "inked" area) by a [fill]
       operation given the current path and fill parameters.  If the
@@ -2266,7 +2195,7 @@ external fill_extents : context -> rectangle = "caml_cairo_fill_extents"
 
       See {!Cairo.fill} and {!Cairo.set_fill_rule}. *)
 
-external in_fill : context -> x:float -> y:float -> bool = "caml_cairo_in_fill"
+val in_fill : context -> x:float -> y:float -> bool
   (** Tests whether the given point is inside the area that would be
       affected by a [fill] operation given the current path and
       filling parameters.  Surface dimensions and clipping are not
@@ -2274,13 +2203,12 @@ external in_fill : context -> x:float -> y:float -> bool = "caml_cairo_in_fill"
 
       See also {!Cairo.fill} and {!Cairo.set_fill_rule}.  *)
 
-external mask : context -> 'a Pattern.t -> unit = "caml_cairo_mask"
+val mask : context -> 'a Pattern.t -> unit
   (** [mask cr pattern]: a drawing operator that paints the current
       source using the alpha channel of [pattern] as a mask.  (Opaque
       areas of [pattern] are painted with the source, transparent
       areas are not painted.) *)
-external mask_surface : context -> Surface.t -> x:float -> y:float -> unit
-  = "caml_cairo_mask_surface"
+val mask_surface : context -> Surface.t -> x:float -> y:float -> unit
   (** [mask_surface cr surface x y]: a drawing operator that paints
       the current source using the alpha channel of [surface] as a
       mask.  (Opaque areas of [surface] are painted with the source,
@@ -2296,7 +2224,7 @@ val paint : ?alpha:float -> context -> unit
 
       @param alpha  alpha value, between 0 (transparent) and 1 (opaque).  *)
 
-external stroke : context -> unit = "caml_cairo_stroke"
+val stroke : context -> unit
   (** A drawing operator that strokes the current path according to
       the current line width, line join, line cap, and dash settings.
       After [stroke], the current path will be cleared from the cairo
@@ -2324,7 +2252,7 @@ external stroke : context -> unit = "caml_cairo_stroke"
       In no case will a cap style of [BUTT] cause anything to be drawn
       in the case of either degenerate segments or sub-paths. *)
 
-external stroke_preserve : context -> unit = "caml_cairo_stroke_preserve"
+val stroke_preserve : context -> unit
   (** Like {!Cairo.stroke} except that it preserves the path within
       the cairo context. *)
 
@@ -2349,14 +2277,13 @@ val stroke_extents : context -> rectangle
       See {!Cairo.stroke}, {!Cairo.set_line_width}, {!Cairo.set_line_join},
       {!Cairo.set_line_cap}, and {!Cairo.set_dash}. *)
 
-external in_stroke : context -> x:float -> y:float -> bool
-  = "caml_cairo_in_stroke"
+val in_stroke : context -> x:float -> y:float -> bool
   (** Tests whether the given point is inside the area that would be
       affected by a {!Cairo.stroke} operation given the current path
       and stroking parameters. Surface dimensions and clipping are not
       taken into account.  *)
 
-external copy_page : context -> unit = "caml_cairo_copy_page"
+val copy_page : context -> unit
   (** [copy_page cr] emits the current page for backends that support
       multiple pages, but doesn't clear it, so, the contents of the
       current page will be retained for the next page too.  Use
@@ -2365,7 +2292,7 @@ external copy_page : context -> unit = "caml_cairo_copy_page"
 
       This is a convenience function that simply calls
       {!Cairo.Surface.copy_page} on [cr]'s target. *)
-external show_page : context -> unit = "caml_cairo_show_page"
+val show_page : context -> unit
   (** [show_page cr] emits and clears the current page for backends
       that support multiple pages.  Use {!Cairo.copy_page} if you
       don't want to clear the page.
@@ -2391,11 +2318,11 @@ module Path :
 sig
   type t
 
-  external copy : context -> t = "caml_cairo_copy_path"
+  val copy : context -> t
     (** Creates a copy of the current path. See cairo_path_data_t for
         hints on how to iterate over the returned data structure.  *)
 
-  external copy_flat : context -> t = "caml_cairo_copy_path_flat"
+  val copy_flat : context -> t
     (** Gets a flattened copy of the current path.
 
         This function is like {!Cairo.Path.copy} except that any
@@ -2405,13 +2332,12 @@ sig
         elements of type [CURVE_TO] which will instead be replaced by
         a series of [LINE_TO] elements.  *)
 
-  external append : context -> t -> unit = "caml_cairo_append_path"
+  val append : context -> t -> unit
     (** Append the path onto the current path.  The path may be either
         the return value from one of {!Cairo.Path.copy} or
         {!Cairo.Path.copy_flat} or it may be constructed manually.  *)
 
-  external get_current_point : context -> float * float
-    = "caml_cairo_get_current_point"
+  val get_current_point : context -> float * float
     (** [get_current_point cr] gets the (x,y) coordinates of the
         current point of the current path, which is conceptually the
         final point reached by the path so far.  The current point is
@@ -2434,11 +2360,11 @@ sig
         Some functions unset the current path and as a result, current
         point: {!Cairo.fill}, {!Cairo.stroke}. *)
 
-  external clear : context -> unit = "caml_cairo_new_path"
+  val clear : context -> unit
     (** Clears the current path. After this call there will be no path
         and no current point. *)
 
-  external sub : context -> unit = "caml_cairo_new_sub_path"
+  val sub : context -> unit
     (** Begin a new sub-path. Note that the existing path is not
         affected. After this call there will be no current point.
 
@@ -2451,7 +2377,7 @@ sig
         manually compute the arc's initial coordinates for a call to
         {!Cairo.move_to}. *)
 
-  external close : context -> unit = "caml_cairo_close_path"
+  val close : context -> unit
     (** Adds a line segment to the path from the current point to the
         beginning of the current sub-path (the most recent point
         passed to {!Cairo.move_to}) and closes this sub-path.  After
@@ -2476,12 +2402,12 @@ sig
         the "last move_to point" during processing as the [MOVE_TO]
         immediately after the [CLOSE_PATH] will provide that point. *)
 
-  external glyph : context -> Glyph.t array -> unit = "caml_cairo_glyph_path"
+  val glyph : context -> Glyph.t array -> unit
     (** Adds closed paths for the glyphs to the current path. The
         generated path if filled, achieves an effect similar to that
         of {!Cairo.Glyph.show}. *)
 
-  external text : context -> string -> unit = "caml_cairo_text_path"
+  val text : context -> string -> unit
     (** [text cr utf8] adds closed paths for text to the current path.
         The generated path if filled, achieves an effect similar to
         that of {!Cairo.show_text}.  [utf8] should be a valid UTF8
@@ -2502,7 +2428,7 @@ sig
         adequate for serious text-using applications.  See
         {!Cairo.Path.glyph} for the "real" text path API in cairo. *)
 
-  external extents : context -> rectangle = "caml_cairo_path_extents"
+  val extents : context -> rectangle
     (** Computes a bounding box in user-space coordinates covering the
         points on the current path. If the current path is empty,
         returns an empty rectangle [{ x=0.; y=0.; w=0.; h=0. }].
@@ -2526,18 +2452,16 @@ sig
         {!Cairo.move_to} will not contribute to the results of
         [Cairo.Path.extents]. *)
 
-  external fold : t -> ('a -> path_data -> 'a) -> 'a -> 'a
-    = "caml_cairo_path_fold"
-      (** [fold cr f] folds [f] over all elements of the path. *)
+  val fold : t -> ('a -> path_data -> 'a) -> 'a -> 'a
+  (** [fold cr f] folds [f] over all elements of the path. *)
 
   val to_array : t -> path_data array
 
   val of_array : path_data array -> t
 end
 
-external arc : context ->
-  x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
-  = "caml_cairo_arc_bc" "caml_cairo_arc"
+val arc : context ->
+          x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
   (** [arc xc yc radius angle1 angle2] adds a circular arc of the
       given radius to the current path.  The arc is centered at [(xc,
       yc)], begins at [angle1] and proceeds in the direction of
@@ -2580,9 +2504,8 @@ external arc : context ->
       ]}
   *)
 
-external arc_negative : context ->
-  x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
-  = "caml_cairo_arc_negative_bc" "caml_cairo_arc_negative"
+val arc_negative : context ->
+                   x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
   (** [arc_negative xc yc radius angle1 angle2] adds a circular arc of
       the given radius to the current path.  The arc is centered at
       [(xc, yc)], begins at [angle1] and proceeds in the direction of
@@ -2593,9 +2516,9 @@ external arc_negative : context ->
       See {!Cairo.arc} for more details.  This function differs only
       in the direction of the arc between the two angles. *)
 
-external curve_to : context ->
-  x1:float -> y1:float -> x2:float -> y2:float -> x3:float -> y3:float -> unit
-  = "caml_cairo_curve_to_bc" "caml_cairo_curve_to"
+val curve_to : context ->
+               x1:float -> y1:float -> x2:float -> y2:float ->
+               x3:float -> y3:float -> unit
   (** Adds a cubic Bézier spline to the path from the current point to
       position (x3, y3) in user-space coordinates, using (x1, y1) and
       (x2, y2) as the control points.  After this call the current
@@ -2605,7 +2528,7 @@ external curve_to : context ->
       function will behave as if preceded by a call to
       {!Cairo.move_to}[ cr x1 y1]. *)
 
-external line_to : context -> x:float -> y:float -> unit = "caml_cairo_line_to"
+val line_to : context -> x:float -> y:float -> unit
   (** Adds a line to the path from the current point to position (x,
       y) in user-space coordinates. After this call the current point
       will be (x, y).
@@ -2613,13 +2536,12 @@ external line_to : context -> x:float -> y:float -> unit = "caml_cairo_line_to"
       If there is no current point before the call to [Cairo.line_to],
       this function will behave as {!Cairo.move_to}[ cr x y]. *)
 
-external move_to : context -> x:float -> y:float -> unit = "caml_cairo_move_to"
+val move_to : context -> x:float -> y:float -> unit
   (** Begin a new sub-path.  After this call the current point will be
       (x, y). *)
 
-external rectangle : context ->
-  x:float -> y:float -> w:float -> h:float -> unit
-  = "caml_cairo_rectangle"
+val rectangle : context ->
+                x:float -> y:float -> w:float -> h:float -> unit
   (** Adds a closed sub-path rectangle of the given size to the
       current path at position (x, y) in user-space coordinates.
 
@@ -2633,9 +2555,9 @@ external rectangle : context ->
       ]}
   *)
 
-external rel_curve_to : context ->
-  x1:float -> y1:float -> x2:float -> y2:float -> x3:float -> y3:float -> unit
-  = "caml_cairo_rel_curve_to_bc" "caml_cairo_rel_curve_to"
+val rel_curve_to : context ->
+                   x1:float -> y1:float -> x2:float -> y2:float ->
+                   x3:float -> y3:float -> unit
   (** Relative-coordinate version of {!Cairo.curve_to}.  All offsets
       are relative to the current point.  Adds a cubic Bézier spline
       to the path from the current point to a point offset from the
@@ -2650,8 +2572,7 @@ external rel_curve_to : context ->
       It is an error to call this function with no current point.
       Doing so will cause [Error NO_CURRENT_POINT] to be raised.  *)
 
-external rel_line_to : context -> x:float -> y:float -> unit
-  = "caml_cairo_rel_line_to"
+val rel_line_to : context -> x:float -> y:float -> unit
   (** Relative-coordinate version of {!Cairo.line_to}.  Adds a line to
       the path from the current point to a point that is offset from the
       current point by (dx, dy) in user space. After this call the current
@@ -2663,8 +2584,7 @@ external rel_line_to : context -> x:float -> y:float -> unit
       It is an error to call this function with no current point.
       Doing so will cause [Error NO_CURRENT_POINT] to be raised.  *)
 
-external rel_move_to : context -> x:float -> y:float -> unit
-  = "caml_cairo_rel_move_to"
+val rel_move_to : context -> x:float -> y:float -> unit
   (** Begin a new sub-path. After this call the current point will
       offset by (x, y).
 
@@ -2687,8 +2607,7 @@ external rel_move_to : context -> x:float -> y:float -> unit
     See also {!Cairo.Matrix}. *)
 
 
-external translate : context -> x:float -> y:float -> unit
-  = "caml_cairo_translate"
+val translate : context -> x:float -> y:float -> unit
   (** [translate cr tx ty] modifies the current transformation matrix
       (CTM) by translating the user-space origin by ([tx], [ty]).
       This offset is interpreted as a user-space coordinate according
@@ -2696,63 +2615,55 @@ external translate : context -> x:float -> y:float -> unit
       other words, the translation of the user-space origin takes
       place after any existing transformation. *)
 
-external scale : context -> x:float -> y:float -> unit = "caml_cairo_scale"
+val scale : context -> x:float -> y:float -> unit
   (** [scale sx sy] modifies the current transformation matrix (CTM)
       by scaling the X and Y user-space axes by [sx] and [sy]
       respectively.  The scaling of the axes takes place after any
       existing transformation of user space. *)
 
-external rotate : context -> angle:float -> unit = "caml_cairo_rotate"
+val rotate : context -> angle:float -> unit
   (** Modifies the current transformation matrix (CTM) by rotating the
       user-space axes by [angle] radians.  The rotation of the axes
       takes places after any existing transformation of user space.
       The rotation direction for positive angles is from the positive
       X axis toward the positive Y axis. *)
 
-external transform : context -> Matrix.t -> unit
-  = "caml_cairo_transform" "noalloc"
+val transform : context -> Matrix.t -> unit
   (** [transform cr matrix] modifies the current transformation matrix
       (CTM) by applying [matrix] as an additional transformation.  The
       new transformation of user space takes place after any existing
       transformation. *)
 
-external set_matrix : context -> Matrix.t -> unit
-  = "caml_cairo_set_matrix" "noalloc"
+val set_matrix : context -> Matrix.t -> unit
   (** [set_matrix cr matrix] Modifies the current transformation
       matrix (CTM) by setting it equal to [matrix]. *)
 
-external get_matrix : context -> Matrix.t = "caml_cairo_get_matrix"
+val get_matrix : context -> Matrix.t
   (** Return the current transformation matrix (CTM). *)
 
-external identity_matrix : context -> unit = "caml_cairo_identity_matrix"
+val identity_matrix : context -> unit
   (** Resets the current transformation matrix (CTM) by setting it
       equal to the identity matrix.  That is, the user-space and
       device-space axes will be aligned and one user-space unit will
       transform to one device-space unit. *)
 
-external user_to_device : context -> x:float -> y:float -> float * float
-  = "caml_cairo_user_to_device"
+val user_to_device : context -> x:float -> y:float -> float * float
   (** [user_to_device cr x y] transform a coordinate from user space
       to device space by multiplying the given point by the current
       transformation matrix (CTM). *)
 
-external user_to_device_distance :
-  context -> x:float -> y:float -> float * float
-  = "caml_cairo_user_to_device_distance"
+val user_to_device_distance : context -> x:float -> y:float -> float * float
   (** [user_to_device_distance cr dx dy] transform a distance vector
       from user space to device space.  This function is similar to
       {!Cairo.user_to_device} except that the translation components
       of the CTM will be ignored when transforming ([dx],[dy]). *)
 
-external device_to_user : context -> x:float -> y:float -> float * float
-  = "caml_cairo_device_to_user"
+val device_to_user : context -> x:float -> y:float -> float * float
   (** Transform a coordinate from device space to user space by
       multiplying the given point by the inverse of the current
       transformation matrix (CTM). *)
 
-external device_to_user_distance :
-  context -> x:float -> y:float -> float * float
-  = "caml_cairo_device_to_user_distance"
+val device_to_user_distance : context -> x:float -> y:float -> float * float
   (** [device_to_user_distance cr dx dy] transform a distance vector
       from device space to user space.  This function is similar to
       {!Cairo.device_to_user} except that the translation components
