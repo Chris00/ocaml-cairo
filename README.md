@@ -13,8 +13,9 @@ online.
 Prerequisites
 -------------
 
-You need the development file of Cairo (e.g. on Debian, you must
-install the package ``libcairo2-dev``) and the OCaml package
+You need the development files of Cairo (e.g. on Debian, you must
+install the package ``libcairo2-dev``, on Mageia `libcairo-devel`, and
+on Fedora `cairo-devel`) and the OCaml package
 ``lablgtk2`` (in the [OPAM](http://opam.ocamlpro.com/) package
 ``lablgtk``).
 
