@@ -14,7 +14,7 @@ License:     LGPL-3.0 with OCaml linking exception
 Maintainers: Christophe Troestler <Christophe.Troestler@umons.ac.be>
 Homepage:    https://github.com/Chris00/ocaml-cairo
 # BugReports: https://github.com/Chris00/ocaml-cairo/issues
-Plugins:     META (0.4), StdFiles (0.4)
+Plugins:     META (0.4)
 AlphaFeatures: ocamlbuild_more_args
 OCamlVersion: >= 4.02
 
