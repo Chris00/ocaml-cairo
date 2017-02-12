@@ -49,6 +49,22 @@ let () =
                        "Please install \"pkg-config\".\n%!";
     exit 1
 
+let config = OASISExec.run_read_output ~ctxt:!BaseContext.default
+               (BaseOCamlcConfig.ocamlc ()) ["-config"]
+
+let rec find_map f = function
+  | [] -> raise Not_found
+  | e :: tl -> try f e
+               with Not_found -> find_map f tl
+
+let system =
+  find_map (OASISString.strip_starts_with ~what:"system: ") config
+
+let has_pkg_config =
+  try ignore(OASISFileUtil.which "pkg-config" ~ctxt:!BaseContext.default);
+      true
+  with Not_found -> false
+
 let pkg_config lib args =
   try
     OASISExec.run_read_one_line ~ctxt:!BaseContext.default
@@ -70,26 +86,34 @@ and skip is_delim s i i1 =
 
 let split_on_space s = split_on (fun c -> c = ' ') s 0 0 (String.length s)
 
+let contains ~what str =
+  try ignore(OASISString.find ~what str); true with Not_found -> false
+
 (** Compute the correct CFLAGS for Cairo. *)
 let cairo_cflags =
   lazy(match cairo_cflags with
        | [] ->
-         (match Sys.os_type with
-          | "Cygwin"
-            | "Unix" -> split_on_space(pkg_config "cairo" ["--cflags-only-I"])
-          | "Win32" -> ["/I"; "C:\\gtk\\include\\cairo"]
-          | os -> printf "Operating system %S not known" os;  exit 1)
+          (* If pkg-config is present, use it regardless of the system. *)
+          if has_pkg_config then
+            split_on_space(pkg_config "cairo" ["--cflags-only-I"])
+          else if Sys.os_type = "Win32" then
+            ["/I"; "C:\\gtk\\include\\cairo"]
+          else (
+            printf "Operating system %S not known.\n" Sys.os_type;
+            exit 1)
        | _ -> cairo_cflags)
 
 (** Compute the correct CLIBS for Cairo. *)
 let cairo_clibs =
   lazy(match cairo_clibs with
        | [] ->
-         (match Sys.os_type with
-          | "Cygwin"
-            | "Unix" -> split_on_space(pkg_config "cairo" ["--libs"])
-          | "Win32" -> ["/LC:\\gtk\\lib"; "cairo.lib"]
-          | os -> printf "Operating system %S not known" os;  exit 1)
+          if has_pkg_config then
+            split_on_space(pkg_config "cairo" ["--libs"])
+          else if Sys.os_type = "Win32" then
+            ["/LC:\\gtk\\lib"; "cairo.lib"]
+          else (
+            printf "Operating system %S not known" Sys.os_type;
+            exit 1)
        | _ -> cairo_clibs)
 
 
@@ -106,11 +130,12 @@ let compile_and_run_c =
     output_string fh pgm;
     close_out fh;
     let exe = Filename.temp_file "oasis-" ".exe" in
-    let o = match Sys.os_type with
-      | "Unix" | "Cygwin" -> "-o " ^ exe
-      | "Win32" -> "/Fe" ^ exe
-      | _ -> assert false in
-    let args = o :: stdlib :: (cflags @ [tmp] @ lflags) in
+    let o = if contains ~what:"mingw" system
+               || Sys.os_type = "Unix" || Sys.os_type = "Cygwin" then
+              "-o " ^ Filename.quote exe
+            else if Sys.os_type = "Win32" then "/Fe" ^ Filename.quote exe
+            else assert false in
+    let args = o :: stdlib :: (cflags @ [Filename.quote tmp] @ lflags) in
     let f_exit_code e =
       if e <> 0 then (compile_err(); Sys.remove tmp; exit 1) in
     OASISExec.run ~ctxt:!BaseContext.default cc args ~f_exit_code;
