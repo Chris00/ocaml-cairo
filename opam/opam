@@ -8,6 +8,7 @@ license: "LGPL-3.0 with OCaml linking exception"
 homepage: "https://github.com/Chris00/ocaml-cairo"
 dev-repo: "https://github.com/Chris00/ocaml-cairo.git"
 bug-reports: "https://github.com/Chris00/ocaml-cairo/issues"
+tags: [ "Cairo" "stroke" "drawing" "tutorial"  ]
 build: [
   ["oasis" "setup"]
   ["ocaml" "setup.ml" "-configure" "--prefix" prefix
@@ -28,7 +29,7 @@ build-test: [
 build-doc: [ "ocaml" "setup.ml" "-doc" ]
 depends: [
   "base-bigarray"
-  "oasis" {build & >= "0.4"}
+  "oasis" {build & >= "0.4.7"}
   "ocamlbuild" {build}
   "ocamlfind" {build}
   # Included from _opam file
@@ -38,8 +39,8 @@ depopts: [
   "lablgtk"
 ]
 conflicts: [
-  "cairo" {= "0.4.2"}
   "cairo" {= "0.4.1"}
+  "cairo" {= "0.4.2"}
 ]
 depexts: [
   [ ["mageia"] ["libcairo-devel"] ]
