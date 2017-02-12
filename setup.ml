@@ -1,9 +1,9 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 9852805d5c19ca1cb6abefde2dcea323) *)
+(* DO NOT EDIT (digest: a426e2d026defb34183b787d31fbdcff) *)
 (******************************************************************************)
 (* OASIS: architecture for building OCaml libraries and applications          *)
 (*                                                                            *)
-(* Copyright (C) 2011-2013, Sylvain Le Gall                                   *)
+(* Copyright (C) 2011-2016, Sylvain Le Gall                                   *)
 (* Copyright (C) 2008-2011, OCamlCore SARL                                    *)
 (*                                                                            *)
 (* This library is free software; you can redistribute it and/or modify it    *)
@@ -31,6 +31,8 @@ let () =
 #require "oasis.dynrun";;
 open OASISDynRun;;
 
+let setup_t = BaseCompat.Compat_0_4.adapt_setup_t setup_t
+open BaseCompat.Compat_0_4
 (* OASIS_STOP *)
 
 open Printf;;
@@ -191,7 +193,8 @@ let () =
          int main(int argc, char **argv) {
            return(0);
          }"
-        (fun _ -> printf "ERROR: Install the development files for lablgtk2 (e.g. \
-                       the\n  liblablgtk2-ocaml-dev package for Debian).\n");
+        (fun _ -> printf "ERROR: Install the development files for lablgtk2 \
+                          (e.g. the\n  liblablgtk2-ocaml-dev package for \
+                          Debian).\n");
     ) in
   BaseSetup.setup { setup_t with BaseSetup.configure = configure }
