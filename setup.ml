@@ -75,8 +75,8 @@ let cairo_cflags =
   lazy(match cairo_cflags with
        | [] ->
          (match Sys.os_type with
-          | "Unix" -> split_on_space(pkg_config "cairo" ["--cflags-only-I"])
-          | "Cygwin" -> ["-I"; "C:/gtk/include/cairo"]
+          | "Cygwin"
+            | "Unix" -> split_on_space(pkg_config "cairo" ["--cflags-only-I"])
           | "Win32" -> ["/I"; "C:\\gtk\\include\\cairo"]
           | os -> printf "Operating system %S not known" os;  exit 1)
        | _ -> cairo_cflags)
@@ -86,8 +86,8 @@ let cairo_clibs =
   lazy(match cairo_clibs with
        | [] ->
          (match Sys.os_type with
-          | "Unix" -> split_on_space(pkg_config "cairo" ["--libs"])
-          | "Cygwin" -> ["-LC:/gtk/lib"; "-lcairo"]
+          | "Cygwin"
+            | "Unix" -> split_on_space(pkg_config "cairo" ["--libs"])
           | "Win32" -> ["/LC:\\gtk\\lib"; "cairo.lib"]
           | os -> printf "Operating system %S not known" os;  exit 1)
        | _ -> cairo_clibs)
