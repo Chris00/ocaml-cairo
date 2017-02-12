@@ -150,8 +150,9 @@ let get_cairo_clibs () =
        cairo_destroy(cr);
        return(0);
      }"
-    (fun _ -> printf "ERROR: Could not compile a test program. The cairo library \
-                   flags %S are likely incorrect.  Set them in config.ml.\n"
+    (fun _ -> printf "ERROR: Could not compile a test program. The cairo \
+                      library flags %S are likely incorrect.  Set them \
+                      in config.ml.\n"
                   (String.concat " " cairo_clibs));
   String.concat "\t" cairo_clibs
 
