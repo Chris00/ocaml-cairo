@@ -1429,7 +1429,7 @@ static cairo_status_t caml_cairo_image_bigarray_attach_proxy
     cairo_status_t status;                                              \
                                                                         \
     if ((b->flags & CAML_BA_MANAGED_MASK) == CAML_BA_MAPPED_FILE)       \
-      caml_invalid_argument("Caml.Image.create_for_" #name              \
+      caml_invalid_argument("Cairo.Image.create_for_" #name             \
                             ": cannot use a memory mapped file.");      \
     vsurf = ALLOC(surface); /* alloc this first in case it raises an exn */ \
     surf = cairo_image_surface_create_for_data                          \
@@ -1461,7 +1461,7 @@ SURFACE_CREATE_DATA(data32)
     if (data == NULL)                                                   \
       invalid_argument("Cairo.Image.get_data: not an image surface.");  \
     if (proxy == NULL)                                                  \
-      failwith("Cairo.Image.get_data: BUG: no bigarray proxy");         \
+      invalid_argument("Cairo.Image.get_data: not created from a bigarray"); \
     vb = caml_ba_alloc(CAML_BA_##type | CAML_BA_C_LAYOUT | CAML_BA_MANAGED, \
                        num_dims, data, dim);                            \
     /* Attach the proxy of the surface to the bigarray */               \
