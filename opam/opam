@@ -42,6 +42,7 @@ conflicts: [
   "cairo" {= "0.4.1"}
   "cairo" {= "0.4.2"}
 ]
+available: [ ocaml-version >= "4.02" ]
 depexts: [
   [ ["mageia"] ["libcairo-devel"] ]
   [ [ "debian"  ] [ "libcairo2-dev" "liblablgtk2-ocaml-dev" ] ]

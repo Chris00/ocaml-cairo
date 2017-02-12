@@ -502,7 +502,7 @@ type font_type =
     | `User
     ]
 
-external font_type_init : unit -> unit = "caml_cairo_font_type_init" "noalloc"
+external font_type_init : unit -> unit = "caml_cairo_font_type_init" [@@noalloc]
 let () = font_type_init()
 
 module Font_face =
@@ -687,7 +687,7 @@ struct
   external get_stride : Surface.t -> int = "caml_cairo_image_surface_get_stride"
 
   external stride_for_width : format -> width:int -> int
-    = "caml_cairo_format_stride_for_width" "noalloc"
+    = "caml_cairo_format_stride_for_width" [@@noalloc]
 
   open Bigarray
   type data8 =
@@ -787,7 +787,7 @@ struct
        The "problem" is the absence of close function... *)
 
   external set_size : Surface.t -> width:float -> height:float -> unit
-    = "caml_cairo_pdf_surface_set_size" "noalloc"
+    = "caml_cairo_pdf_surface_set_size" [@@noalloc]
 end
 
 module PNG =
@@ -877,7 +877,7 @@ struct
 
   external add_color_stop_rgb_stub : [> `Gradient] t -> ofs:float ->
     r:float -> g:float -> b:float -> unit
-    = "caml_cairo_pattern_add_color_stop_rgb" "noalloc"
+    = "caml_cairo_pattern_add_color_stop_rgb" [@@noalloc]
 
   let add_color_stop_rgb cr ?(ofs=0.0) r g b =
     add_color_stop_rgb_stub cr ~ofs ~r ~g ~b
@@ -885,7 +885,7 @@ struct
   external add_color_stop_rgba_stub : [> `Gradient] t -> ofs:float ->
     r:float -> g:float -> b:float -> a:float -> unit
     = "caml_cairo_pattern_add_color_stop_rgba_bc"
-    "caml_cairo_pattern_add_color_stop_rgba" "noalloc"
+    "caml_cairo_pattern_add_color_stop_rgba" [@@noalloc]
 
   let add_color_stop_rgba cr ?(ofs=0.0) r g b a =
     add_color_stop_rgba_stub cr ~ofs ~r ~g ~b ~a
@@ -934,7 +934,7 @@ struct
     | PAD
 
   external set_extend : 'a t -> extend -> unit
-    = "caml_cairo_pattern_set_extend" "noalloc"
+    = "caml_cairo_pattern_set_extend" [@@noalloc]
 
   external get_extend : 'a t -> extend = "caml_cairo_pattern_get_extend"
 
@@ -947,12 +947,12 @@ struct
     (* | GAUSSIAN *)
 
   external set_filter : 'a t -> filter -> unit
-    = "caml_cairo_pattern_set_filter" "noalloc"
+    = "caml_cairo_pattern_set_filter" [@@noalloc]
 
   external get_filter : 'a t -> filter = "caml_cairo_pattern_get_filter"
 
   external set_matrix : 'a t -> Matrix.t -> unit
-    = "caml_cairo_pattern_set_matrix" "noalloc"
+    = "caml_cairo_pattern_set_matrix" [@@noalloc]
 
   external get_matrix : 'a t -> Matrix.t = "caml_cairo_pattern_get_matrix"
 end
@@ -966,9 +966,9 @@ external scale : context -> x:float -> y:float -> unit = "caml_cairo_scale"
 external rotate : context -> angle:float -> unit = "caml_cairo_rotate"
 
 external transform : context -> Matrix.t -> unit
-  = "caml_cairo_transform" "noalloc"
+  = "caml_cairo_transform" [@@noalloc]
 external set_matrix : context -> Matrix.t -> unit
-  = "caml_cairo_set_matrix" "noalloc"
+  = "caml_cairo_set_matrix" [@@noalloc]
 
 external get_matrix : context -> Matrix.t = "caml_cairo_get_matrix"
 
