@@ -29,7 +29,10 @@ build-doc: [ "ocaml" "setup.ml" "-doc" ]
 depends: [
   "base-bigarray"
   "oasis" {build & >= "0.4"}
+  "ocamlbuild" {build}
   "ocamlfind" {build}
+  # Included from _opam file
+  "conf-cairo"
 ]
 depopts: [
   "lablgtk"
@@ -41,8 +44,11 @@ conflicts: [
 depexts: [
   [ ["mageia"] ["libcairo-devel"] ]
   [ [ "debian"  ] [ "libcairo2-dev" "liblablgtk2-ocaml-dev" ] ]
+  [ [ "ubuntu"  ] [ "pkg-config" "libcairo2-dev" "libexpat1-dev" ] ]
   [ [ "centos" ]  [ "cairo" "cairo-devel" "pkgconfig" ] ]
+  [ [ "fedora" ] [ "cairo-devel" ] ]
   [ [ "freebsd" ] [ "graphics/cairo" ] ]
   [ [ "openbsd" ] [ "graphics/cairo" ] ]
+  [ [ "osx" "homebrew" ] [ "cairo" "pkg-config" ] ]
 ]
 

@@ -1,7 +1,10 @@
+depends: [
+  "conf-cairo"
+]
 depexts: [
   [ ["mageia"] ["libcairo-devel"] ]
   [ [ "debian"  ] [ "libcairo2-dev" "liblablgtk2-ocaml-dev" ] ]
-  [ [ "ubuntu"  ] [ "pkg-config" "libcairo2-dev" "expat" ] ]
+  [ [ "ubuntu"  ] [ "pkg-config" "libcairo2-dev" "libexpat1-dev" ] ]
   [ [ "centos" ]  [ "cairo" "cairo-devel" "pkgconfig" ] ]
   [ [ "fedora" ] [ "cairo-devel" ] ]
   [ [ "freebsd" ] [ "graphics/cairo" ] ]
