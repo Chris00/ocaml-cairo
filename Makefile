@@ -59,7 +59,7 @@ web tutorial: all doc
 clean:
 	ocaml setup.ml -clean
 	$(RM) $(PKG_TARBALL)
-	$(RM) $(wildcard *~ *.pdf *.ps *.png *.svg) cairo.godiva setup.data
+	$(RM) $(wildcard *~ *.pdf *.ps *.png *.svg) setup.data
 	$(MAKE) -C doc $@
 
 distclean dist-clean::
