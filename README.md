@@ -1,3 +1,6 @@
+[![Travis Build Status](https://travis-ci.org/ocaml/tuareg.svg?branch=master)](https://travis-ci.org/ocaml/tuareg)
+[![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/5dp8aftaq7ohyflq?svg=true)](https://ci.appveyor.com/project/Chris00/ocaml-cairo)
+
 OCaml interface to Cairo
 ========================
 
@@ -34,6 +37,7 @@ If you would like to compile from the sources, install
 
 and do:
 
+	oasis setup
     ocaml setup.ml -configure
 	ocaml setup.ml -build
 
