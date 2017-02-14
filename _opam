@@ -1,13 +1,7 @@
 depends: [
   "conf-cairo"
+  "conf-pkg-config"
 ]
 depexts: [
-  [ [ "debian" ] [ "pkg-config" ] ]
-  [ [ "ubuntu" ] [ "pkg-config" "libexpat1-dev" ] ]
-  [ [ "fedora" ] [ "pkgconfig" ] ]
-  [ [ "centos" ] [ "pkgconfig" ] ]
-  [ [ "mageia" ] [ "pkgconfig" ] ]
-  [ [ "freebsd" ] [ "devel/pkgconf" ] ]
-  [ [ "openbsd" ] [ "devel/pkgconf" ] ]
-  [ [ "osx" "homebrew" ] [ "pkg-config" ] ]
+  [ [ "ubuntu" ] [ "libexpat1-dev" ] ]
 ]
