@@ -1,4 +1,4 @@
-OPAM_PACKAGES='ocamlfind lablgtk'
+OPAM_PACKAGES='ocamlfind lablgtk oasis'
 
 export OPAMYES=1
 
@@ -22,5 +22,6 @@ opam remove cairo2
 # Compile the tests
 OCAML_VERSION_MAJOR=`ocamlc -version | cut -d . -f 1`
 if [ $OCAML_VERSION_MAJOR -gt 3 ]; then
-   make
+    oasis setup
+    make
 fi
