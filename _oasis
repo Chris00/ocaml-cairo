@@ -34,9 +34,7 @@ Library cairo2
   BuildDepends: bigarray
 
 Library cairo_gtk
-  Build: false
-  if flag(lablgtk2)
-    Build: true
+  Build$:	flag(lablgtk2)
   Path:         src/
   BuildTools:   ocamlbuild
   Modules:	Cairo_gtk
