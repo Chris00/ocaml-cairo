@@ -49,16 +49,16 @@ let () =
                        "Please install \"pkg-config\".\n%!";
     exit 1
 
-let config = OASISExec.run_read_output ~ctxt:!BaseContext.default
-               (BaseOCamlcConfig.ocamlc ()) ["-config"]
+let config = lazy(OASISExec.run_read_output ~ctxt:!BaseContext.default
+                    (BaseOCamlcConfig.ocamlc ()) ["-config"])
 
 let rec find_map f = function
   | [] -> raise Not_found
   | e :: tl -> try f e
                with Not_found -> find_map f tl
 
-let system =
-  find_map (OASISString.strip_starts_with ~what:"system: ") config
+let system = lazy(find_map (OASISString.strip_starts_with ~what:"system: ")
+                    (Lazy.force config))
 
 let has_pkg_config =
   try ignore(OASISFileUtil.which "pkg-config" ~ctxt:!BaseContext.default);
@@ -130,7 +130,7 @@ let compile_and_run_c =
     output_string fh pgm;
     close_out fh;
     let exe = Filename.temp_file "oasis-" ".exe" in
-    let o = if contains ~what:"mingw" system
+    let o = if contains ~what:"mingw" (Lazy.force system)
                || Sys.os_type = "Unix" || Sys.os_type = "Cygwin" then
               "-o " ^ Filename.quote exe
             else if Sys.os_type = "Win32" then "/Fe" ^ Filename.quote exe
