@@ -11,9 +11,9 @@ static int caml_cairo_compare_pointers(value v1, value v2)
   else return(1);
 }
 
-static long caml_cairo_hash_pointer(value v)
+static intnat caml_cairo_hash_pointer(value v)
 {
-  return((long) (* (void **) Data_custom_val(v)));
+  return((intnat) (* (void **) Data_custom_val(v)));
 }
 
 #define CUSTOM_OPERATIONS(name)                                         \
@@ -279,7 +279,7 @@ static int caml_cairo_font_options_compare(value v1, value v2)
   else return(1);
 }
 
-static long caml_cairo_font_options_hash(value v)
+static intnat caml_cairo_font_options_hash(value v)
 {
   return(cairo_font_options_hash(FONT_OPTIONS_VAL(v)));
 }
