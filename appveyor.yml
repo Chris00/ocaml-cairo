@@ -7,6 +7,7 @@ environment:
     CYG_ROOT: "C:\\cygwin"
     CYG_BASH: "%CYG_ROOT%\\bin\\bash -lc"
     FORK_USER: ocaml
+    PRE_INSTALL_HOOK: opam depext -i lablgtk && opam install lablgtk
 
 init:
   - 'echo System architecture: %PLATFORM%'
