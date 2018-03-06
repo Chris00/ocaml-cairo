@@ -1,0 +1,9 @@
+(jbuild_version 1)
+
+(executables
+ ((names     (gtk_demo))
+  (libraries (cairo2-gtk))))
+
+(alias
+ ((name examples)
+  (deps (gtk_demo.exe))))

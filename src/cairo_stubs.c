@@ -31,8 +31,8 @@
 #include <caml/intext.h>
 #include <caml/bigarray.h>
 
-#include "cairo_macros.c"
-#include "cairo_ocaml_types.c"
+#include "cairo_macros.h"
+#include "cairo_ocaml_types.h"
 
 /* cairo_t functions.
 ***********************************************************************/

@@ -1,7 +1,0 @@
-depends: [
-  "conf-cairo"
-  "conf-pkg-config"
-]
-depexts: [
-  [ [ "ubuntu" ] [ "libexpat1-dev" ] ]
-]

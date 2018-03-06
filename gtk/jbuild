@@ -1,0 +1,15 @@
+(jbuild_version 1)
+
+(library
+ ((name        cairo_gtk)
+  (public_name cairo2-gtk)
+  (c_names    (cairo_gtk_stubs))
+  (c_flags    (:standard (:include c_flags.sexp)))
+  (c_library_flags (:standard (:include c_library_flags.sexp)))
+  (libraries  (threads lablgtk2 cairo2))
+  (synopsis "Rendering Cairo on Gtk canvas")))
+
+(rule
+ ((targets (c_flags.sexp c_library_flags.sexp))
+  (deps    (../config/discover.exe))
+  (action  (run ${<} --gtk))))
