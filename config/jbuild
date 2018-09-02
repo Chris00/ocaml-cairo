@@ -1,6 +1,0 @@
-(jbuild_version 1)
-
-(executable
- ((name      discover)
-  (modules   discover)
-  (libraries (base stdio configurator))))

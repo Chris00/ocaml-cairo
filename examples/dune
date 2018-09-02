@@ -1,0 +1,25 @@
+(executables
+ (names arcs clip curve_to dash fill_stroke
+        fill_style gradient set_line_cap set_line_join
+        text text_align_center text_extents text_rotate
+        recording pythagoras_tree
+        graphics_demo
+        ;; Tutorial sources
+        stroke fill showtext paint mask setsourcergba
+        setsourcegradient path_close textextents diagram
+        draw tips_ellipse tips_letter tips_font)
+  (libraries cairo2 graphics))
+
+(alias
+ (name examples)
+ (deps arcs.exe clip.exe curve_to.exe dash.exe fill_stroke.exe
+       fill_style.exe gradient.exe set_line_cap.exe set_line_join.exe
+       text.exe text_align_center.exe text_extents.exe text_rotate.exe
+       recording.exe pythagoras_tree.exe))
+
+(alias
+ (name tutorial)
+ (deps stroke.exe fill.exe showtext.exe paint.exe mask.exe setsourcergba.exe
+       setsourcegradient.exe path_close.exe textextents.exe diagram.exe
+       draw.exe tips_ellipse.exe tips_letter.exe tips_font.exe))
+

@@ -1,4 +1,5 @@
 # 							-*-conf-unix-*-
 .merlin
 _build/
+*.install
 packages

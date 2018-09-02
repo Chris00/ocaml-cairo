@@ -1,7 +1,4 @@
-ROOT=..
-include $(ROOT)/Makefile.conf
-
-TUTORIAL = $(WEB)/tutorial
+TUTORIAL = shell.forge.ocamlcore.org:/home/groups/cairo/htdocs/tutorial
 
 IMAGES=$(shell grep .png tutorial.html | sed "s/.*\"\(.*\.png\).*/\1/")
 
@@ -25,11 +22,6 @@ web: $(IMAGES) web-html
 tutorial: $(IMAGES)
 # Just generate the images (the .html file is ok)
 
-$(IMAGES):
-	for f in $(TUTORIAL_SOURCES:.ml=.byte); do \
-	  $(ROOT)/_build/examples/$$f; \
-	done
-
-
-clean:
-	$(RM) $(wildcard *~ *.png *.svg)
+$(addprefix ../_build/default/examples/, $(IMAGES)):
+	cd .. && dune build @tutorial
+	cd _build/default/examples/ && for p in *.exe; do ./$$p; done
