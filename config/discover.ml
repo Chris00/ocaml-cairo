@@ -1,15 +1,10 @@
-open Stdio
-module C = Configurator
-module P = Configurator.Pkg_config
-
-let split_ws str =
-  Base.(String.(split str ~on:' ' |> List.filter ~f:((<>) "")))
+module C = Configurator.V1
+module P = C.Pkg_config
 
 let write ~cflags ~libs =
-  let write_sexp file sexp =
-    Out_channel.write_all file ~data:(Base.Sexp.to_string sexp) in
-  write_sexp "c_flags.sexp" (Base.sexp_of_list Base.sexp_of_string cflags);
-  write_sexp "c_library_flags.sexp" (Base.sexp_of_list Base.sexp_of_string libs)
+  C.Flags.write_sexp "c_flags.sexp" cflags;
+  C.Flags.write_sexp "c_library_flags.sexp" libs
+(* let write ~cflags:_ ~libs:_ = () *)
 
 let default_cairo c =
   (* In case pkg-config fails *)
@@ -25,13 +20,13 @@ let discover_cairo c =
                  | Some p -> p | None -> default_cairo c)
     | None -> default_cairo c in
   let cflags =
-    match Caml.Sys.getenv "CAIRO_CFLAGS" with
+    match Sys.getenv "CAIRO_CFLAGS" with
     | exception Not_found -> p.P.cflags
-    | alt_cflags -> split_ws alt_cflags in
+    | alt_cflags -> C.Flags.extract_blank_separated_words alt_cflags in
   let libs =
-    match Caml.Sys.getenv "CAIRO_LIBS" with
+    match Sys.getenv "CAIRO_LIBS" with
     | exception Not_found -> p.P.libs
-    | alt_libs -> split_ws alt_libs in
+    | alt_libs -> C.Flags.extract_blank_separated_words alt_libs in
   (* FIXME: find cairo.h and check that
      CAIRO_VERSION_MAJOR > 1 ||
      (CAIRO_VERSION_MAJOR = 1 && CAIRO_VERSION_MINOR >= 6) *)
@@ -51,20 +46,20 @@ let discover_gtk c =
                  | Some p -> p | None -> default_gtk c)
     | None -> default_gtk c in
   let cflags =
-    match Caml.Sys.getenv "GTK_CFLAGS" with
+    match Sys.getenv "GTK_CFLAGS" with
     | exception Not_found -> p.P.cflags
-    | alt_cflags -> split_ws alt_cflags in
+    | alt_cflags -> C.Flags.extract_blank_separated_words alt_cflags in
   let libs =
-    match Caml.Sys.getenv "GTK_LIBS" with
+    match Sys.getenv "GTK_LIBS" with
     | exception Not_found -> p.P.libs
-    | alt_libs -> split_ws alt_libs in
+    | alt_libs -> C.Flags.extract_blank_separated_words alt_libs in
   write ~cflags ~libs
 
 let () =
   let gtk = ref false in
   let specs = [
-      ("--gtk", Caml.Arg.Set gtk, " add flags for Gtk")] in
-  Caml.Arg.parse specs (fun _ -> raise(Caml.Arg.Bad "no anonymous arg"))
+      ("--gtk", Arg.Set gtk, " add flags for Gtk")] in
+  Arg.parse specs (fun _ -> raise(Arg.Bad "no anonymous arg"))
     "discover";
-  Configurator.main ~name:"cairo"
+  C.main ~name:"cairo"
     (if !gtk then discover_gtk else discover_cairo)

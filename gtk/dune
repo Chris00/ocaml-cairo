@@ -10,5 +10,4 @@
 
 (rule
  (targets c_flags.sexp c_library_flags.sexp)
- (deps    ../config/discover.exe)
- (action  (run %{deps} --gtk)))
+ (action  (run ../config/discover.exe --gtk)))

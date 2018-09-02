@@ -16,9 +16,6 @@ build-doc: [ "dune" "build" "@doc" ]
 depends: [
   "base-bigarray"
   "dune" {build}
-  "configurator" {build}
-  "stdio" {build}
-  "base" {build}
   "conf-cairo"
 ]
 conflicts: [
