@@ -16,8 +16,8 @@ install uninstall:
 	jbuilder $@
 
 doc:
-	sed -e 's/%%VERSION%%/$(PKGVERSION)/' src/curve_sampling.mli \
-	  > _build/default/src/curve_sampling.mli
+	sed -e 's/%%VERSION%%/$(PKGVERSION)/' src/cairo.mli \
+	  > _build/default/src/cairo.mli
 	jbuilder build @doc
 	echo '.def { background: #f9f9de; }' >> _build/default/_doc/odoc.css
 

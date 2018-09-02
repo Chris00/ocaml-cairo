@@ -19,34 +19,37 @@
 (** Cairo: A Vector Graphics Library (bindings).
 
     {b Drawing:}
-    - {!cairo_t}: The cairo drawing context
-    - {!paths}: Creating paths and manipulating path data
+    - {{!cairo_t}Cairo.context}: The cairo drawing context
+    - {{!paths}Path}: Creating paths and manipulating path data
     - {!Pattern}: Sources for drawing.
-    - {!transformations}: Manipulating the current transformation matrix.
-    - {!text}: Rendering text and glyphs.
+    - Regions — Representing a pixel-aligned area (TODO).
+    - {{!transformations}Transformations}: Manipulating the current
+      transformation matrix.
+    - {{!text}Text}: Rendering text and glyphs.
+    - Raster Sources — Supplying arbitrary image data (TODO).
 
     {b Fonts:}
     - {!Font_face}: Base module for font faces.
     - {!Scaled_font}: Font face at particular size and options.
     - {!Font_options}: How a font should be rendered.
-    - {!Ft}: FreeType Fonts -- Font support for FreeType.
-    - {!Win32_font}: Win32 Fonts -- Font support for Microsoft Windows.
-    - {!Quartz_font}: Quartz (CGFont) Fonts -- Font support via CGFont on OS X.
+    - {!Ft}: FreeType Fonts — Font support for FreeType.
+    - {!Win32_font}: Win32 Fonts — Font support for Microsoft Windows.
+    - {!Quartz_font}: Quartz (CGFont) Fonts — Font support via CGFont on OS X.
     - {!User_font}: Font support with font data provided by the user.
 
     {b {!surfaces}} (platform independent {!surface_backends} and others):
     - {!Surface}: Base module for surfaces.
-    - {!Image}: Image Surfaces -- Rendering to memory buffers.
-    - {!PDF}: PDF Surfaces -- Rendering PDF documents.
-    - {!PNG}: PNG Support -- Reading and writing PNG images.
-    - {!PS}: PostScript Surfaces -- Rendering PostScript documents.
-    - {!SVG}: SVG Surfaces -- Rendering SVG documents.
+    - {!Image}: Image Surfaces — Rendering to memory buffers.
+    - {!PDF}: PDF Surfaces — Rendering PDF documents.
+    - {!PNG}: PNG Support — Reading and writing PNG images.
+    - {!PS}: PostScript Surfaces — Rendering PostScript documents.
+    - {!SVG}: SVG Surfaces — Rendering SVG documents.
 
     Surfaces that Cairo supports but for which no OCaml binding has
     been created (yet, please contribute!):
-    - {!XLib}: XLib Surfaces -- X Window System rendering using XLib.
-    - {!Win32}: Win32 Surfaces -- Microsoft Windows surface support.
-    - {!Quartz}: Quartz Surfaces -- Rendering to Quartz surfaces.
+    - {!XLib}: XLib Surfaces — X Window System rendering using XLib.
+    - {!Win32}: Win32 Surfaces — Microsoft Windows surface support.
+    - {!Quartz}: Quartz Surfaces — Rendering to Quartz surfaces.
 
 
     In order to get acquainted with Cairo's concepts we recommend that
@@ -54,6 +57,7 @@
     Cairo OCaml tutorial}.
 
     @author Christophe Troestler
+    @version %%VERSION%%
 *)
 
 type status =
@@ -69,7 +73,7 @@ type status =
   | WRITE_ERROR
   | SURFACE_FINISHED
   | SURFACE_TYPE_MISMATCH
-  | PATTERN_TYPE_MISMATCH  (* should not be raised -- fobidden by types *)
+  | PATTERN_TYPE_MISMATCH  (* should not be raised — fobidden by types *)
   | INVALID_CONTENT
   | INVALID_FORMAT
   | INVALID_VISUAL
@@ -96,15 +100,15 @@ type status =
   | JBIG2_GLOBAL_MISSING
 
 exception Error of status
-  (** [Error status]: raised by functions of this module to indicate
-      a cause of failure. *)
+(** [Error status]: raised by functions of this module to indicate a
+   cause of failure. *)
 
 val status_to_string  : status -> string
-    (** Provides a human-readable description of a status. *)
+(** Provides a human-readable description of a status. *)
 
 exception Unavailable
-  (** Exception raised by functions of backend modules when they are
-      not available in the installed Cairo library. *)
+(** Exception raised by functions of backend modules when they are not
+   available in the installed Cairo library. *)
 
 type context
 (** The cairo drawing context.  This is the main object used when
@@ -134,71 +138,71 @@ sig
   type t = matrix
 
   val init_identity : unit -> t
-    (** [init_identity()] returns the identity transformation. *)
+  (** [init_identity()] returns the identity transformation. *)
 
   val init_translate : x:float -> y:float -> t
-    (** [init_translate tx ty] return a transformation that translates
-        by [tx] and [ty] in the X and Y dimensions, respectively. *)
+  (** [init_translate tx ty] return a transformation that translates
+     by [tx] and [ty] in the X and Y dimensions, respectively. *)
 
   val init_scale : x:float -> y:float -> t
-    (** [init_scale sx sy] return a transformation that scales by [sx]
-        and [sy] in the X and Y dimensions, respectively. *)
+  (** [init_scale sx sy] return a transformation that scales by [sx]
+     and [sy] in the X and Y dimensions, respectively. *)
 
   val init_rotate : angle:float -> t
-    (** [init_rotate radians] returns a a transformation that rotates
-        by [radians]. *)
+  (** [init_rotate radians] returns a a transformation that rotates by
+     [radians]. *)
 
   val translate : t -> x:float -> y:float -> unit
-    (** [translate matrix tx ty] applies a translation by [tx], [ty]
-        to the transformation in [matrix].  The effect of the new
-        transformation is to first translate the coordinates by [tx]
-        and [ty], then apply the original transformation to the
-        coordinates. *)
+  (** [translate matrix tx ty] applies a translation by [tx], [ty] to
+     the transformation in [matrix].  The effect of the new
+     transformation is to first translate the coordinates by [tx] and
+     [ty], then apply the original transformation to the
+     coordinates. *)
 
   val scale : t -> x:float -> y:float -> unit
-    (** [scale matrix sx sy] applies scaling by [sx], [sy] to the
-        transformation in [matrix].  The effect of the new
-        transformation is to first scale the coordinates by [sx] and [sy],
-        then apply the original transformation to the coordinates. *)
+  (** [scale matrix sx sy] applies scaling by [sx], [sy] to the
+     transformation in [matrix].  The effect of the new transformation
+     is to first scale the coordinates by [sx] and [sy], then apply
+     the original transformation to the coordinates. *)
 
   val rotate : t -> angle:float -> unit
-    (** [rotate matrix radians] applies rotation by [radians] to the
-        transformation in [matrix].  The effect of the new
-        transformation is to first rotate the coordinates by [radians],
-        then apply the original transformation to the coordinates. *)
+  (** [rotate matrix radians] applies rotation by [radians] to the
+     transformation in [matrix].  The effect of the new transformation
+     is to first rotate the coordinates by [radians], then apply the
+     original transformation to the coordinates. *)
 
   val invert : t -> unit
-    (** [invert matrix] changes [matrix] to be the inverse of it's
-        original value.  Not all transformation matrices have
-        inverses; if the matrix collapses points together (it is
-        degenerate), then it has no inverse and this function will
-        raise [Error INVALID_MATRIX]. *)
+  (** [invert matrix] changes [matrix] to be the inverse of it's
+     original value.  Not all transformation matrices have inverses;
+     if the matrix collapses points together (it is degenerate), then
+     it has no inverse and this function will raise [Error
+     INVALID_MATRIX]. *)
 
   val multiply : t -> t -> t
-    (** [multiply a b] multiplies the affine transformations in [a]
-        and [b] together and return the result.  The effect of the
-        resulting transformation is to first apply the transformation
-        in [a] to the coordinates and then apply the transformation in
-        [b] to the coordinates.  *)
+  (** [multiply a b] multiplies the affine transformations in [a] and
+     [b] together and return the result.  The effect of the resulting
+     transformation is to first apply the transformation in [a] to the
+     coordinates and then apply the transformation in [b] to the
+     coordinates.  *)
 
   val transform_distance : t -> dx:float -> dy:float -> float * float
-    (** [transform_distance matrix dx dy] transforms the distance
-        vector ([dx],[dy]) by [matrix].  This is similar to
-        {!Cairo.Matrix.transform_point} except that the translation
-        components of the transformation are ignored.  The calculation
-        of the returned vector is as follows:
-        {[
-        dx2 = dx1 * a + dy1 * c;
-        dy2 = dx1 * b + dy1 * d;
-        ]}
-        Affine transformations are position invariant, so the same
-        vector always transforms to the same vector.  If (x1,y1)
-        transforms to (x2,y2) then (x1+dx1,y1+dy1) will transform to
-        (x1+dx2,y1+dy2) for all values of x1 and x2.  *)
+  (** [transform_distance matrix dx dy] transforms the distance
+     vector ([dx],[dy]) by [matrix].  This is similar to
+     {!Cairo.Matrix.transform_point} except that the translation
+     components of the transformation are ignored.  The calculation
+     of the returned vector is as follows:
+     {[
+     dx2 = dx1 * a + dy1 * c;
+     dy2 = dx1 * b + dy1 * d;
+     ]}
+     Affine transformations are position invariant, so the same
+     vector always transforms to the same vector.  If (x1,y1)
+     transforms to (x2,y2) then (x1+dx1,y1+dy1) will transform to
+     (x1+dx2,y1+dy2) for all values of x1 and x2.  *)
 
   val transform_point : t -> x:float -> y:float -> float * float
-    (** [transform_point matrix x y] transforms the point ([x], [y])
-        by [matrix]. *)
+  (** [transform_point matrix x y] transforms the point ([x], [y]) by
+     [matrix]. *)
 end
 
 (* ---------------------------------------------------------------------- *)
@@ -291,45 +295,44 @@ sig
                    the glyph array from end to start. *)
 
   val extents : context -> t array -> text_extents
-    (** Gets the extents for an array of glyphs. The extents describe a
-        user-space rectangle that encloses the "inked" portion of the
-        glyphs (as they would be drawn by {!Cairo.Glyph.show}).
-        Additionally, the [x_advance] and [y_advance] values indicate
-        the amount by which the current point would be advanced by
-        {!Cairo.Glyph.show}.
+  (** Gets the extents for an array of glyphs. The extents describe a
+     user-space rectangle that encloses the "inked" portion of the
+     glyphs (as they would be drawn by {!Cairo.Glyph.show}).
+     Additionally, the [x_advance] and [y_advance] values indicate the
+     amount by which the current point would be advanced by
+     {!Cairo.Glyph.show}.
 
-        Note that whitespace glyphs do not contribute to the size of the
-        rectangle (extents.width and extents.height). *)
+     Note that whitespace glyphs do not contribute to the size of
+     the rectangle (extents.width and extents.height). *)
 
   val show : context -> t array -> unit
-    (** A drawing operator that generates the shape from an array of
-        glyphs, rendered according to the current font face, font size (font
-        matrix), and font options. *)
+  (** A drawing operator that generates the shape from an array of
+     glyphs, rendered according to the current font face, font size
+     (font matrix), and font options. *)
 
   val show_text : context -> string -> t array -> cluster array ->
                   cluster_flags -> unit
-    (** [show_text cr utf8 glyphs clusters cluster_flags]: This
-        operation has rendering effects similar to
-        {!Cairo.Glyph.show} but, if the target surface supports it,
-        uses the provided text and cluster mapping to embed the text
-        for the glyphs shown in the output.  If the target does not
-        support the extended attributes, this function acts like the
-        basic {!Cairo.Glyph.show} as if it had been passed [glyphs].
+  (** [show_text cr utf8 glyphs clusters cluster_flags]: This
+     operation has rendering effects similar to {!Cairo.Glyph.show}
+     but, if the target surface supports it, uses the provided text
+     and cluster mapping to embed the text for the glyphs shown in the
+     output.  If the target does not support the extended attributes,
+     this function acts like the basic {!Cairo.Glyph.show} as if it
+     had been passed [glyphs].
 
-        The mapping between [utf8] and [glyphs] is provided by an
-        array of [clusters].  Each cluster covers a number of text bytes
-        and glyphs, and neighboring clusters cover neighboring areas
-        of [utf8] and [glyphs].  The clusters should collectively cover
-        [utf8] and [glyphs] in entirety.
+     The mapping between [utf8] and [glyphs] is provided by an
+     array of [clusters].  Each cluster covers a number of text bytes
+     and glyphs, and neighboring clusters cover neighboring areas of
+     [utf8] and [glyphs].  The clusters should collectively cover
+     [utf8] and [glyphs] in entirety.
 
-        The first cluster always covers bytes from the beginning of
-        [utf8].  If [cluster_flags] do not have the [BACKWARD] set,
-        the first cluster also covers the beginning of glyphs,
-        otherwise it covers the end of the glyphs array and following
-        clusters move backward.
+     The first cluster always covers bytes from the beginning of
+     [utf8].  If [cluster_flags] do not have the [BACKWARD] set, the
+     first cluster also covers the beginning of glyphs, otherwise it
+     covers the end of the glyphs array and following clusters move
+     backward.
 
-        See {!Cairo.Glyph.cluster} for constraints on valid clusters. *)
-
+     See {!Cairo.Glyph.cluster} for constraints on valid clusters. *)
 end
 
 
@@ -412,96 +415,93 @@ type hint_metrics =
 module Font_options :
 sig
   type t
-    (** An opaque type holding all options that are used when rendering
-        fonts.
+  (** An opaque type holding all options that are used when rendering
+     fonts.
 
-        Individual features of a [Cairo.Font_options.t] can be set or
-        accessed using functions below, like
-        {!Cairo.Font_options.set_antialias} and
-        {!Cairo.Font_options.get_antialias}.
+     Individual features of a [Cairo.Font_options.t] can be set or
+     accessed using functions below, like
+     {!Cairo.Font_options.set_antialias} and
+     {!Cairo.Font_options.get_antialias}.
 
-        New features may be added to a [font_options] in the future. For
-        this reason, {!Cairo.Font_options.copy} and
-        {!Cairo.Font_options.merge} should be used to copy or merge of
-        [Cairo.Font_options.t] values. *)
+     New features may be added to a [font_options] in the future. For
+     this reason, {!Cairo.Font_options.copy} and
+     {!Cairo.Font_options.merge} should be used to copy or merge of
+     [Cairo.Font_options.t] values. *)
 
   val set : context -> t -> unit
-    (** [set_font_options cr opt] sets a set of custom font rendering
-        options for [cr].  Rendering options are derived by merging
-        these options with the options derived from underlying
-        surface; if the value in options has a default value (like
-        [ANTIALIAS_DEFAULT]), then the value from the surface is used.  *)
+  (** [set_font_options cr opt] sets a set of custom font rendering
+     options for [cr].  Rendering options are derived by merging these
+     options with the options derived from underlying surface; if the
+     value in options has a default value (like [ANTIALIAS_DEFAULT]),
+     then the value from the surface is used.  *)
 
   val get : context -> t
-    (** Retrieves font rendering options set via
-        {!Cairo.Font_options.set}.  Note that the returned options do
-        not include any options derived from the underlying surface;
-        they are literally the options passed to
-        {!Cairo.Font_options.set}. *)
+  (** Retrieves font rendering options set via
+     {!Cairo.Font_options.set}.  Note that the returned options do not
+     include any options derived from the underlying surface; they are
+     literally the options passed to {!Cairo.Font_options.set}. *)
 
   val create : unit -> t
-    (** Allocates a new font options object with all options initialized
-        to default values.  *)
+  (** Allocates a new font options object with all options initialized
+     to default values.  *)
 
   val make : ?antialias:antialias -> ?subpixel_order:subpixel_order ->
     ?hint_style:hint_style -> ?hint_metrics:hint_metrics -> unit -> t
-    (** Convenience function to create an options object with properties set.
-        @param antialias default: [ANTIALIAS_DEFAULT]
-        @param subpixel_order default: [SUBPIXEL_ORDER_DEFAULT]
-        @param hint_style default: [HINT_STYLE_DEFAULT]
-        @param hint_metrics default: [HINT_METRICS_DEFAULT]
-    *)
+  (** Convenience function to create an options object with properties set.
+     @param antialias default: [ANTIALIAS_DEFAULT]
+     @param subpixel_order default: [SUBPIXEL_ORDER_DEFAULT]
+     @param hint_style default: [HINT_STYLE_DEFAULT]
+     @param hint_metrics default: [HINT_METRICS_DEFAULT]  *)
 
   val copy : t -> t
-    (** [copy original] allocates a new font options object copying
-        the option values from [original]. *)
+  (** [copy original] allocates a new font options object copying the
+     option values from [original]. *)
 
   val merge : t -> t -> unit
-    (** [merge options other] merges non-default options from other
-        into options, replacing existing values.  This operation can
-        be thought of as somewhat similar to compositing other onto
-        options with the operation of [OVER] (see {!Cairo.operator}). *)
+  (** [merge options other] merges non-default options from other into
+     options, replacing existing values.  This operation can be
+     thought of as somewhat similar to compositing other onto options
+     with the operation of [OVER] (see {!Cairo.operator}). *)
 
   val set_antialias : t -> antialias -> unit
-    (** Sets the antialiasing mode for the font options object.  This
-        specifies the type of antialiasing to do when rendering text. *)
+  (** Sets the antialiasing mode for the font options object.  This
+     specifies the type of antialiasing to do when rendering text. *)
 
   val get_antialias : t -> antialias
-    (** Gets the antialiasing mode for the font options object. *)
+  (** Gets the antialiasing mode for the font options object. *)
 
   val set_subpixel_order : t -> subpixel_order -> unit
-    (** Sets the subpixel order for the font options object.  The
-        subpixel order specifies the order of color elements within
-        each pixel on the display device when rendering with an
-        antialiasing mode of [ANTIALIAS_SUBPIXEL] (see
-        {!Cairo.antialias}).  See the documentation for
-        {!Cairo.subpixel_order} for full details. *)
+  (** Sets the subpixel order for the font options object.  The
+     subpixel order specifies the order of color elements within each
+     pixel on the display device when rendering with an antialiasing
+     mode of [ANTIALIAS_SUBPIXEL] (see {!Cairo.antialias}).  See the
+     documentation for {!Cairo.subpixel_order} for full details. *)
 
   val get_subpixel_order : t -> subpixel_order
-    (** Gets the subpixel order for the font options object. See the
-        documentation for {!Cairo.subpixel_order} for full details. *)
+  (** Gets the subpixel order for the font options object. See the
+     documentation for {!Cairo.subpixel_order} for full details. *)
 
   val set_hint_style : t -> hint_style -> unit
-    (** Sets the hint style for font outlines for the font options
-        object. This controls whether to fit font outlines to the
-        pixel grid, and if so, whether to optimize for fidelity or
-        contrast.  See the documentation for {!Cairo.hint_style} for
-        full details. *)
+  (** Sets the hint style for font outlines for the font options
+     object. This controls whether to fit font outlines to the pixel
+     grid, and if so, whether to optimize for fidelity or contrast.
+     See the documentation for {!Cairo.hint_style} for full
+     details. *)
 
   val get_hint_style : t -> hint_style
-    (** Gets the hint style for font outlines for the font options
-        object. See the documentation for {!Cairo.hint_style} for full
-        details. *)
+  (** Gets the hint style for font outlines for the font options
+     object. See the documentation for {!Cairo.hint_style} for full
+     details. *)
 
   val set_hint_metrics : t -> hint_metrics -> unit
-    (** Sets the metrics hinting mode for the font options
-        object. This controls whether metrics are quantized to integer
-        values in device units. See the documentation for
-        {!Cairo.hint_metrics} for full details. *)
+  (** Sets the metrics hinting mode for the font options object. This
+     controls whether metrics are quantized to integer values in
+     device units. See the documentation for {!Cairo.hint_metrics} for
+     full details. *)
 
   val get_hint_metrics : t -> hint_metrics
-    (** Gets the metrics hinting mode for the font options object. See
-        the documentation for {!Cairo.hint_metrics} for full details. *)
+(** Gets the metrics hinting mode for the font options object. See the
+   documentation for {!Cairo.hint_metrics} for full details. *)
 end
 
 (** Specifies variants of a font face based on their slant. *)
@@ -547,53 +547,53 @@ type font_type =
 module Font_face :
 sig
   type 'a t
-    (** A {!Cairo.Font_face.t} specifies all aspects of a font other
-        than the size or font matrix (a font matrix is used to distort
-        a font by sheering it or scaling it unequally in the two
-        directions).  A font face can be set on a {!Cairo.context} by using
-        {!Cairo.Font_face.set}; the size and font matrix are set with
-        {!Cairo.set_font_size} and {!Cairo.set_font_matrix}.
+  (** A {!Cairo.Font_face.t} specifies all aspects of a font other
+     than the size or font matrix (a font matrix is used to distort a
+     font by sheering it or scaling it unequally in the two
+     directions).  A font face can be set on a {!Cairo.context} by
+     using {!Cairo.Font_face.set}; the size and font matrix are set
+     with {!Cairo.set_font_size} and {!Cairo.set_font_matrix}.
 
-        Font faces are created using font-backend-specific constructors,
-        or implicitly using the toy text API by way of
-        {!Cairo.select_font_face}.
+     Font faces are created using font-backend-specific
+     constructors, or implicitly using the toy text API by way of
+     {!Cairo.select_font_face}.
 
-        There are various types of font faces, depending on the font
-        backend they use.  The type of a font face can be queried using
-        {!Cairo.Font_face.get_type}.  *)
+     There are various types of font faces, depending on the font
+     backend they use.  The type of a font face can be queried using
+     {!Cairo.Font_face.get_type}.  *)
 
   val set : context -> _ t -> unit
-      (** Replaces the current {!Cairo.Font_face.t} object in the
-          {!Cairo.context} with font_face. *)
+  (** Replaces the current {!Cairo.Font_face.t} object in the
+     {!Cairo.context} with font_face. *)
 
   val get : context -> font_type t
-      (** Gets the current font face for a {!Cairo.context}. *)
+  (** Gets the current font face for a {!Cairo.context}. *)
 
   val get_type : 'a t -> font_type
-      (** This function returns the type of the backend used to create a
-          font face. See {!Cairo.font_type} for available types.  If ['a]
-          contains a single variant, it will be the returned value. *)
+  (** This function returns the type of the backend used to create a
+     font face. See {!Cairo.font_type} for available types.  If ['a]
+     contains a single variant, it will be the returned value. *)
 
   val create : ?family:string -> slant -> weight -> [`Toy] t
-    (** [create family slant weight] creates a font face from a
-        triplet of family, slant, and weight.  These font faces are
-        used in implementation of the the cairo "toy" font API.
+  (** [create family slant weight] creates a font face from a triplet
+     of family, slant, and weight.  These font faces are used in
+     implementation of the the cairo "toy" font API.
 
-        If family is not given or is the zero-length string "", the
-        platform-specific default family is assumed.  The default
-        family then can be queried using {!Cairo.Font_face.get_family}.
+     If family is not given or is the zero-length string "", the
+     platform-specific default family is assumed.  The default family
+     then can be queried using {!Cairo.Font_face.get_family}.
 
-        The {!Cairo.select_font_face} function uses this to create font
-        faces. See that function for limitations of toy font faces. *)
+     The {!Cairo.select_font_face} function uses this to create font
+     faces. See that function for limitations of toy font faces. *)
 
   val get_family : [`Toy] t -> string
-    (** Gets the familly name of a toy font. *)
+  (** Gets the familly name of a toy font. *)
 
   val get_slant : [`Toy] t -> slant
-    (** Gets the slant a toy font. *)
+  (** Gets the slant a toy font. *)
 
   val get_weight : [`Toy] t -> weight
-    (** Gets the weight a toy font. *)
+  (** Gets the weight a toy font. *)
 end
 
 (** The [Cairo.font_extents] structure stores metric information for a
@@ -644,195 +644,192 @@ type font_extents = {
 module Scaled_font :
 sig
   type 'a t
-    (** A [Cairo.Scaled_font.t] is a font scaled to a particular size
-        and device resolution.  It is most useful for low-level font
-        usage where a library or application wants to cache a
-        reference to a scaled font to speed up the computation of metrics.
+  (** A [Cairo.Scaled_font.t] is a font scaled to a particular size
+     and device resolution.  It is most useful for low-level font
+     usage where a library or application wants to cache a reference
+     to a scaled font to speed up the computation of metrics.
 
-        There are various types of scaled fonts, depending on the font
-        backend they use.  The type of a scaled font can be queried
-        using {!Cairo.Scaled_font.get_type}.  *)
+     There are various types of scaled fonts, depending on the font
+     backend they use.  The type of a scaled font can be queried using
+     {!Cairo.Scaled_font.get_type}.  *)
 
   val set : context -> _ t -> unit
-    (** Replaces the current font face, font matrix, and font options in
-        the {Cairo.context} with those of the {!Cairo.Scaled_font.t}.  Except
-        for some translation, the current CTM of the {!Cairo.context} should be
-        the same as that of the {!Cairo.Scaled_font.t}, which can be
-        accessed using {!Cairo.Scaled_font.get_ctm}. *)
+  (** Replaces the current font face, font matrix, and font options in
+     the {Cairo.context} with those of the {!Cairo.Scaled_font.t}.
+     Except for some translation, the current CTM of the
+     {!Cairo.context} should be the same as that of the
+     {!Cairo.Scaled_font.t}, which can be accessed using
+     {!Cairo.Scaled_font.get_ctm}. *)
 
   val get : context -> 'a t
-    (** Gets the current scaled font for a cairo_t. *)
+  (** Gets the current scaled font for a cairo_t. *)
 
   val create : 'a Font_face.t -> Matrix.t -> Matrix.t -> Font_options.t -> 'a t
-    (** [create font_face font_matrix ctm options] creates a
-        {!Cairo.Scaled_font.t} object from a font face and matrices that
-        describe the size of the font and the environment in which it
-        will be used. *)
+  (** [create font_face font_matrix ctm options] creates a
+     {!Cairo.Scaled_font.t} object from a font face and matrices that
+     describe the size of the font and the environment in which it
+     will be used. *)
 
   val extents : _ t -> font_extents
-    (** [extents sf] gets the metrics for [sf]. *)
+  (** [extents sf] gets the metrics for [sf]. *)
 
   val text_extents : _ t -> string -> text_extents
-      (** [text_extents scaled_font utf8] gets the [extents] for a string of
-          text. The extents describe a user-space rectangle that encloses
-          the "inked" portion of the text drawn at the origin (0,0) (as it
-          would be drawn by {!Cairo.show_text} if the cairo graphics state
-          were set to the same font_face, font_matrix, ctm, and
-          font_options as [scaled_font]). Additionally, the x_advance and
-          y_advance values indicate the amount by which the current point
-          would be advanced by {!Cairo.show_text}.  The string [utf8]
-          should not contain ['\000'] characters.
+  (** [text_extents scaled_font utf8] gets the [extents] for a string
+     of text. The extents describe a user-space rectangle that
+     encloses the "inked" portion of the text drawn at the origin
+     (0,0) (as it would be drawn by {!Cairo.show_text} if the cairo
+     graphics state were set to the same font_face, font_matrix, ctm,
+     and font_options as [scaled_font]). Additionally, the x_advance
+     and y_advance values indicate the amount by which the current
+     point would be advanced by {!Cairo.show_text}.  The string [utf8]
+     should not contain ['\000'] characters.
 
-          Note that whitespace characters do not directly contribute
-          to the size of the rectangle ([extents.width] and
-          [extents.height]).  They do contribute indirectly by changing
-          the position of non-whitespace characters.  In particular,
-          trailing whitespace characters are likely to not affect the
-          size of the rectangle, though they will affect the [x_advance]
-          and [y_advance] values. *)
+     Note that whitespace characters do not directly contribute to the
+     size of the rectangle ([extents.width] and [extents.height]).
+     They do contribute indirectly by changing the position of
+     non-whitespace characters.  In particular, trailing whitespace
+     characters are likely to not affect the size of the rectangle,
+     though they will affect the [x_advance] and [y_advance]
+     values. *)
 
   val glyph_extents : _ t -> Glyph.t array -> text_extents
-    (** [glyph_extents scaled_font glyphs] gets the [extents] for an
-        array of glyphs. The extents describe a user-space rectangle
-        that encloses the "inked" portion of the glyphs (as they
-        would be drawn by {!Cairo.Glyph.show} if the cairo graphics
-        state were set to the same font_face, font_matrix, ctm, and
-        font_options as [scaled_font]).  Additionally, the [x_advance] and
-        [y_advance] values indicate the amount by which the current
-        point would be advanced by {!Cairo.Glyph.show}.
+  (** [glyph_extents scaled_font glyphs] gets the [extents] for an
+     array of glyphs. The extents describe a user-space rectangle that
+     encloses the "inked" portion of the glyphs (as they would be
+     drawn by {!Cairo.Glyph.show} if the cairo graphics state were set
+     to the same font_face, font_matrix, ctm, and font_options as
+     [scaled_font]).  Additionally, the [x_advance] and [y_advance]
+     values indicate the amount by which the current point would be
+     advanced by {!Cairo.Glyph.show}.
 
-        Note that whitespace glyphs do not contribute to the size of the
-        rectangle ([extents.width] and [extents.height]). *)
+     Note that whitespace glyphs do not contribute to the size of
+     the rectangle ([extents.width] and [extents.height]). *)
 
   val text_to_glyphs : _ t -> x:float -> y:float -> string
     -> Glyph.t array * Glyph.cluster array * Glyph.cluster_flags
-    (** [text_to_glyphs scaled_font x y utf8] converts UTF-8 text to
-        an array of glyphs, optionally with cluster mapping, that can
-        be used to render later using [scaled_font].
-        See {!Cairo.Glyph.show_text}. *)
+  (** [text_to_glyphs scaled_font x y utf8] converts UTF-8 text to an
+     array of glyphs, optionally with cluster mapping, that can be
+     used to render later using [scaled_font].  See
+     {!Cairo.Glyph.show_text}. *)
 
   val get_font_face : 'a t -> 'a Font_face.t
-    (** Gets the font face that this scaled font was created for. *)
+  (** Gets the font face that this scaled font was created for. *)
 
   val get_font_options : _ t -> Font_options.t
-    (** [get_font_options scaled_font] returns the font options with
-        which [scaled_font] was created.  *)
+  (** [get_font_options scaled_font] returns the font options with
+     which [scaled_font] was created.  *)
 
   val get_font_matrix : _ t -> Matrix.t
-    (** [get_font_matrix scaled_font] return the font matrix with
-        which [scaled_font] was created. *)
+  (** [get_font_matrix scaled_font] return the font matrix with which
+     [scaled_font] was created. *)
 
   val get_ctm : _ t -> Matrix.t
-    (** [get_ctm scaled_font] returns the CTM with which [scaled_font]
-        was created. *)
+  (** [get_ctm scaled_font] returns the CTM with which [scaled_font]
+     was created. *)
 
   val get_scale_matrix : _ t -> Matrix.t
-    (** [get_scale_matrix scaled_font] returns the scale matrix of
-        [scaled_font].  The scale matrix is product of the font matrix
-        and the ctm associated with the scaled font, and hence is the
-        matrix mapping from font space to device space. *)
+  (** [get_scale_matrix scaled_font] returns the scale matrix of
+     [scaled_font].  The scale matrix is product of the font matrix
+     and the ctm associated with the scaled font, and hence is the
+     matrix mapping from font space to device space. *)
 
   val get_type : 'a t -> font_type
-    (** This function returns the type of the backend used to create a
-        scaled font.  See {!Cairo.font_type} for available types. *)
+  (** This function returns the type of the backend used to create a
+     scaled font.  See {!Cairo.font_type} for available types. *)
 end
 
 
 val select_font_face : context -> ?slant:slant -> ?weight:weight -> string ->
                        unit
-  (** [select_font_face cr family ?slant ?weight] selects a family
-      and style of font from a simplified description as a family
-      name, slant and weight. Cairo provides no operation to list
-      available family names on the system (this is a "toy",
-      remember), but the standard CSS2 generic family names,
-      ("serif", "sans-serif", "cursive", "fantasy", "monospace"),
-      are likely to work as expected.
+(** [select_font_face cr family ?slant ?weight] selects a family and
+   style of font from a simplified description as a family name, slant
+   and weight. Cairo provides no operation to list available family
+   names on the system (this is a "toy", remember), but the standard
+   CSS2 generic family names, ("serif", "sans-serif", "cursive",
+   "fantasy", "monospace"), are likely to work as expected.
 
-      @param slant default [Upright].
-      @param weight default [Normal].
+   @param slant default [Upright].
+   @param weight default [Normal].
 
-      For "real" font selection, see the font-backend-specific
-      [font_face_create] functions for the font backend you are
-      using.  (For example, if you are using the freetype-based
-      cairo-ft font backend, see
-      {!Cairo.Ft.font_face_create_for_ft_face} or
-      {!Cairo.Ft.font_face_create_for_pattern}.)  The resulting font
-      face could then be used with {!Cairo.Scaled_font.create} and
-      {!Cairo.Scaled_font.set}.
+   For "real" font selection, see the font-backend-specific
+   [font_face_create] functions for the font backend you are using.
+   (For example, if you are using the freetype-based cairo-ft font
+   backend, see {!Cairo.Ft.font_face_create_for_ft_face} or
+   {!Cairo.Ft.font_face_create_for_pattern}.)  The resulting font face
+   could then be used with {!Cairo.Scaled_font.create} and
+   {!Cairo.Scaled_font.set}.
 
-      Similarly, when using the "real" font support, you can call
-      directly into the underlying font system (such as fontconfig
-      or freetype), for operations such as listing available fonts, etc.
+   Similarly, when using the "real" font support, you can call
+   directly into the underlying font system (such as fontconfig or
+   freetype), for operations such as listing available fonts, etc.
 
-      It is expected that most applications will need to use a more
-      comprehensive font handling and text layout library (for
-      example, pango) in conjunction with cairo.
+   It is expected that most applications will need to use a more
+   comprehensive font handling and text layout library (for example,
+   pango) in conjunction with cairo.
 
-      If text is drawn without a call to {!Cairo.select_font_face},
-      (nor {!Cairo.Font_face.set} nor {!Cairo.Scaled_font.set}), the
-      default family is platform-specific, but is essentially
-      "sans-serif".  Default slant is [Upright], and default weight is
-      [Normal].  *)
+   If text is drawn without a call to {!Cairo.select_font_face},
+   (nor {!Cairo.Font_face.set} nor {!Cairo.Scaled_font.set}), the
+   default family is platform-specific, but is essentially
+   "sans-serif".  Default slant is [Upright], and default weight is
+   [Normal].  *)
 
 val set_font_size : context -> float -> unit
-  (** [set_font_size cr size] sets the current font matrix to a
-      scale by a factor of size, replacing any font matrix previously
-      set with [set_font_size] or {!Cairo.set_font_matrix}.  This
-      results in a font size of size user space units.  (More precisely,
-      this matrix will result in the font's em-square being a size by
-      size square in user space.)
+(** [set_font_size cr size] sets the current font matrix to a scale by
+   a factor of size, replacing any font matrix previously set with
+   [set_font_size] or {!Cairo.set_font_matrix}.  This results in a
+   font size of size user space units.  (More precisely, this matrix
+   will result in the font's em-square being a size by size square in
+   user space.)
 
-      If text is drawn without a call to [set_font_size] (nor
-      {!Cairo.set_font_matrix}, nor {!Cairo.Scaled_font.set}),
-      the default font size is 10.0. *)
+   If text is drawn without a call to [set_font_size] (nor
+   {!Cairo.set_font_matrix}, nor {!Cairo.Scaled_font.set}), the
+   default font size is 10.0. *)
 
 val set_font_matrix : context -> Matrix.t -> unit
-  (** [set_font_matrix cr matrix] sets the current font matrix to
-      [matrix].  The font matrix gives a transformation from the
-      design space of the font (in this space, the em-square is 1
-      unit by 1 unit) to user space.  Normally, a simple scale is
-      used (see {!Cairo.set_font_size}), but a more complex font
-      matrix can be used to shear the font or stretch it unequally
-      along the two axes.  *)
+(** [set_font_matrix cr matrix] sets the current font matrix to
+   [matrix].  The font matrix gives a transformation from the design
+   space of the font (in this space, the em-square is 1 unit by 1
+   unit) to user space.  Normally, a simple scale is used (see
+   {!Cairo.set_font_size}), but a more complex font matrix can be used
+   to shear the font or stretch it unequally along the two axes.  *)
 
 val get_font_matrix : context -> Matrix.t
-  (** Returns the current font matrix.  See {!Cairo.set_font_matrix}. *)
+(** Returns the current font matrix.  See {!Cairo.set_font_matrix}. *)
 
 val show_text : context -> string -> unit
-  (** A drawing operator that generates the shape from a string of
-      UTF-8 characters, rendered according to the current [font_face],
-      [font_size] (font_matrix), and [font_options].
+(** A drawing operator that generates the shape from a string of UTF-8
+   characters, rendered according to the current [font_face],
+   [font_size] (font_matrix), and [font_options].
 
-      This function first computes a set of glyphs for the string of
-      text. The first glyph is placed so that its origin is at the
-      current point. The origin of each subsequent glyph is offset
-      from that of the previous glyph by the advance values of the
-      previous glyph.
+   This function first computes a set of glyphs for the string of
+   text. The first glyph is placed so that its origin is at the
+   current point. The origin of each subsequent glyph is offset from
+   that of the previous glyph by the advance values of the previous
+   glyph.
 
-      After this call the current point is moved to the origin of
-      where the next glyph would be placed in this same progression.
-      That is, the current point will be at the origin of the final
-      glyph offset by its advance values. This allows for easy display
-      of a single logical string with multiple calls to [show_text].  *)
+   After this call the current point is moved to the origin of where
+   the next glyph would be placed in this same progression.  That is,
+   the current point will be at the origin of the final glyph offset
+   by its advance values. This allows for easy display of a single
+   logical string with multiple calls to [show_text].  *)
 
 val font_extents : context -> font_extents
-  (** Gets the font extents for the currently selected font. *)
+(** Gets the font extents for the currently selected font. *)
 
 val text_extents : context -> string -> text_extents
-  (** [text_extents cr utf8] gets the extents for a string of text.
-      The extents describe a user-space rectangle that encloses the
-      "inked" portion of the text (as it would be drawn by
-      {!Cairo.show_text}).  Additionally, the [x_advance] and
-      [y_advance] values indicate the amount by which the current
-      point would be advanced by {!Cairo.show_text}.
+(** [text_extents cr utf8] gets the extents for a string of text.  The
+   extents describe a user-space rectangle that encloses the "inked"
+   portion of the text (as it would be drawn by {!Cairo.show_text}).
+   Additionally, the [x_advance] and [y_advance] values indicate the
+   amount by which the current point would be advanced by
+   {!Cairo.show_text}.
 
-      Note that whitespace characters do not directly contribute to
-      the size of the rectangle ([extents.width] and
-      [extents.height]).  They do contribute indirectly by changing
-      the position of non-whitespace characters.  In particular,
-      trailing whitespace characters are likely to not affect the size
-      of the rectangle, though they will affect the [x_advance] and
-      [y_advance] values. *)
+   Note that whitespace characters do not directly contribute to the
+   size of the rectangle ([extents.width] and [extents.height]).  They
+   do contribute indirectly by changing the position of non-whitespace
+   characters.  In particular, trailing whitespace characters are
+   likely to not affect the size of the rectangle, though they will
+   affect the [x_advance] and [y_advance] values. *)
 
 
 (* ---------------------------------------------------------------------- *)
@@ -850,138 +847,135 @@ type rectangle = {
 (** {3 Base module for surfaces} *)
 
 (** This is used to describe the content that a surface will contain,
-    whether color information, alpha information (translucence
-    vs. opacity), or both.  *)
+   whether color information, alpha information (translucence
+   vs. opacity), or both.  *)
 type content = COLOR | ALPHA | COLOR_ALPHA
 
 (** Abstract representation of all different drawing targets that
-    cairo can render to; the actual drawings are performed using a
-    cairo context.  *)
+   cairo can render to; the actual drawings are performed using a
+   cairo context.  *)
 module Surface :
 sig
   type t
-    (** A {!Cairo.Surface.t} represents an image, either as the
-        destination of a drawing operation or as source when drawing onto
-        another surface.  To draw to a {!Cairo.Surface.t}, create a cairo
-        context with the surface as the target, using {!Cairo.create}.
+  (** A {!Cairo.Surface.t} represents an image, either as the
+     destination of a drawing operation or as source when drawing onto
+     another surface.  To draw to a {!Cairo.Surface.t}, create a cairo
+     context with the surface as the target, using {!Cairo.create}.
 
-        There are different subtypes of {!Cairo.Surface.t} for
-        different drawing backends; for example, {!Cairo.Image.create}
-        creates a bitmap image in memory.  The type of a surface can
-        be queried with {!Cairo.Surface.get_type}.  *)
+     There are different subtypes of {!Cairo.Surface.t} for
+     different drawing backends; for example, {!Cairo.Image.create}
+     creates a bitmap image in memory.  The type of a surface can be
+     queried with {!Cairo.Surface.get_type}.  *)
 
   val create_similar : t -> content -> width:int -> height:int -> t
-      (** [create_similar other content width height] create a new
-          surface that is as compatible as possible with the existing
-          surface [other].  For example the new surface will have the
-          same fallback resolution and font options as [other].
-          Generally, the new surface will also use the same backend as
-          other, unless that is not possible for some reason. The type
-          of the returned surface may be examined with
-          {!Cairo.Surface.get_type}.
+  (** [create_similar other content width height] create a new surface
+     that is as compatible as possible with the existing surface
+     [other].  For example the new surface will have the same fallback
+     resolution and font options as [other].  Generally, the new
+     surface will also use the same backend as other, unless that is
+     not possible for some reason. The type of the returned surface
+     may be examined with {!Cairo.Surface.get_type}.
 
-          Initially the surface contents are all 0 (transparent if
-          contents have transparency, black otherwise.) *)
+     Initially the surface contents are all 0 (transparent if contents
+     have transparency, black otherwise.) *)
 
   val finish : t -> unit
-      (** This function finishes the surface and drops all references
-          to external resources. For example, for the Xlib backend it
-          means that cairo will no longer access the drawable.  After
-          calling {!Cairo.Surface.finish} the only valid operations on
-          a surface are flushing and finishing it.  Further drawing to
-          the surface will not affect the surface but will instead
-          raise [Error(SURFACE_FINISHED)].  *)
+  (** This function finishes the surface and drops all references to
+     external resources. For example, for the Xlib backend it means
+     that cairo will no longer access the drawable.  After calling
+     {!Cairo.Surface.finish} the only valid operations on a surface
+     are flushing and finishing it.  Further drawing to the surface
+     will not affect the surface but will instead raise
+     [Error(SURFACE_FINISHED)].  *)
 
   val flush : t -> unit
-      (** Do any pending drawing for the surface and also restore any
-          temporary modification's cairo has made to the surface's
-          state.  This function must be called before switching from
-          drawing on the surface with cairo to drawing on it directly
-          with native APIs.  If the surface doesn't support direct
-          access, then this function does nothing.  *)
+  (** Do any pending drawing for the surface and also restore any
+     temporary modification's cairo has made to the surface's state.
+     This function must be called before switching from drawing on the
+     surface with cairo to drawing on it directly with native APIs.
+     If the surface doesn't support direct access, then this function
+     does nothing.  *)
 
   val get_font_options : t -> Font_options.t
-      (** [get_font_options surface] retrieves the default font
-          rendering options for the [surface].  This allows display
-          surfaces to report the correct subpixel order for rendering
-          on them, print surfaces to disable hinting of metrics and so
-          forth.  The result can then be used with
-          {!Cairo.Scaled_font.create}. *)
+  (** [get_font_options surface] retrieves the default font rendering
+     options for the [surface].  This allows display surfaces to
+     report the correct subpixel order for rendering on them, print
+     surfaces to disable hinting of metrics and so forth.  The result
+     can then be used with {!Cairo.Scaled_font.create}. *)
 
   val get_content : t -> content
-      (** This function returns the content type of surface which
-          indicates whether the surface contains color and/or alpha
-          information. See {!Cairo.content}. *)
+  (** This function returns the content type of surface which
+     indicates whether the surface contains color and/or alpha
+     information. See {!Cairo.content}. *)
 
   val mark_dirty : t -> unit
-      (** Tells cairo that drawing has been done to surface using
-          means other than cairo, and that cairo should reread any
-          cached areas.  Note that you must call {!Cairo.Surface.flush}
-          before doing such drawing.  *)
+  (** Tells cairo that drawing has been done to surface using means
+     other than cairo, and that cairo should reread any cached areas.
+     Note that you must call {!Cairo.Surface.flush} before doing such
+     drawing.  *)
 
   val mark_dirty_rectangle : t ->
                              x:int -> y:int -> w:int -> h:int -> unit
-      (** Like {!Cairo.Surface.mark_dirty}, but drawing has been done
-          only to the specified rectangle, so that cairo can retain cached
-          contents for other parts of the surface.
+  (** Like {!Cairo.Surface.mark_dirty}, but drawing has been done only
+     to the specified rectangle, so that cairo can retain cached
+     contents for other parts of the surface.
 
-          Any cached clip set on the surface will be reset by this
-          function, to make sure that future cairo calls have the clip
-          set that they expect. *)
+     Any cached clip set on the surface will be reset by this
+     function, to make sure that future cairo calls have the clip set
+     that they expect. *)
 
   val set_device_offset : t -> x:float -> y:float -> unit
-      (** Sets an offset that is added to the device coordinates
-          determined by the CTM when drawing to surface. One use case for
-          this function is when we want to create a {!Cairo.Surface.t} that
-          redirects drawing for a portion of an onscreen surface to an
-          offscreen surface in a way that is completely invisible to the
-          user of the cairo API.  Setting a transformation via
-          {!Cairo.translate} isn't sufficient to do this, since functions
-          like {!Cairo.device_to_user} will expose the hidden offset.
+  (** Sets an offset that is added to the device coordinates
+     determined by the CTM when drawing to surface. One use case for
+     this function is when we want to create a {!Cairo.Surface.t} that
+     redirects drawing for a portion of an onscreen surface to an
+     offscreen surface in a way that is completely invisible to the
+     user of the cairo API.  Setting a transformation via
+     {!Cairo.translate} isn't sufficient to do this, since functions
+     like {!Cairo.device_to_user} will expose the hidden offset.
 
-          Note that the offset affects drawing to the surface as well
-          as using the surface in a source pattern.
+     Note that the offset affects drawing to the surface as well
+     as using the surface in a source pattern.
 
-          @param x the offset in the X direction, in device units.
-          @param y the offset in the Y direction, in device units. *)
+     @param x the offset in the X direction, in device units.
+     @param y the offset in the Y direction, in device units. *)
 
   val get_device_offset : t -> float * float
-      (** This function returns the previous device offset set by
-          {!Cairo.Surface.set_device_offset}. *)
+  (** This function returns the previous device offset set by
+     {!Cairo.Surface.set_device_offset}. *)
 
   val set_fallback_resolution : t -> x:float -> y:float -> unit
-      (** [set_fallback_resolution surface x_pixels_per_inch
-          y_pixels_per_inch] sets the horizontal and vertical
-          resolution for image fallbacks.
+  (** [set_fallback_resolution surface x_pixels_per_inch
+     y_pixels_per_inch] sets the horizontal and vertical resolution
+     for image fallbacks.
 
-          When certain operations aren't supported natively by a
-          backend, cairo will fallback by rendering operations to an
-          image and then overlaying that image onto the output.  For
-          backends that are natively vector-oriented, this function
-          can be used to set the resolution used for these image
-          fallbacks (larger values will result in more detailed
-          images, but also larger file sizes).
+     When certain operations aren't supported natively by a backend,
+     cairo will fallback by rendering operations to an image and then
+     overlaying that image onto the output.  For backends that are
+     natively vector-oriented, this function can be used to set the
+     resolution used for these image fallbacks (larger values will
+     result in more detailed images, but also larger file sizes).
 
-          Some examples of natively vector-oriented backends are the
-          ps, pdf, and svg backends.
+     Some examples of natively vector-oriented backends are the ps,
+     pdf, and svg backends.
 
-          For backends that are natively raster-oriented, image
-          fallbacks are still possible, but they are always performed
-          at the native device resolution. So this function has no
-          effect on those backends.
+     For backends that are natively raster-oriented, image fallbacks
+     are still possible, but they are always performed at the native
+     device resolution. So this function has no effect on those
+     backends.
 
-          Note: The fallback resolution only takes effect at the time
-          of completing a page (with {!Cairo.show_page} or
-          {!Cairo.copy_page}) so there is currently no way to have more
-          than one fallback resolution in effect on a single page.
+     Note: The fallback resolution only takes effect at the time of
+     completing a page (with {!Cairo.show_page} or {!Cairo.copy_page})
+     so there is currently no way to have more than one fallback
+     resolution in effect on a single page.
 
-          The default fallback resoultion is 300 pixels per inch in
-          both dimensions. *)
+     The default fallback resoultion is 300 pixels per inch in both
+     dimensions. *)
 
   val get_fallback_resolution : t -> float * float
-      (** This function returns the previous fallback resolution set
-          by {!Cairo.Surface.set_fallback_resolution}, or default fallback
-          resolution if never set. *)
+  (** This function returns the previous fallback resolution set by
+     {!Cairo.Surface.set_fallback_resolution}, or default fallback
+     resolution if never set. *)
 
   (** This is used to describe the type of a given surface. The
       surface types are also known as "backends" or "surface backends"
@@ -1010,39 +1004,38 @@ sig
       ]
 
   val get_type : t -> kind
-      (** This function returns the type of the backend used to create
-          a surface.  See {!Cairo.Surface.kind} for available types. *)
+  (** This function returns the type of the backend used to create a
+     surface.  See {!Cairo.Surface.kind} for available types. *)
 
   val copy_page : t -> unit
-      (** Emits the current page for backends that support multiple
-          pages, but doesn't clear it, so that the contents of the
-          current page will be retained for the next page.  Use
-          {!Cairo.Surface.show_page} if you want to get an empty page
-          after the emission.
+  (** Emits the current page for backends that support multiple pages,
+     but doesn't clear it, so that the contents of the current page
+     will be retained for the next page.  Use
+     {!Cairo.Surface.show_page} if you want to get an empty page after
+     the emission.
 
-          There is a convenience function for this that takes a
-          {!Cairo.context}, namely {!Cairo.copy_page}. *)
+     There is a convenience function for this that takes a
+     {!Cairo.context}, namely {!Cairo.copy_page}. *)
 
   val show_page : t -> unit
-      (** Emits and clears the current page for backends that support
-          multiple pages.  Use {!Cairo.Surface.copy_page} if you don't
-          want to clear the page.
+  (** Emits and clears the current page for backends that support
+     multiple pages.  Use {!Cairo.Surface.copy_page} if you don't want
+     to clear the page.
 
-          There is a convenience function for this that takes a
-          {!Cairo.context}, namely {!Cairo.show_page}.  *)
+     There is a convenience function for this that takes a
+     {!Cairo.context}, namely {!Cairo.show_page}.  *)
 
   val has_show_text_glyphs : t -> bool
-      (** Returns whether the surface supports sophisticated
-          {!Cairo.Glyph.show_text} operations.  That is, whether it
-          actually uses the provided text and cluster data to a
-          {!Cairo.Glyph.show_text} call.
+  (** Returns whether the surface supports sophisticated
+     {!Cairo.Glyph.show_text} operations.  That is, whether it
+     actually uses the provided text and cluster data to a
+     {!Cairo.Glyph.show_text} call.
 
-          Note: Even if this function returns [false], a
-          {!Cairo.Glyph.show_text} operation targeted at surface will
-          still succeed.  It just will act like a {!Cairo.Glyph.show}
-          operation.  Users can use this function to avoid computing
-          UTF-8 text and cluster mapping if the target surface does
-          not use it.  *)
+     Note: Even if this function returns [false], a
+     {!Cairo.Glyph.show_text} operation targeted at surface will still
+     succeed.  It just will act like a {!Cairo.Glyph.show} operation.
+     Users can use this function to avoid computing UTF-8 text and
+     cluster mapping if the target surface does not use it.  *)
 end
 
 (** {3:surface_backends   Surface backends}
@@ -1053,8 +1046,8 @@ end
 *)
 
 (** Image surfaces provide the ability to render to memory buffers
-    either allocated by cairo or by the calling code. The supported image
-    formats are those defined in {!Cairo.Image.format}.  *)
+   either allocated by cairo or by the calling code. The supported
+   image formats are those defined in {!Cairo.Image.format}.  *)
 module Image :
 sig
   (** This is used to identify the memory format of image data.  *)
@@ -1076,73 +1069,69 @@ sig
              pixel is in the least-significant bit. *)
 
   val create : format -> width:int -> height:int -> Surface.t
-      (** Creates an image surface of the specified format and
-          dimensions. Initially the surface contents are all 0.
-          (Specifically, within each pixel, each color or alpha
-          channel belonging to format will be 0. The contents of bits
-          within a pixel, but not belonging to the given format are
-          undefined). *)
+  (** Creates an image surface of the specified format and
+     dimensions. Initially the surface contents are all 0.
+     (Specifically, within each pixel, each color or alpha channel
+     belonging to format will be 0. The contents of bits within a
+     pixel, but not belonging to the given format are undefined). *)
 
   type data8 =
       (int, Bigarray.int8_unsigned_elt, Bigarray.c_layout) Bigarray.Array1.t
-        (** Images represented as an array of 8 bytes values. *)
+  (** Images represented as an array of 8 bytes values. *)
 
   type data32 =
       (int32, Bigarray.int32_elt, Bigarray.c_layout) Bigarray.Array2.t
-        (** Images represented as an array of 32 bytes (RGB or RGBA) values. *)
+  (** Images represented as an array of 32 bytes (RGB or RGBA) values. *)
 
   val create_for_data8 : data8 ->
     format -> ?stride:int -> int -> int -> Surface.t
-    (** [create_for_data8 data format ?stride width height] creates an
-        image surface for the provided pixel data.  The initial
-        contents of buffer will be used as the initial image contents;
-        you must explicitly clear the buffer, using, for example,
-        {!Cairo.rectangle} and {!Cairo.fill} if you want it
-        cleared.
+  (** [create_for_data8 data format ?stride width height] creates an
+     image surface for the provided pixel data.  The initial contents
+     of buffer will be used as the initial image contents; you must
+     explicitly clear the buffer, using, for example,
+     {!Cairo.rectangle} and {!Cairo.fill} if you want it cleared.
 
-        @param stride the number of bytes between the start of rows in
-        the buffer as allocated. This value should always be computed
-        by {!stride_for_width} before allocating the data buffer.
-        (that's what this function does if the argument is not
-        provided).  *)
+     @param stride the number of bytes between the start of rows in
+     the buffer as allocated. This value should always be computed by
+     {!stride_for_width} before allocating the data buffer.  (that's
+     what this function does if the argument is not provided).  *)
 
   val create_for_data32 : ?width:int -> ?height:int -> ?alpha:bool ->
     data32 -> Surface.t
-    (** [create_for_data32 ?width ?height ?alpha data] same as
-        {!Cairo.Image.create_for_data8} except that the stride will
-        necessarily be according to the bigarray 1st dimension (so
-        that matrix coordinates correspond to pixels) and the [width]
-        and [height] will be by default taken from the bigarray 1st
-        and 2nd dimensions respectively.  If [alpha] is true (default),
-        the [ARGB32] format is selected, otherwise [RGB24] is used. *)
+  (** [create_for_data32 ?width ?height ?alpha data] same as
+     {!Cairo.Image.create_for_data8} except that the stride will
+     necessarily be according to the bigarray 1st dimension (so that
+     matrix coordinates correspond to pixels) and the [width] and
+     [height] will be by default taken from the bigarray 1st and 2nd
+     dimensions respectively.  If [alpha] is true (default), the
+     [ARGB32] format is selected, otherwise [RGB24] is used. *)
 
   val get_data8 : Surface.t -> data8
-    (** Get the data of the image surface (shared), for direct
-        inspection or modification. A call to
-        {!Cairo.Surface.mark_dirty} or
-        {!Cairo.Surface.mark_dirty_rectangle} is required after the
-        data is modified. *)
+  (** Get the data of the image surface (shared), for direct
+     inspection or modification. A call to {!Cairo.Surface.mark_dirty}
+     or {!Cairo.Surface.mark_dirty_rectangle} is required after the
+     data is modified. *)
 
   val get_data32 : Surface.t -> data32
-    (** Get the data of the image surface (shared), for direct
-        inspection or modification.  The 1st (resp. 2nd) dimension of
-        the bigarray correspond to the height (resp. width) of the
-        surface. A call to {!Cairo.Surface.mark_dirty} or
-        {!Cairo.Surface.mark_dirty_rectangle} is required after the
-        data is modified.
+  (** Get the data of the image surface (shared), for direct
+     inspection or modification.  The 1st (resp. 2nd) dimension of the
+     bigarray correspond to the height (resp. width) of the surface. A
+     call to {!Cairo.Surface.mark_dirty} or
+     {!Cairo.Surface.mark_dirty_rectangle} is required after the data
+     is modified.
 
-        @raise Invalid_argument if the format is not [ARGB32] or
-        [RGB24] because the array dimensions would not reflect the
-        image coordinates.  *)
+     @raise Invalid_argument if the format is not [ARGB32] or
+     [RGB24] because the array dimensions would not reflect the image
+     coordinates.  *)
 
   val get_format : Surface.t -> format
   (** Get the format of the image surface. *)
 
   val get_width : Surface.t -> int
-      (** Get the width of the image surface in pixels. *)
+  (** Get the width of the image surface in pixels. *)
 
   val get_height : Surface.t -> int
-      (** Get the height of the image surface in pixels. *)
+  (** Get the height of the image surface in pixels. *)
 
   val get_stride : Surface.t -> int
   (** Get the stride of the image surface in bytes.  Note that in
@@ -1157,9 +1146,9 @@ sig
       within cairo.  See {!create_for_data8}.  *)
 
   val output_ppm : out_channel -> ?width:int -> ?height:int -> data32 -> unit
-    (** Convenience function to write the subarray of size ([width],
-        [height]) representing an image to the PPM format.  The
-        possible alpha channel is ignored. *)
+  (** Convenience function to write the subarray of size ([width],
+     [height]) representing an image to the PPM format.  The possible
+     alpha channel is ignored. *)
 end
 
 (** The PDF surface is used to render cairo graphics to Adobe PDF
@@ -1173,35 +1162,33 @@ end
 module PDF :
 sig
   val create : fname:string -> width:float -> height:float -> Surface.t
-    (** Creates a PDF surface of the specified size in points to be
-        written to [fname].
+  (** Creates a PDF surface of the specified size in points to be
+     written to [fname].
 
-        @param width width of the surface, in points (1 point = 1/72.0 inch)
-        @param height height of the surface, in points (1 point = 1/72.0 inch)
+     @param width width of the surface, in points (1 point = 1/72.0 inch)
+     @param height height of the surface, in points (1 point = 1/72.0 inch)
     *)
 
   val create_for_stream : output:(string -> unit) ->
     width:float -> height:float -> Surface.t
-    (** Creates a PDF surface of the specified size in points to be
-        written incrementally to the stream represented by [output].
-        Any exception that [output] raises is considered as a write
-        error.
+  (** Creates a PDF surface of the specified size in points to be
+     written incrementally to the stream represented by [output].  Any
+     exception that [output] raises is considered as a write error.
 
-        @param width width of the surface, in points (1 point = 1/72.0 inch)
-        @param height height of the surface, in points (1 point = 1/72.0 inch)
-    *)
+     @param width width of the surface, in points (1 point = 1/72.0 inch)
+     @param height height of the surface, in points (1 point = 1/72.0 inch) *)
 
   val set_size : Surface.t -> width:float -> height:float -> unit
-    (** Changes the size of a PDF surface for the current (and
-        subsequent) pages.
-        @param width width of the surface, in points (1 point = 1/72.0 inch)
-        @param height height of the surface, in points (1 point = 1/72.0 inch)
+  (** Changes the size of a PDF surface for the current (and
+     subsequent) pages.
+     @param width width of the surface, in points (1 point = 1/72.0 inch)
+     @param height height of the surface, in points (1 point = 1/72.0 inch)
 
-        This function should only be called before any drawing
-        operations have been performed on the current page.  The
-        simplest way to do this is to call this function immediately
-        after creating the surface or immediately after completing a
-        page with either {!Cairo.show_page} or {!Cairo.copy_page}. *)
+     This function should only be called before any drawing operations
+     have been performed on the current page.  The simplest way to do
+     this is to call this function immediately after creating the
+     surface or immediately after completing a page with either
+     {!Cairo.show_page} or {!Cairo.copy_page}. *)
 end
 
 (** The PNG functions allow reading PNG images into image surfaces,
@@ -1217,22 +1204,21 @@ end
 module PNG :
 sig
   val create : string -> Surface.t
-    (** [create filename] creates a new image surface and initializes
-        the contents to the given PNG file. *)
+  (** [create filename] creates a new image surface and initializes
+     the contents to the given PNG file. *)
 
   val create_from_stream : input:(string -> int -> unit) -> Surface.t
-    (** Creates a new image surface from PNG data read incrementally
-        via the [input] function.  The [input s l] function receives a
-        string [s] whose first [l] bytes must be filled with PNG data.
-        Any exception raised by [input] is considered as a read
-        error.  *)
+  (** Creates a new image surface from PNG data read incrementally via
+     the [input] function.  The [input s l] function receives a string
+     [s] whose first [l] bytes must be filled with PNG data.  Any
+     exception raised by [input] is considered as a read error.  *)
 
   val write : Surface.t -> string -> unit
-    (** [write surface filename] writes the contents of [surface] to a
-        new file [filename] as a PNG image. *)
+  (** [write surface filename] writes the contents of [surface] to a
+     new file [filename] as a PNG image. *)
 
   val write_to_stream : Surface.t -> output:(string -> unit) -> unit
-    (** Writes the image surface using the [output] function. *)
+  (** Writes the image surface using the [output] function. *)
 end
 
 (** The PostScript surface is used to render cairo graphics to Adobe
@@ -1246,180 +1232,175 @@ end
 module PS :
 sig
   val create : fname:string -> width:float -> height:float -> Surface.t
-    (** Creates a PostScript surface of the specified size in points
-        to be written to [fname].
-        @param width width of the surface, in points (1 point = 1/72.0 inch)
-        @param height height of the surface, in points (1 point = 1/72.0 inch)
-    *)
+  (** Creates a PostScript surface of the specified size in points
+     to be written to [fname].
+     @param width width of the surface, in points (1 point = 1/72.0 inch)
+     @param height height of the surface, in points (1 point = 1/72.0 inch) *)
 
   val create_for_stream : output:(string -> unit) ->
     width:float -> height:float -> Surface.t
-    (** Creates a PostScript surface of the specified size in points to be
-        written incrementally to the stream represented by [output].
-        Any exception that [output] raises is considered as a write
-        error.
+  (** Creates a PostScript surface of the specified size in points to be
+     written incrementally to the stream represented by [output].
+     Any exception that [output] raises is considered as a write
+     error.
 
-        @param width width of the surface, in points (1 point = 1/72.0 inch)
-        @param height height of the surface, in points (1 point = 1/72.0 inch)
-    *)
+     @param width width of the surface, in points (1 point = 1/72.0 inch)
+     @param height height of the surface, in points (1 point = 1/72.0 inch) *)
 
   (** Describe the language level of the PostScript Language Reference
       that a generated PostScript file will conform to. *)
   type level = LEVEL_2 | LEVEL_3
 
   val restrict_to_level : Surface.t -> level -> unit
-      (** [restrict_to_level level] restricts the generated PostSript
-          file to [level].  See {!Cairo.PS.get_levels} for a list of
-          available level values that can be used here.
+  (** [restrict_to_level level] restricts the generated PostSript file
+     to [level].  See {!Cairo.PS.get_levels} for a list of available
+     level values that can be used here.
 
-          This function should only be called before any drawing
-          operations have been performed on the given surface. The
-          simplest way to do this is to call this function immediately
-          after creating the surface.  *)
+     This function should only be called before any drawing
+     operations have been performed on the given surface. The simplest
+     way to do this is to call this function immediately after
+     creating the surface.  *)
 
   val get_levels : unit -> level list
-      (** Retrieves the list of supported levels. *)
+  (** Retrieves the list of supported levels. *)
 
   val level_to_string : level -> string
-      (** [level_to_string level] return the string representation of
-          the given [level] id. *)
+  (** [level_to_string level] return the string representation of the
+     given [level] id. *)
 
   val set_eps : Surface.t -> eps:bool -> unit
-      (** If [eps] is [true], the PostScript surface will output
-          Encapsulated PostScript.
+  (** If [eps] is [true], the PostScript surface will output
+     Encapsulated PostScript.
 
-          This function should only be called before any drawing
-          operations have been performed on the current page. The
-          simplest way to do this is to call this function immediately
-          after creating the surface. An Encapsulated PostScript file
-          should never contain more than one page. *)
+     This function should only be called before any drawing
+     operations have been performed on the current page. The simplest
+     way to do this is to call this function immediately after
+     creating the surface. An Encapsulated PostScript file should
+     never contain more than one page. *)
 
   val get_eps : Surface.t -> bool
-      (** Check whether the PostScript surface will output
-          Encapsulated PostScript.  *)
+  (** Check whether the PostScript surface will output Encapsulated
+     PostScript.  *)
 
   val set_size : Surface.t -> width:float -> height:float -> unit
-      (** Changes the size of a PostScript surface for the current
-          (and subsequent) pages.
+  (** Changes the size of a PostScript surface for the current (and
+     subsequent) pages.
 
-          This function should only be called before any drawing
-          operations have been performed on the current page. The
-          simplest way to do this is to call this function immediately
-          after creating the surface or immediately after completing a
-          page with either {!Cairo.show_page} or {!Cairo.copy_page}. *)
+     This function should only be called before any drawing
+     operations have been performed on the current page. The simplest
+     way to do this is to call this function immediately after
+     creating the surface or immediately after completing a page with
+     either {!Cairo.show_page} or {!Cairo.copy_page}. *)
 
   (** PostScript comments. *)
   module Dsc :
   sig
     val begin_setup : Surface.t -> unit
-      (** This function indicates that subsequent calls to
-          {!Cairo.PS.Dsc.comment} should direct comments to the Setup
-          section of the PostScript output.
+    (** This function indicates that subsequent calls to
+       {!Cairo.PS.Dsc.comment} should direct comments to the Setup
+       section of the PostScript output.
 
-          This function should be called at most once per surface, and
-          must be called before any call to
-          {!Cairo.PS.Dsc.begin_page_setup} and before any drawing is
-          performed to the surface.
+       This function should be called at most once per surface, and
+       must be called before any call to
+       {!Cairo.PS.Dsc.begin_page_setup} and before any drawing is
+       performed to the surface.
 
-          See {!Cairo.PS.Dsc.comment} for more details. *)
+       See {!Cairo.PS.Dsc.comment} for more details. *)
 
     val begin_page_setup : Surface.t -> unit
-      (** This function indicates that subsequent calls to
-          {!Cairo.PS.Dsc.comment} should direct comments to the
-          PageSetup section of the PostScript output.
+    (** This function indicates that subsequent calls to
+       {!Cairo.PS.Dsc.comment} should direct comments to the PageSetup
+       section of the PostScript output.
 
-          This function call is only needed for the first page of a
-          surface.  It should be called after any call to
-          {!Cairo.PS.Dsc.begin_setup} and before any drawing is
-          performed to the surface.
+       This function call is only needed for the first page of a
+       surface.  It should be called after any call to
+       {!Cairo.PS.Dsc.begin_setup} and before any drawing is performed
+       to the surface.
 
-          See {!Cairo.PS.Dsc.comment} for more details. *)
+       See {!Cairo.PS.Dsc.comment} for more details. *)
 
     val comment : Surface.t -> string -> unit
-      (** Emit a comment into the PostScript output for the given surface.
+    (** Emit a comment into the PostScript output for the given surface.
 
-          The comment is expected to conform to the PostScript
-          Language Document Structuring Conventions (DSC). Please see
-          that manual for details on the available comments and their
-          meanings. In particular, the [%IncludeFeature] comment allows
-          a device-independent means of controlling printer device
-          features. So the PostScript Printer Description Files
-          Specification will also be a useful reference.
+       The comment is expected to conform to the PostScript Language
+       Document Structuring Conventions (DSC). Please see that manual
+       for details on the available comments and their meanings. In
+       particular, the [%IncludeFeature] comment allows a
+       device-independent means of controlling printer device
+       features. So the PostScript Printer Description Files
+       Specification will also be a useful reference.
 
-          The comment string must begin with a percent character (%)
-          and the total length of the string (including any initial
-          percent characters) must not exceed 255 characters.
-          Violating either of these conditions will raise en
-          exception.  But beyond these two conditions, this function
-          will not enforce conformance of the comment with any
-          particular specification.
+       The comment string must begin with a percent character (%) and
+       the total length of the string (including any initial percent
+       characters) must not exceed 255 characters.  Violating either
+       of these conditions will raise en exception.  But beyond these
+       two conditions, this function will not enforce conformance of
+       the comment with any particular specification.
 
-          The comment string should not have a trailing newline.
+       The comment string should not have a trailing newline.
 
-          The DSC specifies different sections in which particular
-          comments can appear. This function provides for comments to
-          be emitted within three sections: the header, the Setup
-          section, and the PageSetup section. Comments appearing in
-          the first two sections apply to the entire document while
-          comments in the BeginPageSetup section apply only to a
-          single page.
+       The DSC specifies different sections in which particular
+       comments can appear. This function provides for comments to be
+       emitted within three sections: the header, the Setup section,
+       and the PageSetup section. Comments appearing in the first two
+       sections apply to the entire document while comments in the
+       BeginPageSetup section apply only to a single page.
 
-          For comments to appear in the header section, this function
-          should be called after the surface is created, but before a
-          call to {!Cairo.PS.Dsc.begin_setup}.
+       For comments to appear in the header section, this function
+       should be called after the surface is created, but before a
+       call to {!Cairo.PS.Dsc.begin_setup}.
 
-          For comments to appear in the Setup section, this function
-          should be called after a call to {!Cairo.PS.Dsc.begin_setup}
-          but before a call to {!Cairo.PS.Dsc.begin_page_setup}.
+       For comments to appear in the Setup section, this function
+       should be called after a call to {!Cairo.PS.Dsc.begin_setup}
+       but before a call to {!Cairo.PS.Dsc.begin_page_setup}.
 
-          For comments to appear in the PageSetup section, this
-          function should be called after a call to
-          {!Cairo.PS.Dsc.begin_page_setup}.
+       For comments to appear in the PageSetup section, this function
+       should be called after a call to {!Cairo.PS.Dsc.begin_page_setup}.
 
-          Note that it is only necessary to call
-          {!Cairo.PS.Dsc.begin_page_setup} for the first page of
-          any surface.  After a call to {!Cairo.show_page} or
-          {!Cairo.copy_page} comments are unambiguously directed to the
-          PageSetup section of the current page.  But it doesn't hurt
-          to call this function at the beginning of every page as that
-          consistency may make the calling code simpler.
+       Note that it is only necessary to call
+       {!Cairo.PS.Dsc.begin_page_setup} for the first page of any
+       surface.  After a call to {!Cairo.show_page} or
+       {!Cairo.copy_page} comments are unambiguously directed to the
+       PageSetup section of the current page.  But it doesn't hurt to
+       call this function at the beginning of every page as that
+       consistency may make the calling code simpler.
 
-          As a final note, cairo automatically generates several
-          comments on its own.  As such, applications must not
-          manually generate any of the following comments:
+       As a final note, cairo automatically generates several comments
+       on its own.  As such, applications must not manually generate
+       any of the following comments:
 
-          - Header section: %!PS-Adobe-3.0, %Creator, %CreationDate, %Pages,
-            %BoundingBox, %DocumentData, %LanguageLevel, %EndComments.
-          - Setup section: %BeginSetup, %EndSetup
-          - PageSetup section: %BeginPageSetup, %PageBoundingBox,
-            %EndPageSetup.
-          - Other sections: %BeginProlog, %EndProlog, %Page, %Trailer, %EOF
+       - Header section: %!PS-Adobe-3.0, %Creator, %CreationDate, %Pages,
+         %BoundingBox, %DocumentData, %LanguageLevel, %EndComments.
+       - Setup section: %BeginSetup, %EndSetup
+       - PageSetup section: %BeginPageSetup, %PageBoundingBox,
+         %EndPageSetup.
+       - Other sections: %BeginProlog, %EndProlog, %Page, %Trailer, %EOF
 
-          Here is an example sequence showing how this function might
-          be used:
-          {[
-          let surface = Cairo.PS.create filename width height in
-          ...
-          Cairo.PS.Dsc.comment surface "%%Title: My excellent document";
-          Cairo.PS.Dsc.comment surface
-            "%%Copyright: Copyright (C) 2006 Cairo Lover";
-          ...
-          Cairo.PS.Dsc.begin_setup surface;
-          Cairo.PS.Dsc.comment surface "%%IncludeFeature: *MediaColor White";
-          ...
-          Cairo.PS.Dsc.begin_page_setup surface;
-          Cairo.PS.Dsc.comment surface "%%IncludeFeature: *PageSize A3";
-          Cairo.PS.Dsc.comment surface
-            "%%IncludeFeature: *InputSlot LargeCapacity";
-          Cairo.PS.Dsc.comment surface "%%IncludeFeature: *MediaType Glossy";
-          Cairo.PS.Dsc.comment surface "%%IncludeFeature: *MediaColor Blue";
-          ... (* draw to first page here *) ...
-          Cairo.show_page cr;
-          ...
-          Cairo.PS.Dsc.comment surface "%%IncludeFeature: *PageSize A5";
-          ...
-          ]}
-      *)
+       Here is an example sequence showing how this function might
+       be used:
+       {[
+       let surface = Cairo.PS.create filename width height in
+       ...
+       Cairo.PS.Dsc.comment surface "%%Title: My excellent document";
+       Cairo.PS.Dsc.comment surface
+         "%%Copyright: Copyright (C) 2006 Cairo Lover";
+       ...
+       Cairo.PS.Dsc.begin_setup surface;
+       Cairo.PS.Dsc.comment surface "%%IncludeFeature: *MediaColor White";
+       ...
+       Cairo.PS.Dsc.begin_page_setup surface;
+       Cairo.PS.Dsc.comment surface "%%IncludeFeature: *PageSize A3";
+       Cairo.PS.Dsc.comment surface
+         "%%IncludeFeature: *InputSlot LargeCapacity";
+       Cairo.PS.Dsc.comment surface "%%IncludeFeature: *MediaType Glossy";
+       Cairo.PS.Dsc.comment surface "%%IncludeFeature: *MediaColor Blue";
+       ... (* draw to first page here *) ...
+       Cairo.show_page cr;
+       ...
+       Cairo.PS.Dsc.comment surface "%%IncludeFeature: *PageSize A5";
+       ...
+       ]}
+   *)
   end
 end
 
@@ -1434,42 +1415,40 @@ end
 module SVG :
 sig
   val create : fname:string -> width:float -> height:float -> Surface.t
-    (** Creates a SVG surface of the specified size in points to be
-        written to [fname].
-        @param width width of the surface, in points (1 point = 1/72.0 inch)
-        @param height height of the surface, in points (1 point = 1/72.0 inch)
-    *)
+  (** Creates a SVG surface of the specified size in points to be
+     written to [fname].
+     @param width width of the surface, in points (1 point = 1/72.0 inch)
+     @param height height of the surface, in points (1 point = 1/72.0 inch) *)
 
   val create_for_stream : output:(string -> unit) ->
                           width:float -> height:float -> Surface.t
-    (** Creates a SVG surface of the specified size in points to be
-        written incrementally to the stream represented by [output].
-        Any exception that [output] raises is considered as a write
-        error.
+  (** Creates a SVG surface of the specified size in points to be
+     written incrementally to the stream represented by [output].
+     Any exception that [output] raises is considered as a write
+     error.
 
-        @param width width of the surface, in points (1 point = 1/72.0 inch)
-        @param height height of the surface, in points (1 point = 1/72.0 inch)
-    *)
+     @param width width of the surface, in points (1 point = 1/72.0 inch)
+     @param height height of the surface, in points (1 point = 1/72.0 inch) *)
 
   (** The version number of the SVG specification that a generated SVG
       file will conform to. *)
   type version = VERSION_1_1 | VERSION_1_2
 
   val restrict_to_version : Surface.t -> version -> unit
-      (** Restricts the generated SVG file to version. See
-          {!Cairo.SVG.get_versions} for a list of available version
-          values that can be used here.
+  (** Restricts the generated SVG file to version. See
+     {!Cairo.SVG.get_versions} for a list of available version values
+     that can be used here.
 
-          This function should only be called before any drawing
-          operations have been performed on the given surface. The
-          simplest way to do this is to call this function immediately
-          after creating the surface. *)
+     This function should only be called before any drawing
+     operations have been performed on the given surface. The simplest
+     way to do this is to call this function immediately after
+     creating the surface. *)
 
   val get_versions : unit -> version list
-      (** Retrieve the list of supported versions.  *)
+  (** Retrieve the list of supported versions.  *)
 
   val version_to_string : version -> string
-      (** Get the string representation of the given version id. *)
+  (** Get the string representation of the given version id. *)
 end
 
 (** The recording surface is a surface that records all drawing operations at
@@ -1508,129 +1487,127 @@ end
 module Pattern :
 sig
   type 'a t constraint 'a = [<`Solid | `Surface | `Gradient | `Linear | `Radial]
-    (** This is the paint with which cairo draws.  The primary use of
-        patterns is as the source for all cairo drawing operations,
-        although they can also be used as masks, that is, as the brush
-        too.
+  (** This is the paint with which cairo draws.  The primary use of
+     patterns is as the source for all cairo drawing operations,
+     although they can also be used as masks, that is, as the brush
+     too.
 
-        A cairo pattern is created by using one of the many functions,
-        of the form [Cairo.Pattern.create_type] or implicitly through
-        [Cairo.set_source_*] functions.  *)
+     A cairo pattern is created by using one of the many functions,
+     of the form [Cairo.Pattern.create_type] or implicitly through
+     [Cairo.set_source_*] functions.  *)
 
   type any = [`Solid | `Surface | `Gradient | `Linear | `Radial] t
-      (** {!Cairo.Group.pop} and {!Cairo.get_source} retrieve patterns
-          whose properties we do not know.  In this case, we can only
-          assume the pattern has potentially all properties and the
-          functions below may raise an exception if it turns out that
-          the needed property is not present. *)
+  (** {!Cairo.Group.pop} and {!Cairo.get_source} retrieve patterns
+     whose properties we do not know.  In this case, we can only
+     assume the pattern has potentially all properties and the
+     functions below may raise an exception if it turns out that the
+     needed property is not present. *)
 
   val add_color_stop_rgb : [> `Gradient] t -> ?ofs:float ->
     float -> float -> float -> unit
-    (** Adds an opaque color stop to a gradient pattern.  The offset
-        [ofs] specifies the location along the gradient's control
-        vector (default: [0.0]).  For example, a linear gradient's
-        control vector is from (x0,y0) to (x1,y1) while a radial
-        gradient's control vector is from any point on the start
-        circle to the corresponding point on the end circle.
+  (** Adds an opaque color stop to a gradient pattern.  The offset
+     [ofs] specifies the location along the gradient's control vector
+     (default: [0.0]).  For example, a linear gradient's control
+     vector is from (x0,y0) to (x1,y1) while a radial gradient's
+     control vector is from any point on the start circle to the
+     corresponding point on the end circle.
 
-        The color is specified in the same way as in {!Cairo.set_source_rgb}.
+     The color is specified in the same way as in {!Cairo.set_source_rgb}.
 
-        If two (or more) stops are specified with identical offset
-        values, they will be sorted according to the order in which
-        the stops are added (stops added earlier will compare less
-        than stops added later).  This can be useful for reliably
-        making sharp color transitions instead of the typical blend. *)
+     If two (or more) stops are specified with identical offset
+     values, they will be sorted according to the order in which the
+     stops are added (stops added earlier will compare less than stops
+     added later).  This can be useful for reliably making sharp color
+     transitions instead of the typical blend. *)
 
   val add_color_stop_rgba : [> `Gradient] t -> ?ofs:float ->
     float -> float -> float -> float -> unit
-    (** Adds a translucent color stop to a gradient pattern. The
-        offset specifies the location along the gradient's control
-        vector. For example, a linear gradient's control vector is from
-        (x0,y0) to (x1,y1) while a radial gradient's control vector is
-        from any point on the start circle to the corresponding point on
-        the end circle.
+  (** Adds a translucent color stop to a gradient pattern. The offset
+     specifies the location along the gradient's control vector. For
+     example, a linear gradient's control vector is from (x0,y0) to
+     (x1,y1) while a radial gradient's control vector is from any
+     point on the start circle to the corresponding point on the end
+     circle.
 
-        The color is specified in the same way as in {!Cairo.set_source_rgba}.
+     The color is specified in the same way as in {!Cairo.set_source_rgba}.
 
-        If two (or more) stops are specified with identical offset
-        values, they will be sorted according to the order in which
-        the stops are added (stops added earlier will compare less
-        than stops added later). This can be useful for reliably
-        making sharp color transitions instead of the typical
-        blend.  *)
+     If two (or more) stops are specified with identical offset
+     values, they will be sorted according to the order in which the
+     stops are added (stops added earlier will compare less than stops
+     added later). This can be useful for reliably making sharp color
+     transitions instead of the typical blend.  *)
 
   val get_color_stop_count : [> `Gradient] t -> int
-    (** Return the number of color stops specified in the given
-        gradient pattern. *)
+  (** Return the number of color stops specified in the given gradient
+     pattern. *)
 
   val get_color_stop_rgba : [> `Gradient] t -> idx:int ->
     float * float * float * float * float
-      (** Gets the color and offset information at the given index for
-          a gradient pattern. Values of index are 0 to 1 less than the
-          number returned by {!Cairo.Pattern.get_color_stop_count}.
+  (** Gets the color and offset information at the given index for a
+     gradient pattern. Values of index are 0 to 1 less than the number
+     returned by {!Cairo.Pattern.get_color_stop_count}.
 
-          @return (offset, red, green, blue, alpha) *)
+     @return (offset, red, green, blue, alpha) *)
 
   val create_rgb : r:float -> g:float -> b:float -> [`Solid] t
-    (** Creates a new {!Cairo.Pattern.t} corresponding to an opaque
-        color. The color components are floating point numbers in the
-        range 0 to 1. If the values passed in are outside that range,
-        they will be clamped. *)
+  (** Creates a new {!Cairo.Pattern.t} corresponding to an opaque
+     color. The color components are floating point numbers in the
+     range 0 to 1. If the values passed in are outside that range,
+     they will be clamped. *)
 
   val create_rgba : r:float -> g:float -> b:float -> a:float -> [`Solid] t
-    (** Creates a new {!Cairo.Pattern.t} corresponding to a
-        translucent color.  The color components are floating point
-        numbers in the range 0 to 1.  If the values passed in are
-        outside that range, they will be clamped. *)
+  (** Creates a new {!Cairo.Pattern.t} corresponding to a translucent
+     color.  The color components are floating point numbers in the
+     range 0 to 1.  If the values passed in are outside that range,
+     they will be clamped. *)
 
   val get_rgba : [> `Solid] t -> float * float * float * float
-    (** Return the solid color for a solid color pattern.
-
-    @return (red, green, blue, alpha) *)
+  (** Return the solid color for a solid color pattern.
+     @return (red, green, blue, alpha) *)
 
   val create_for_surface : Surface.t -> [`Surface] t
-    (** Create a new {!Cairo.Pattern.t} for the given surface. *)
+  (** Create a new {!Cairo.Pattern.t} for the given surface. *)
 
   val get_surface : [`Surface] t -> Surface.t
-    (** Gets the surface of a surface pattern.  *)
+  (** Gets the surface of a surface pattern.  *)
 
   val create_linear : x0:float -> y0:float -> x1:float -> y1:float ->
                       [`Linear | `Gradient] t
-      (** Create a new linear gradient {!Cairo.Pattern.t} along the
-          line defined by (x0, y0) and (x1, y1).  Before using the
-          gradient pattern, a number of color stops should be defined
-          using {!Cairo.Pattern.add_color_stop_rgb} or
-          {!Cairo.Pattern.add_color_stop_rgba}.
+  (** Create a new linear gradient {!Cairo.Pattern.t} along the line
+     defined by (x0, y0) and (x1, y1).  Before using the gradient
+     pattern, a number of color stops should be defined using
+     {!Cairo.Pattern.add_color_stop_rgb} or
+     {!Cairo.Pattern.add_color_stop_rgba}.
 
           Note: The coordinates here are in pattern space. For a new
-          pattern, pattern space is identical to user space, but the
-          relationship between the spaces can be changed with
-          {!Cairo.Pattern.set_matrix}.  *)
+     pattern, pattern space is identical to user space, but the
+     relationship between the spaces can be changed with
+     {!Cairo.Pattern.set_matrix}.  *)
 
   val get_linear_points : [> `Linear|`Gradient] t
                           -> float * float * float * float
-    (** Gets the gradient endpoints for a linear gradient.
-        @return (x0, y0, x1, y1). *)
+  (** Gets the gradient endpoints for a linear gradient.
+     @return (x0, y0, x1, y1). *)
 
   val create_radial :
     x0:float -> y0:float -> r0:float ->
     x1:float -> y1:float -> r1:float -> [`Radial | `Gradient] t
-    (** Creates a new radial gradient {!Cairo.Pattern.t} between the
-        two circles defined by (cx0, cy0, radius0) and (cx1, cy1,
-        radius1). Before using the gradient pattern, a number of color
-        stops should be defined using {!Cairo.Pattern.add_color_stop_rgb} or
-        {!Cairo.Pattern.add_color_stop_rgba}.
+  (** Creates a new radial gradient {!Cairo.Pattern.t} between the two
+     circles defined by (cx0, cy0, radius0) and (cx1, cy1,
+     radius1). Before using the gradient pattern, a number of color
+     stops should be defined using {!Cairo.Pattern.add_color_stop_rgb}
+     or {!Cairo.Pattern.add_color_stop_rgba}.
 
-        Note: The coordinates here are in pattern space. For a new
-        pattern, pattern space is identical to user space, but the
-        relationship between the spaces can be changed with
-        {!Cairo.Pattern.set_matrix}. *)
+     Note: The coordinates here are in pattern space. For a new
+     pattern, pattern space is identical to user space, but the
+     relationship between the spaces can be changed with
+     {!Cairo.Pattern.set_matrix}. *)
 
   val get_radial_circles : [> `Radial|`Gradient] t ->
                            float * float * float * float * float * float
-      (** Gets the gradient endpoint circles for a radial gradient,
-          each specified as a center coordinate and a radius.
-          @return (x0, y0, r0, x1, y1, r1).      *)
+  (** Gets the gradient endpoint circles for a radial gradient,
+     each specified as a center coordinate and a radius.
+     @return (x0, y0, r0, x1, y1, r1).      *)
 
   (** This is used to describe how pattern color/alpha will be
       determined for areas "outside" the pattern's natural area (for
@@ -1644,22 +1621,22 @@ sig
               from the source. *)
 
   val set_extend : 'a t -> extend -> unit
-    (** Sets the mode to be used for drawing outside the area of a
-        pattern.  See {!Cairo.Pattern.extend} for details on the
-        semantics of each extend strategy.
+  (** Sets the mode to be used for drawing outside the area of a
+     pattern.  See {!Cairo.Pattern.extend} for details on the
+     semantics of each extend strategy.
 
-        The default extend mode is [NONE] for surface patterns and
-        [PAD] for gradient patterns. *)
+     The default extend mode is [NONE] for surface patterns and [PAD]
+     for gradient patterns. *)
 
   val get_extend : 'a t -> extend
-    (** Gets the current extend mode for a pattern. See
-        {!Cairo.Pattern.extend} for details on the semantics of each
-        extend strategy. *)
+  (** Gets the current extend mode for a pattern. See
+     {!Cairo.Pattern.extend} for details on the semantics of each
+     extend strategy. *)
 
   (** This is used to indicate what filtering should be applied when
-      reading pixel values from patterns.  See
-      {!Cairo.Pattern.set_filter} for indicating the desired filter to
-      be used with a particular pattern. *)
+     reading pixel values from patterns.  See
+     {!Cairo.Pattern.set_filter} for indicating the desired filter to
+     be used with a particular pattern. *)
   type filter =
     | FAST (** A high-performance filter, with quality similar to NEAREST *)
     | GOOD (** A reasonable-performance filter, with quality similar
@@ -1671,48 +1648,48 @@ sig
     (* | GAUSSIAN *)
 
   val set_filter : 'a t -> filter -> unit
-    (** Sets the filter to be used for resizing when using this
-        pattern. See {!Cairo.Pattern.filter} for details on each
-        filter.
+  (** Sets the filter to be used for resizing when using this
+     pattern. See {!Cairo.Pattern.filter} for details on each
+     filter.
 
-        Note that you might want to control filtering even when you do
-        not have an explicit {!Cairo.Pattern.t} value (for example
-        when using {!Cairo.set_source_surface}).  In these cases, it
-        is convenient to use {!Cairo.get_source} to get access to the
-        pattern that cairo creates implicitly. For example:
-        {[
-        Cairo.set_source_surface cr image x y;
-        Cairo.Pattern.set_filter (Cairo.get_source cr) Cairo.Pattern.NEAREST;
-        ]} *)
+     Note that you might want to control filtering even when you do
+     not have an explicit {!Cairo.Pattern.t} value (for example
+     when using {!Cairo.set_source_surface}).  In these cases, it
+     is convenient to use {!Cairo.get_source} to get access to the
+     pattern that cairo creates implicitly. For example:
+     {[
+     Cairo.set_source_surface cr image x y;
+     Cairo.Pattern.set_filter (Cairo.get_source cr) Cairo.Pattern.NEAREST;
+     ]} *)
 
   val get_filter : 'a t -> filter
-    (** Gets the current filter for a pattern.  See
-        {!Cairo.Pattern.filter} for details on each filter. *)
+  (** Gets the current filter for a pattern.  See
+     {!Cairo.Pattern.filter} for details on each filter. *)
 
   val set_matrix : 'a t -> Matrix.t -> unit
-    (** Sets the pattern's transformation matrix to matrix. This
-        matrix is a transformation from user space to pattern space.
+  (** Sets the pattern's transformation matrix to matrix. This
+      matrix is a transformation from user space to pattern space.
 
-        When a pattern is first created it always has the identity
-        matrix for its transformation matrix, which means that pattern
-        space is initially identical to user space.
+      When a pattern is first created it always has the identity
+      matrix for its transformation matrix, which means that pattern
+      space is initially identical to user space.
 
-        Important: Please note that the direction of this
-        transformation matrix is from user space to pattern
-        space. This means that if you imagine the flow from a pattern
-        to user space (and on to device space), then coordinates in
-        that flow will be transformed by the inverse of the pattern
-        matrix.
+      Important: Please note that the direction of this
+      transformation matrix is from user space to pattern
+      space. This means that if you imagine the flow from a pattern
+      to user space (and on to device space), then coordinates in
+      that flow will be transformed by the inverse of the pattern
+      matrix.
 
-        For example, if you want to make a pattern appear twice as
-        large as it does by default the correct code to use is:
-        {[
-        let matrix = Cairo.Matrix.init_scale 0.5 0.5 in
-        Cairo.Pattern.set_matrix pattern matrix;
-        ]} *)
+      For example, if you want to make a pattern appear twice as
+      large as it does by default the correct code to use is:
+      {[
+      let matrix = Cairo.Matrix.init_scale 0.5 0.5 in
+      Cairo.Pattern.set_matrix pattern matrix;
+      ]} *)
 
   val get_matrix : 'a t -> Matrix.t
-    (** Returns the pattern's transformation matrix.  *)
+  (** Returns the pattern's transformation matrix.  *)
 
   (* FIXME: is get_type needed ? *)
 end
@@ -1722,201 +1699,196 @@ end
 (** {2:cairo_t The cairo drawing context functions} *)
 
 val create : Surface.t -> context
-  (** [create target] creates a new context with all graphics state
-      parameters set to default values and with [target] as a target
-      surface. The target surface should be constructed with a
-      backend-specific function such as {!Cairo.Image.create} (or any
-      other {i Backend}[.create] variant).  For many backends, you
-      should not forget to call {!Cairo.Surface.finish} for the data
-      to be completely outputted.
+(** [create target] creates a new context with all graphics state
+   parameters set to default values and with [target] as a target
+   surface. The target surface should be constructed with a
+   backend-specific function such as {!Cairo.Image.create} (or any
+   other {i Backend}[.create] variant).  For many backends, you should
+   not forget to call {!Cairo.Surface.finish} for the data to be
+   completely outputted.
 
-      @raise Out_of_memory if the context could not be allocated. *)
+   @raise Out_of_memory if the context could not be allocated. *)
 
 val save : context -> unit
-  (** [save cr] makes a copy of the current state of [cr] and saves it
-      on an internal stack of saved states for [cr].  When [restore]
-      is called, [cr] will be restored to the saved state.  Multiple
-      calls to [save] and [restore] can be nested; each call to
-      [restore] restores the state from the matching paired [save].  *)
+(** [save cr] makes a copy of the current state of [cr] and saves it
+   on an internal stack of saved states for [cr].  When [restore] is
+   called, [cr] will be restored to the saved state.  Multiple calls
+   to [save] and [restore] can be nested; each call to [restore]
+   restores the state from the matching paired [save].  *)
 val restore : context -> unit
-  (** [restore cr] restores [cr] to the state saved by a preceding
-      call to [save] and removes that state from the stack of saved
-      states. *)
+(** [restore cr] restores [cr] to the state saved by a preceding call
+   to [save] and removes that state from the stack of saved states. *)
 
 val get_target : context -> Surface.t
-  (** Gets the target surface for the cairo context as passed to [create]. *)
+(** Gets the target surface for the cairo context as passed to [create]. *)
 
-(** Temporary redirection of drawing commands to intermediate
-    surfaces. *)
+(** Temporary redirection of drawing commands to intermediate surfaces. *)
 module Group :
 sig
   val push : ?content:content -> context -> unit
-    (** Temporarily redirects drawing to an intermediate surface known
-        as a group.  The redirection lasts until the group is completed
-        by a call to {!Cairo.Group.pop} or {!Cairo.Group.pop_to_source}.
-        These calls provide the result of any drawing to the group as a
-        pattern (either as an explicit object, or set as the source
-        pattern).
+  (** Temporarily redirects drawing to an intermediate surface known
+     as a group.  The redirection lasts until the group is completed
+     by a call to {!Cairo.Group.pop} or {!Cairo.Group.pop_to_source}.
+     These calls provide the result of any drawing to the group as a
+     pattern (either as an explicit object, or set as the source
+     pattern).
 
-        This group functionality can be convenient for performing
-        intermediate compositing. One common use of a group is to render
-        objects as opaque within the group (so that they occlude each
-        other) and then blend the result with translucence onto the
-        destination.
+     This group functionality can be convenient for performing
+     intermediate compositing. One common use of a group is to render
+     objects as opaque within the group (so that they occlude each
+     other) and then blend the result with translucence onto the
+     destination.
 
-        Groups can be nested arbitrarily deep by making balanced calls
-        to [Group.push]/[Group.pop]. Each call pushes/pops the new
-        target group onto/from a stack.
+     Groups can be nested arbitrarily deep by making balanced calls to
+     [Group.push]/[Group.pop]. Each call pushes/pops the new target
+     group onto/from a stack.
 
-        The [Group.push] function calls [save] so that any changes
-        to the graphics state will not be visible outside the group,
-        (the [Group.pop] function call [restore]).
+     The [Group.push] function calls [save] so that any changes to the
+     graphics state will not be visible outside the group, (the
+     [Group.pop] function call [restore]).
 
-        @param content The content type of the group.  By default the
-        intermediate group will have a content type of [COLOR_ALPHA]
-        (see {!Cairo.content}).  *)
+     @param content The content type of the group.  By default the
+     intermediate group will have a content type of [COLOR_ALPHA] (see
+     {!Cairo.content}).  *)
 
   val pop : context -> Pattern.any
-    (** Terminates the redirection begun by a call to
-        {!Cairo.Group.push} and returns a new pattern containing the
-        results of all drawing operations performed to the group.
+  (** Terminates the redirection begun by a call to
+     {!Cairo.Group.push} and returns a new pattern containing the
+     results of all drawing operations performed to the group.
 
-        The [Group.pop] function calls {!Cairo.restore} (balancing a
-        call to {!Cairo.save} by the [Group.push] function), so that any
-        changes to the graphics state will not be visible outside the
-        group.
+     The [Group.pop] function calls {!Cairo.restore} (balancing a call
+     to {!Cairo.save} by the [Group.push] function), so that any
+     changes to the graphics state will not be visible outside the
+     group.
 
-        @return a newly created (surface) pattern containing the results
-        of all drawing operations performed to the group.  *)
+     @return a newly created (surface) pattern containing the results
+     of all drawing operations performed to the group.  *)
 
   val pop_to_source : context -> unit
-    (** Terminates the redirection begun by a call to [Group.push] and
-        installs the resulting pattern as the source pattern in the
-        given cairo context.
+  (** Terminates the redirection begun by a call to [Group.push] and
+     installs the resulting pattern as the source pattern in the
+     given cairo context.
 
-        The behavior of this function is equivalent to the sequence of
-        operations:
-        {[
-        let group = Cairo.Group.pop cr in
-        Cairo.set_source cr group;
-        ]}
-    *)
+     The behavior of this function is equivalent to the sequence of
+     operations:
+     {[
+     let group = Cairo.Group.pop cr in
+     Cairo.set_source cr group;
+     ]}  *)
 
   val get_target : context -> Surface.t
-    (** Gets the current destination surface for the context.  This is
-        either the original target surface as passed to [create] or
-        the target surface for the current group as started by the most
-        recent call to [Group.push]. *)
+  (** Gets the current destination surface for the context.  This is
+     either the original target surface as passed to [create] or the
+     target surface for the current group as started by the most
+     recent call to [Group.push]. *)
 end
 
 val set_source_rgb : context -> r:float -> g:float -> b:float -> unit
-  (** [set_source_rgb cr r g b] sets the source pattern within [cr] to
-      an opaque color.  This opaque color will then be used for any
-      subsequent drawing operation until a new source pattern is set.
+(** [set_source_rgb cr r g b] sets the source pattern within [cr] to
+   an opaque color.  This opaque color will then be used for any
+   subsequent drawing operation until a new source pattern is set.
 
-      The color components are floating point numbers in the range 0 to
-      1. If the values passed in are outside that range, they will be
-      clamped.
+   The color components are floating point numbers in the range 0
+   to 1. If the values passed in are outside that range, they will be
+   clamped.
 
-      The default source pattern is opaque black (that is, it is
-      equivalent to [set_source_rgb cr 0. 0. 0.]). *)
+   The default source pattern is opaque black (that is, it is
+   equivalent to [set_source_rgb cr 0. 0. 0.]). *)
 
 val set_source_rgba : context ->
                       r:float -> g:float -> b:float -> a:float -> unit
-  (** [set_source_rgba cr r g b a] sets the source pattern within [cr]
-      to a translucent color.  This color will then be used for any
-      subsequent drawing operation until a new source pattern is set.
+(** [set_source_rgba cr r g b a] sets the source pattern within [cr]
+   to a translucent color.  This color will then be used for any
+   subsequent drawing operation until a new source pattern is set.
 
-      The color and alpha components are floating point numbers in the
-      range 0 to 1. If the values passed in are outside that range,
-      they will be clamped.
+   The color and alpha components are floating point numbers in the
+   range 0 to 1. If the values passed in are outside that range, they
+   will be clamped.
 
-      The default source pattern is opaque black (that is, it is
-      equivalent to [set_source_rgba cr 0. 0. 0. 1.0]). *)
+   The default source pattern is opaque black (that is, it is
+   equivalent to [set_source_rgba cr 0. 0. 0. 1.0]). *)
 
 val set_source : context -> 'a Pattern.t -> unit
-  (** [set_source cr source] sets the source pattern within [cr] to
-      [source].  This pattern will then be used for any subsequent
-      drawing operation until a new source pattern is set.
+(** [set_source cr source] sets the source pattern within [cr] to
+   [source].  This pattern will then be used for any subsequent
+   drawing operation until a new source pattern is set.
 
-      Note: The pattern's transformation matrix will be locked to the
-      user space in effect at the time of [set_source].  This means
-      that further modifications of the current transformation matrix
-      will not affect the source pattern. See {!Pattern.set_matrix}.
+   Note: The pattern's transformation matrix will be locked to the
+   user space in effect at the time of [set_source].  This means that
+   further modifications of the current transformation matrix will not
+   affect the source pattern. See {!Pattern.set_matrix}.
 
-      The default source pattern is a solid pattern that is opaque
-      black (that is, it is equivalent to [set_source_rgb cr 0. 0. 0.]). *)
+   The default source pattern is a solid pattern that is opaque black
+   (that is, it is equivalent to [set_source_rgb cr 0. 0. 0.]). *)
 
 val set_source_surface : context -> Surface.t -> x:float -> y:float -> unit
-  (** [set_source_surface cr surface x y] is a convenience for
-      creating a pattern from surface and setting it as the source in [cr]
-      with [set_source].
+(** [set_source_surface cr surface x y] is a convenience for creating
+   a pattern from surface and setting it as the source in [cr] with
+   [set_source].
 
-      The [x] and [y] parameters give the user-space coordinate at
-      which the surface origin should appear.  (The surface origin is
-      its upper-left corner before any transformation has been
-      applied.)  The x and y patterns are negated and then set as
-      translation values in the pattern matrix.
+   The [x] and [y] parameters give the user-space coordinate at which
+   the surface origin should appear.  (The surface origin is its
+   upper-left corner before any transformation has been applied.)  The
+   x and y patterns are negated and then set as translation values in
+   the pattern matrix.
 
-      Other than the initial translation pattern matrix, as described
-      above, all other pattern attributes (such as its extend mode)
-      are set to the default values as in {!Pattern.create_for_surface}.
-      The resulting pattern can be queried with {!Cairo.get_source} so
-      that these attributes can be modified if desired (e.g. to create
-      a repeating pattern with {!Cairo.Pattern.set_extend}). *)
+   Other than the initial translation pattern matrix, as described
+   above, all other pattern attributes (such as its extend mode) are
+   set to the default values as in {!Pattern.create_for_surface}.  The
+   resulting pattern can be queried with {!Cairo.get_source} so that
+   these attributes can be modified if desired (e.g. to create a
+   repeating pattern with {!Cairo.Pattern.set_extend}). *)
 
 val get_source : context -> Pattern.any
-  (** [get_source cr] gets the current source pattern for [cr]. *)
+(** [get_source cr] gets the current source pattern for [cr]. *)
 
 val set_antialias : context -> antialias -> unit
-    (** Set the antialiasing mode of the rasterizer used for drawing
-        shapes.  This value is a hint, and a particular backend may or
-        may not support a particular value.  At the current time, no
-        backend supports [ANTIALIAS_SUBPIXEL] when drawing shapes.
+(** Set the antialiasing mode of the rasterizer used for drawing
+   shapes.  This value is a hint, and a particular backend may or may
+   not support a particular value.  At the current time, no backend
+   supports [ANTIALIAS_SUBPIXEL] when drawing shapes.
 
-        Note that this option does not affect text rendering, instead
-        see {!Cairo.Font_options.set_antialias}. *)
+   Note that this option does not affect text rendering, instead see
+   {!Cairo.Font_options.set_antialias}. *)
 
 val get_antialias : context -> antialias
-  (** Gets the current shape antialiasing mode, as set by
-      {!Cairo.set_antialias}. *)
+(** Gets the current shape antialiasing mode, as set by
+   {!Cairo.set_antialias}. *)
 
 val set_dash : context -> ?ofs:float -> float array -> unit
-  (** [set_dash cr dashes] sets the dash pattern to be used by
-      {!Cairo.stroke}.  A dash pattern is specified by dashes, an
-      array of positive values.  Each value provides the length of
-      alternate "on" and "off" portions of the stroke.  The offset
-      [ofs] specifies an offset into the pattern at which the stroke
-      begins (default: [0.]).
+(** [set_dash cr dashes] sets the dash pattern to be used by
+   {!Cairo.stroke}.  A dash pattern is specified by dashes, an array
+   of positive values.  Each value provides the length of alternate
+   "on" and "off" portions of the stroke.  The offset [ofs] specifies
+   an offset into the pattern at which the stroke begins (default: [0.]).
 
-      [set_dash [| |]] disable dashing.  [set_dash [|l|]] sets a
-      symmetric pattern with alternating on and off portions of the
-      size [l].
+   [set_dash [| |]] disable dashing.  [set_dash [|l|]] sets a
+   symmetric pattern with alternating on and off portions of the size [l].
 
-      Each "on" segment will have caps applied as if the segment were
-      a separate sub-path. In particular, it is valid to use an "on"
-      length of 0.0 with {!Cairo.line_cap} being [ROUND] or [SQUARE]
-      in order to distributed dots or squares along a path.
+   Each "on" segment will have caps applied as if the segment were a
+   separate sub-path. In particular, it is valid to use an "on" length
+   of 0.0 with {!Cairo.line_cap} being [ROUND] or [SQUARE] in order to
+   distributed dots or squares along a path.
 
-      Note: The length values are in user-space units as evaluated at
-      the time of stroking.  This is not necessarily the same as the
-      user space at the time of [set_dash].  *)
+   Note: The length values are in user-space units as evaluated at the
+   time of stroking.  This is not necessarily the same as the user
+   space at the time of [set_dash].  *)
 
 val get_dash : context -> float array * float
-  (** Gets the current dash array ([( [| |], 0.)] if dashing is not
-      currently in effect). *)
+(** Gets the current dash array ([( [| |], 0.)] if dashing is not
+   currently in effect). *)
 
 
 (** Used to select how paths are filled. For both fill rules, whether
-    or not a point is included in the fill is determined by taking a
-    ray from that point to infinity and looking at intersections with the
-    path. The ray can be in any direction, as long as it doesn't pass
-    through the end point of a segment or have a tricky intersection
-    such as intersecting tangent to the path. (Note that filling is
-    not actually implemented in this way. This is just a description
-    of the rule that is applied.)
+   or not a point is included in the fill is determined by taking a
+   ray from that point to infinity and looking at intersections with
+   the path. The ray can be in any direction, as long as it doesn't
+   pass through the end point of a segment or have a tricky
+   intersection such as intersecting tangent to the path. (Note that
+   filling is not actually implemented in this way. This is just a
+   description of the rule that is applied.)
 
-    The default fill rule is [WINDING].   *)
+   The default fill rule is [WINDING].  *)
 type fill_rule =
   | WINDING  (** If the path crosses the ray from left-to-right,
                  counts +1. If the path crosses the ray from right to
@@ -1930,15 +1902,15 @@ type fill_rule =
                  be filled. *)
 
 val set_fill_rule : context -> fill_rule -> unit
-    (** [set_fill_rule cr fill_rule] sets the current fill rule within
-        the cairo context [cr].  The fill rule is used to determine
-        which regions are inside or outside a complex (potentially
-        self-intersecting) path. The current fill rule affects both
-        {!Cairo.fill} and {!Cairo.clip}.  See {!Cairo.fill_rule} for
-        details on the semantics of each available fill rule.  *)
+(** [set_fill_rule cr fill_rule] sets the current fill rule within the
+   cairo context [cr].  The fill rule is used to determine which
+   regions are inside or outside a complex (potentially
+   self-intersecting) path. The current fill rule affects both
+   {!Cairo.fill} and {!Cairo.clip}.  See {!Cairo.fill_rule} for
+   details on the semantics of each available fill rule.  *)
 
 val get_fill_rule : context -> fill_rule
-    (** Gets the current fill rule, as set by [set_fill_rule]. *)
+(** Gets the current fill rule, as set by [set_fill_rule]. *)
 
 
 (** Specifies how to render the endpoints of the path when stroking.
@@ -1949,19 +1921,19 @@ type line_cap =
   | SQUARE (** use squared ending, the center of the square is the end point *)
 
 val set_line_cap : context -> line_cap -> unit
-    (** [set_line_cap cr line_cap] sets the current line cap style
-        within the cairo context [cr].  See {!Cairo.line_cap} for
-        details about how the available line cap styles are drawn.
+(** [set_line_cap cr line_cap] sets the current line cap style within
+   the cairo context [cr].  See {!Cairo.line_cap} for details about
+   how the available line cap styles are drawn.
 
-        As with the other stroke parameters, the current line cap
-        style is examined by {!Cairo.stroke}, {!Cairo.stroke_extents},
-        and {!Cairo.stroke_to_path}, but does not have any effect
-        during path construction.
+   As with the other stroke parameters, the current line cap style is
+   examined by {!Cairo.stroke}, {!Cairo.stroke_extents}, and
+   {!Cairo.stroke_to_path}, but does not have any effect during path
+   construction.
 
-        The default line cap style is [BUTT].  *)
+   The default line cap style is [BUTT].  *)
 
 val get_line_cap : context -> line_cap
-    (** Gets the current line cap style, as set by {!Cairo.set_line_cap}. *)
+(** Gets the current line cap style, as set by {!Cairo.set_line_cap}. *)
 
 
 (** Specifies how to render the junction of two lines when stroking.
@@ -1974,74 +1946,74 @@ type line_join =
                    width from the joint point *)
 
 val set_line_join : context -> line_join -> unit
-    (** Sets the current line join style within the cairo context.
-        See {!Cairo.line_join} for details about how the available
-        line join styles are drawn.
+(** Sets the current line join style within the cairo context.  See
+   {!Cairo.line_join} for details about how the available line join
+   styles are drawn.
 
-        As with the other stroke parameters, the current line join
-        style is examined by {!Cairo.stroke}, {!Cairo.stroke_extents},
-        and {!Cairo.stroke_to_path}, but does not have any effect
-        during path construction.
+   As with the other stroke parameters, the current line join style is
+   examined by {!Cairo.stroke}, {!Cairo.stroke_extents}, and
+   {!Cairo.stroke_to_path}, but does not have any effect during path
+   construction.
 
-        The default line join style is [MITER]. *)
+   The default line join style is [MITER]. *)
+
 val get_line_join : context -> line_join
-    (** Gets the current line join style, as set by {!Cairo.set_line_join}. *)
-
+(** Gets the current line join style, as set by {!Cairo.set_line_join}. *)
 
 val set_line_width : context -> float -> unit
-    (** Sets the current line width within the cairo context. The line
-        width value specifies the diameter of a pen that is circular in
-        user space (though device-space pen may be an ellipse in general
-        due to scaling/shear/rotation of the CTM).
+(** Sets the current line width within the cairo context. The line
+   width value specifies the diameter of a pen that is circular in
+   user space (though device-space pen may be an ellipse in general
+   due to scaling/shear/rotation of the CTM).
 
-        Note: When the description above refers to user space and CTM
-        it refers to the user space and CTM in effect at the time of
-        the stroking operation, not the user space and CTM in effect
-        at the time of the call to [set_line_width].  The simplest
-        usage makes both of these spaces identical.  That is, if there
-        is no change to the CTM between a call to [set_line_with] and
-        the stroking operation, then one can just pass user-space
-        values to [set_line_width] and ignore this note.
+   Note: When the description above refers to user space and CTM it
+   refers to the user space and CTM in effect at the time of the
+   stroking operation, not the user space and CTM in effect at the
+   time of the call to [set_line_width].  The simplest usage makes
+   both of these spaces identical.  That is, if there is no change to
+   the CTM between a call to [set_line_with] and the stroking
+   operation, then one can just pass user-space values to
+   [set_line_width] and ignore this note.
 
-        As with the other stroke parameters, the current line width is
-        examined by {!Cairo.stroke}, {!Cairo.stroke_extents}, and
-        {!Cairo.stroke_to_path}, but does not have any effect during
-        path construction.
+   As with the other stroke parameters, the current line width is
+   examined by {!Cairo.stroke}, {!Cairo.stroke_extents}, and
+   {!Cairo.stroke_to_path}, but does not have any effect during path
+   construction.
 
-        The default line width value is [2.0].  *)
+   The default line width value is [2.0].  *)
 
 val get_line_width : context -> float
-    (** This function returns the current line width value exactly as
-        set by {!Cairo.set_line_width}.  Note that the value is
-        unchanged even if the CTM has changed between the calls to
-        [set_line_width] and [get_line_width]. *)
+(** This function returns the current line width value exactly as set
+   by {!Cairo.set_line_width}.  Note that the value is unchanged even
+   if the CTM has changed between the calls to [set_line_width] and
+   [get_line_width]. *)
 
 val set_miter_limit : context -> float -> unit
-    (** Sets the current miter limit within the cairo context.
+(** Sets the current miter limit within the cairo context.
 
-        If the current line join style is set to [MITER] (see
-        {!Cairo.set_line_join}), the miter limit is used to determine
-        whether the lines should be joined with a bevel instead of a
-        miter.  Cairo divides the length of the miter by the line
-        width.  If the result is greater than the miter limit, the
-        style is converted to a bevel.
+   If the current line join style is set to [MITER] (see
+   {!Cairo.set_line_join}), the miter limit is used to determine
+   whether the lines should be joined with a bevel instead of a miter.
+   Cairo divides the length of the miter by the line width.  If the
+   result is greater than the miter limit, the style is converted to a
+   bevel.
 
-        As with the other stroke parameters, the current line miter
-        limit is examined by {!Cairo.stroke}, {!Cairo.stroke_extents},
-        and {!Cairo.stroke_to_path}, but does not have any effect
-        during path construction.
+   As with the other stroke parameters, the current line miter limit
+   is examined by {!Cairo.stroke}, {!Cairo.stroke_extents}, and
+   {!Cairo.stroke_to_path}, but does not have any effect during path
+   construction.
 
-        The default miter limit value is [10.0], which will convert
-        joins with interior angles less than 11 degrees to bevels
-        instead of miters.  For reference, a miter limit of 2.0 makes
-        the miter cutoff at 60 degrees, and a miter limit of 1.414
-        makes the cutoff at 90 degrees.
+   The default miter limit value is [10.0], which will convert joins
+   with interior angles less than 11 degrees to bevels instead of
+   miters.  For reference, a miter limit of 2.0 makes the miter cutoff
+   at 60 degrees, and a miter limit of 1.414 makes the cutoff at 90
+   degrees.
 
-        A miter limit for a desired angle can be computed as: miter
-        limit = 1/sin(angle/2).  *)
+   A miter limit for a desired angle can be computed as: miter limit =
+   1/sin(angle/2).  *)
 
 val get_miter_limit : context -> float
-    (** Gets the current miter limit, as set by {!Cairo.set_miter_limit}. *)
+(** Gets the current miter limit, as set by {!Cairo.set_miter_limit}. *)
 
 
 (** {3 Drawing operations} *)
@@ -2082,226 +2054,225 @@ type operator =
                  disjoint geometries *)
 
 val set_operator : context -> operator -> unit
-    (** Sets the compositing operator to be used for all drawing
-        operations.  See {!Cairo.operator} for details on the
-        semantics of each available compositing operator.
+(** Sets the compositing operator to be used for all drawing
+   operations.  See {!Cairo.operator} for details on the semantics of
+   each available compositing operator.
 
-        The default operator is [OVER]. *)
+   The default operator is [OVER]. *)
 
 val get_operator : context -> operator
-    (** Gets the current compositing operator for a cairo context.  *)
+(** Gets the current compositing operator for a cairo context.  *)
 
 val set_tolerance : context -> float -> unit
-    (** Sets the tolerance used when converting paths into trapezoids.
-        Curved segments of the path will be subdivided until the
-        maximum deviation between the original path and the polygonal
-        approximation is less than tolerance.  The default value is
-        [0.1].  A larger value will give better performance, a smaller
-        value, better appearance.  (Reducing the value from the
-        default value of [0.1] is unlikely to improve appearance
-        significantly.)  *)
+(** Sets the tolerance used when converting paths into trapezoids.
+   Curved segments of the path will be subdivided until the maximum
+   deviation between the original path and the polygonal approximation
+   is less than tolerance.  The default value is [0.1].  A larger
+   value will give better performance, a smaller value, better
+   appearance.  (Reducing the value from the default value of [0.1] is
+   unlikely to improve appearance significantly.)  *)
+
 val get_tolerance : context -> float
-    (** Gets the current tolerance value, as set by {!Cairo.set_tolerance}. *)
+(** Gets the current tolerance value, as set by {!Cairo.set_tolerance}. *)
 
 
 val clip : context -> unit
-  (** Establishes a new clip region by intersecting the current clip
-      region with the current path as it would be filled by
-      {!Cairo.fill} and according to the current fill rule (see
-      {!Cairo.set_fill_rule}).
+(** Establishes a new clip region by intersecting the current clip
+   region with the current path as it would be filled by {!Cairo.fill}
+   and according to the current fill rule (see
+   {!Cairo.set_fill_rule}).
 
-      After [clip], the current path will be cleared from the cairo
-      context.
+   After [clip], the current path will be cleared from the cairo
+   context.
 
-      Calling {!Cairo.clip} can only make the clip region smaller,
-      never larger.  But the current clip is part of the graphics
-      state, so a temporary restriction of the clip region can be
-      achieved by calling {!Cairo.clip} within a {!Cairo.save} /
-      {!Cairo.restore} pair. The only other means of increasing the
-      size of the clip region is {!Cairo.clip_reset}.  *)
+   Calling {!Cairo.clip} can only make the clip region smaller,
+   never larger.  But the current clip is part of the graphics state,
+   so a temporary restriction of the clip region can be achieved by
+   calling {!Cairo.clip} within a {!Cairo.save} / {!Cairo.restore}
+   pair. The only other means of increasing the size of the clip
+   region is {!Cairo.clip_reset}.  *)
 
 val clip_preserve : context -> unit
-  (** Establishes a new clip region by intersecting the current clip
-      region with the current path as it would be filled by
-      {!Cairo.fill} and according to the current fill rule (see
-      {!Cairo.set_fill_rule}).
+(** Establishes a new clip region by intersecting the current clip
+   region with the current path as it would be filled by {!Cairo.fill}
+   and according to the current fill rule (see
+   {!Cairo.set_fill_rule}).
 
-      Unlike {!Cairo.clip}, preserves the path within the cairo context.
+   Unlike {!Cairo.clip}, preserves the path within the cairo context.
 
-      Calling {!Cairo.clip_preserve} can only make the clip region
-      smaller, never larger.  But the current clip is part of the
-      graphics state, so a temporary restriction of the clip region
-      can be achieved by calling {!Cairo.clip_preserve} within a
-      {!Cairo.save} / {!Cairo.restore} pair. The only other means of
-      increasing the size of the clip region is
-      {!Cairo.clip_reset}.  *)
+   Calling {!Cairo.clip_preserve} can only make the clip region
+   smaller, never larger.  But the current clip is part of the
+   graphics state, so a temporary restriction of the clip region can
+   be achieved by calling {!Cairo.clip_preserve} within a
+   {!Cairo.save} / {!Cairo.restore} pair. The only other means of
+   increasing the size of the clip region is {!Cairo.clip_reset}.  *)
 
 val clip_extents : context -> rectangle
-  (** Computes a bounding box in user coordinates covering the area
-      inside the current clip.  *)
+(** Computes a bounding box in user coordinates covering the area
+   inside the current clip.  *)
 
 val clip_reset : context -> unit
-  (** Reset the current clip region to its original, unrestricted
-      state.  That is, set the clip region to an infinitely large
-      shape containing the target surface.  Equivalently, if infinity is too
-      hard to grasp, one can imagine the clip region being reset to
-      the exact bounds of the target surface.
+(** Reset the current clip region to its original, unrestricted state.
+   That is, set the clip region to an infinitely large shape
+   containing the target surface.  Equivalently, if infinity is too
+   hard to grasp, one can imagine the clip region being reset to the
+   exact bounds of the target surface.
 
-      Note that code meant to be reusable should not call [clip_reset]
-      as it will cause results unexpected by higher-level code which
-      calls {!Cairo.clip}.  Consider using {!Cairo.save} and
-      {!Cairo.restore} around {!Cairo.clip} as a more robust means of
-      temporarily restricting the clip region.
+   Note that code meant to be reusable should not call [clip_reset] as
+   it will cause results unexpected by higher-level code which calls
+   {!Cairo.clip}.  Consider using {!Cairo.save} and {!Cairo.restore}
+   around {!Cairo.clip} as a more robust means of temporarily
+   restricting the clip region.
 
-      (This function binds Cairo [cairo_reset_clip].) *)
+   (This function binds Cairo [cairo_reset_clip].) *)
 
 val clip_rectangle_list : context -> rectangle list
-  (** Gets the current clip region as a list of rectangles in user
-      coordinates.
+(** Gets the current clip region as a list of rectangles in user
+   coordinates.
 
-      Raises [Error(CLIP_NOT_REPRESENTABLE)] to indicate that the clip
-      region cannot be represented as a list of user-space rectangles.  *)
+   Raises [Error(CLIP_NOT_REPRESENTABLE)] to indicate that the clip
+   region cannot be represented as a list of user-space rectangles. *)
 
 
 val fill : context -> unit
-  (** A drawing operator that fills the current path according to the
-      current fill rule (each sub-path is implicitly closed before
-      being filled).  After [fill], the current path will be cleared
-      from the cairo context.
+(** A drawing operator that fills the current path according to the
+   current fill rule (each sub-path is implicitly closed before being
+   filled).  After [fill], the current path will be cleared from the
+   cairo context.
 
-      See also {!Cairo.set_fill_rule}. *)
+   See also {!Cairo.set_fill_rule}. *)
 
 val fill_preserve : context -> unit
-  (** A drawing operator that fills the current path according to
-      the current fill rule (each sub-path is implicitly closed
-      before being filled).  Unlike {!Cairo.fill}, [fill_preserve]
-      preserves the path within the cairo context.
+(** A drawing operator that fills the current path according to the
+   current fill rule (each sub-path is implicitly closed before being
+   filled).  Unlike {!Cairo.fill}, [fill_preserve] preserves the path
+   within the cairo context.
 
-      See also {!Cairo.set_fill_rule}. *)
+   See also {!Cairo.set_fill_rule}. *)
 
 val fill_extents : context -> rectangle
-  (** Computes a bounding box in user coordinates covering the area
-      that would be affected (the "inked" area) by a [fill]
-      operation given the current path and fill parameters.  If the
-      current path is empty, returns an empty rectangle [{ x=0.;
-      y=0.; w=0.; h=0. }].  Surface dimensions and clipping are not
-      taken into account.
+(** Computes a bounding box in user coordinates covering the area that
+   would be affected (the "inked" area) by a [fill] operation given
+   the current path and fill parameters.  If the current path is
+   empty, returns an empty rectangle [{ x=0.; y=0.; w=0.; h=0. }].
+   Surface dimensions and clipping are not taken into account.
 
-      Contrast with {!Cairo.Path.extents}, which is similar, but
-      returns non-zero extents for some paths with no inked area,
-      (such as a simple line segment).
+   Contrast with {!Cairo.Path.extents}, which is similar, but returns
+   non-zero extents for some paths with no inked area, (such as a
+   simple line segment).
 
-      Note that [fill_extents] must necessarily do more work to
-      compute the precise inked areas in light of the fill rule, so
-      {!Cairo.Path.extents} may be more desirable for sake of
-      performance if the non-inked path extents are desired.
+   Note that [fill_extents] must necessarily do more work to compute
+   the precise inked areas in light of the fill rule, so
+   {!Cairo.Path.extents} may be more desirable for sake of performance
+   if the non-inked path extents are desired.
 
-      See {!Cairo.fill} and {!Cairo.set_fill_rule}. *)
+   See {!Cairo.fill} and {!Cairo.set_fill_rule}. *)
 
 val in_fill : context -> x:float -> y:float -> bool
-  (** Tests whether the given point is inside the area that would be
-      affected by a [fill] operation given the current path and
-      filling parameters.  Surface dimensions and clipping are not
-      taken into account.
+(** Tests whether the given point is inside the area that would be
+   affected by a [fill] operation given the current path and filling
+   parameters.  Surface dimensions and clipping are not taken into account.
 
-      See also {!Cairo.fill} and {!Cairo.set_fill_rule}.  *)
+   See also {!Cairo.fill} and {!Cairo.set_fill_rule}.  *)
 
 val mask : context -> 'a Pattern.t -> unit
-  (** [mask cr pattern]: a drawing operator that paints the current
-      source using the alpha channel of [pattern] as a mask.  (Opaque
-      areas of [pattern] are painted with the source, transparent
-      areas are not painted.) *)
-val mask_surface : context -> Surface.t -> x:float -> y:float -> unit
-  (** [mask_surface cr surface x y]: a drawing operator that paints
-      the current source using the alpha channel of [surface] as a
-      mask.  (Opaque areas of [surface] are painted with the source,
-      transparent areas are not painted.)
+(** [mask cr pattern]: a drawing operator that paints the current
+   source using the alpha channel of [pattern] as a mask.  (Opaque
+   areas of [pattern] are painted with the source, transparent areas
+   are not painted.) *)
 
-      @param x  X coordinate at which to place the origin of [surface].
-      @param y  Y coordinate at which to place the origin of [surface]. *)
+val mask_surface : context -> Surface.t -> x:float -> y:float -> unit
+(** [mask_surface cr surface x y]: a drawing operator that paints
+   the current source using the alpha channel of [surface] as a
+   mask.  (Opaque areas of [surface] are painted with the source,
+   transparent areas are not painted.)
+
+   @param x  X coordinate at which to place the origin of [surface].
+   @param y  Y coordinate at which to place the origin of [surface]. *)
 
 val paint : ?alpha:float -> context -> unit
-  (** A drawing operator that paints the current source everywhere
-      within the current clip region.  If [alpha] is set, the drawing
-      is faded out using the alpha value.
+(** A drawing operator that paints the current source everywhere
+   within the current clip region.  If [alpha] is set, the drawing is
+   faded out using the alpha value.
 
-      @param alpha  alpha value, between 0 (transparent) and 1 (opaque).  *)
+   @param alpha alpha value, between 0 (transparent) and 1 (opaque).  *)
 
 val stroke : context -> unit
-  (** A drawing operator that strokes the current path according to
-      the current line width, line join, line cap, and dash settings.
-      After [stroke], the current path will be cleared from the cairo
-      context.  See {!Cairo.set_line_width}, {!Cairo.set_line_join},
-      {!Cairo.set_line_cap}, and {!Cairo.set_dash}.
+(** A drawing operator that strokes the current path according to the
+   current line width, line join, line cap, and dash settings.  After
+   [stroke], the current path will be cleared from the cairo context.
+   See {!Cairo.set_line_width}, {!Cairo.set_line_join},
+   {!Cairo.set_line_cap}, and {!Cairo.set_dash}.
 
-      Note: Degenerate segments and sub-paths are treated specially
-      and provide a useful result.  These can result in two different
-      situations:
+   Note: Degenerate segments and sub-paths are treated specially and
+   provide a useful result.  These can result in two different
+   situations:
 
-      1. Zero-length "on" segments set in {!Cairo.set_dash}.  If the
-      cap style is [ROUND] or [SQUARE] then these segments will be
-      drawn as circular dots or squares respectively.  In the case of
-      [SQUARE], the orientation of the squares is determined by the
-      direction of the underlying path.
+   1. Zero-length "on" segments set in {!Cairo.set_dash}.  If the cap
+   style is [ROUND] or [SQUARE] then these segments will be drawn as
+   circular dots or squares respectively.  In the case of [SQUARE],
+   the orientation of the squares is determined by the direction of
+   the underlying path.
 
-      2. A sub-path created by {!Cairo.move_to} followed by either a
-      {!Cairo.Path.close} or one or more calls to {!Cairo.line_to} to
-      the same coordinate as the {!Cairo.move_to}.  If the cap style
-      is [ROUND] then these sub-paths will be drawn as circular dots.
-      Note that in the case of [SQUARE] line cap, a degenerate
-      sub-path will not be drawn at all (since the correct
-      orientation is indeterminate).
+   2. A sub-path created by {!Cairo.move_to} followed by either a
+   {!Cairo.Path.close} or one or more calls to {!Cairo.line_to} to the
+   same coordinate as the {!Cairo.move_to}.  If the cap style is
+   [ROUND] then these sub-paths will be drawn as circular dots.  Note
+   that in the case of [SQUARE] line cap, a degenerate sub-path will
+   not be drawn at all (since the correct orientation is
+   indeterminate).
 
-      In no case will a cap style of [BUTT] cause anything to be drawn
-      in the case of either degenerate segments or sub-paths. *)
+   In no case will a cap style of [BUTT] cause anything to be drawn in
+   the case of either degenerate segments or sub-paths. *)
 
 val stroke_preserve : context -> unit
-  (** Like {!Cairo.stroke} except that it preserves the path within
-      the cairo context. *)
+(** Like {!Cairo.stroke} except that it preserves the path within the
+   cairo context. *)
 
 val stroke_extents : context -> rectangle
-  (** Computes a bounding box in user coordinates covering the area
-      that would be affected (the "inked" area) by a {!Cairo.stroke}
-      operation operation given the current path and stroke
-      parameters.  If the current path is empty, returns an empty
-      rectangle [{ x=0.; y=0.; w=0.; h=0. }].  Surface dimensions
-      and clipping are not taken into account.
+(** Computes a bounding box in user coordinates covering the area that
+   would be affected (the "inked" area) by a {!Cairo.stroke} operation
+   operation given the current path and stroke parameters.  If the
+   current path is empty, returns an empty rectangle [{ x=0.; y=0.;
+   w=0.; h=0. }].  Surface dimensions and clipping are not taken into
+   account.
 
-      Note that if the line width is set to exactly zero, then
-      [stroke_extents] will return an empty rectangle.  Contrast with
-      {!Cairo.Path.extents} which can be used to compute the non-empty
-      bounds as the line width approaches zero.
+   Note that if the line width is set to exactly zero, then
+   [stroke_extents] will return an empty rectangle.  Contrast with
+   {!Cairo.Path.extents} which can be used to compute the non-empty
+   bounds as the line width approaches zero.
 
-      Note that [stroke_extents] must necessarily do more work to
-      compute the precise inked areas in light of the stroke
-      parameters, so {!Cairo.Path.extents} may be more desirable for
-      sake of performance if non-inked path extents are desired.
+   Note that [stroke_extents] must necessarily do more work to compute
+   the precise inked areas in light of the stroke parameters, so
+   {!Cairo.Path.extents} may be more desirable for sake of performance
+   if non-inked path extents are desired.
 
-      See {!Cairo.stroke}, {!Cairo.set_line_width}, {!Cairo.set_line_join},
-      {!Cairo.set_line_cap}, and {!Cairo.set_dash}. *)
+   See {!Cairo.stroke}, {!Cairo.set_line_width}, {!Cairo.set_line_join},
+   {!Cairo.set_line_cap}, and {!Cairo.set_dash}. *)
 
 val in_stroke : context -> x:float -> y:float -> bool
-  (** Tests whether the given point is inside the area that would be
-      affected by a {!Cairo.stroke} operation given the current path
-      and stroking parameters. Surface dimensions and clipping are not
-      taken into account.  *)
+(** Tests whether the given point is inside the area that would be
+   affected by a {!Cairo.stroke} operation given the current path and
+   stroking parameters. Surface dimensions and clipping are not taken
+   into account.  *)
 
 val copy_page : context -> unit
-  (** [copy_page cr] emits the current page for backends that support
-      multiple pages, but doesn't clear it, so, the contents of the
-      current page will be retained for the next page too.  Use
-      {!Cairo.show_page} if you want to get an empty page after the
-      emission.
+(** [copy_page cr] emits the current page for backends that support
+   multiple pages, but doesn't clear it, so, the contents of the
+   current page will be retained for the next page too.  Use
+   {!Cairo.show_page} if you want to get an empty page after the
+   emission.
 
-      This is a convenience function that simply calls
-      {!Cairo.Surface.copy_page} on [cr]'s target. *)
+   This is a convenience function that simply calls
+   {!Cairo.Surface.copy_page} on [cr]'s target. *)
+
 val show_page : context -> unit
-  (** [show_page cr] emits and clears the current page for backends
-      that support multiple pages.  Use {!Cairo.copy_page} if you
-      don't want to clear the page.
+(** [show_page cr] emits and clears the current page for backends that
+   support multiple pages.  Use {!Cairo.copy_page} if you don't want
+   to clear the page.
 
-      This is a convenience function that simply calls
-      {!Cairo.Surface.show_page} on [cr]'s target. *)
+   This is a convenience function that simply calls
+   {!Cairo.Surface.show_page} on [cr]'s target. *)
 
 
 (* ---------------------------------------------------------------------- *)
@@ -2322,138 +2293,135 @@ sig
   type t
 
   val copy : context -> t
-    (** Creates a copy of the current path. See cairo_path_data_t for
-        hints on how to iterate over the returned data structure.  *)
+  (** Creates a copy of the current path. See cairo_path_data_t for
+     hints on how to iterate over the returned data structure.  *)
 
   val copy_flat : context -> t
-    (** Gets a flattened copy of the current path.
+  (** Gets a flattened copy of the current path.
 
-        This function is like {!Cairo.Path.copy} except that any
-        curves in the path will be approximated with piecewise-linear
-        approximations (accurate to within the current tolerance
-        value).  That is, the result is guaranteed to not have any
-        elements of type [CURVE_TO] which will instead be replaced by
-        a series of [LINE_TO] elements.  *)
+     This function is like {!Cairo.Path.copy} except that any curves
+     in the path will be approximated with piecewise-linear
+     approximations (accurate to within the current tolerance value).
+     That is, the result is guaranteed to not have any elements of
+     type [CURVE_TO] which will instead be replaced by a series of
+     [LINE_TO] elements.  *)
 
   val append : context -> t -> unit
-    (** Append the path onto the current path.  The path may be either
-        the return value from one of {!Cairo.Path.copy} or
-        {!Cairo.Path.copy_flat} or it may be constructed manually.  *)
+  (** Append the path onto the current path.  The path may be either
+     the return value from one of {!Cairo.Path.copy} or
+     {!Cairo.Path.copy_flat} or it may be constructed manually.  *)
 
   val get_current_point : context -> float * float
-    (** [get_current_point cr] gets the (x,y) coordinates of the
-        current point of the current path, which is conceptually the
-        final point reached by the path so far.  The current point is
-        returned in the user-space coordinate system.
+  (** [get_current_point cr] gets the (x,y) coordinates of the current
+     point of the current path, which is conceptually the final point
+     reached by the path so far.  The current point is returned in the
+     user-space coordinate system.
 
-        Raise [Error NO_CURRENT_POINT] if there is no defined current
-        point.
+     Raise [Error NO_CURRENT_POINT] if there is no defined current
+     point.
 
-        Most path construction functions alter the current point.  See the
-        following for details on how they affect the current point:
-        {!Cairo.Path.clear}, {!Cairo.Path.sub}, {!Cairo.Path.append},
-        {!Cairo.Path.close}, {!Cairo.move_to}, {!Cairo.line_to},
-        {!Cairo.curve_to}, {!Cairo.rel_move_to}, {!Cairo.rel_line_to},
-        {!Cairo.rel_curve_to}, {!Cairo.arc}, {!Cairo.arc_negative},
-        {!Cairo.rectangle}, {!Cairo.Path.text}, {!Cairo.Path.glyph}.
+     Most path construction functions alter the current point.  See
+     the following for details on how they affect the current point:
+     {!Cairo.Path.clear}, {!Cairo.Path.sub}, {!Cairo.Path.append},
+     {!Cairo.Path.close}, {!Cairo.move_to}, {!Cairo.line_to},
+     {!Cairo.curve_to}, {!Cairo.rel_move_to}, {!Cairo.rel_line_to},
+     {!Cairo.rel_curve_to}, {!Cairo.arc}, {!Cairo.arc_negative},
+     {!Cairo.rectangle}, {!Cairo.Path.text}, {!Cairo.Path.glyph}.
 
-        Some functions use and alter the current point but do not
-        otherwise change current path: {!Cairo.show_text}.
+     Some functions use and alter the current point but do not
+     otherwise change current path: {!Cairo.show_text}.
 
-        Some functions unset the current path and as a result, current
-        point: {!Cairo.fill}, {!Cairo.stroke}. *)
+     Some functions unset the current path and as a result, current
+     point: {!Cairo.fill}, {!Cairo.stroke}. *)
 
   val clear : context -> unit
-    (** Clears the current path. After this call there will be no path
-        and no current point. *)
+  (** Clears the current path. After this call there will be no path
+     and no current point. *)
 
   val sub : context -> unit
-    (** Begin a new sub-path. Note that the existing path is not
-        affected. After this call there will be no current point.
+  (** Begin a new sub-path. Note that the existing path is not
+     affected. After this call there will be no current point.
 
-        In many cases, this call is not needed since new sub-paths are
-        frequently started with {!Cairo.move_to}.
+     In many cases, this call is not needed since new sub-paths are
+     frequently started with {!Cairo.move_to}.
 
-        A call to {!Cairo.Path.sub} is particularly useful when
-        beginning a new sub-path with one of the {!Cairo.arc} calls.
-        This makes things easier as it is no longer necessary to
-        manually compute the arc's initial coordinates for a call to
-        {!Cairo.move_to}. *)
+     A call to {!Cairo.Path.sub} is particularly useful when
+     beginning a new sub-path with one of the {!Cairo.arc} calls.
+     This makes things easier as it is no longer necessary to manually
+     compute the arc's initial coordinates for a call to
+     {!Cairo.move_to}. *)
 
   val close : context -> unit
-    (** Adds a line segment to the path from the current point to the
-        beginning of the current sub-path (the most recent point
-        passed to {!Cairo.move_to}) and closes this sub-path.  After
-        this call the current point will be at the joined endpoint of
-        the sub-path.
+  (** Adds a line segment to the path from the current point to the
+     beginning of the current sub-path (the most recent point passed
+     to {!Cairo.move_to}) and closes this sub-path.  After this call
+     the current point will be at the joined endpoint of the sub-path.
 
-        The behavior of {!Cairo.Path.close} is distinct from simply
-        calling {!Cairo.line_to} with the equivalent coordinate in the
-        case of stroking.  When a closed sub-path is stroked, there
-        are no caps on the ends of the sub-path.  Instead, there is a
-        line join connecting the final and initial segments of the
-        sub-path.
+     The behavior of {!Cairo.Path.close} is distinct from simply
+     calling {!Cairo.line_to} with the equivalent coordinate in the
+     case of stroking.  When a closed sub-path is stroked, there are
+     no caps on the ends of the sub-path.  Instead, there is a line
+     join connecting the final and initial segments of the sub-path.
 
-        If there is no current point before the call to [close], this
-        function will have no effect.
+     If there is no current point before the call to [close], this
+     function will have no effect.
 
-        Note: As of cairo version 1.2.4 any call to [close] will place
-        an explicit [MOVE_TO] element into the path immediately after
-        the [CLOSE_PATH] element (which can be seen in
-        {!Cairo.Path.copy} for example).  This can simplify path
-        processing in some cases as it may not be necessary to save
-        the "last move_to point" during processing as the [MOVE_TO]
-        immediately after the [CLOSE_PATH] will provide that point. *)
+     Note: As of cairo version 1.2.4 any call to [close] will place an
+     explicit [MOVE_TO] element into the path immediately after the
+     [CLOSE_PATH] element (which can be seen in {!Cairo.Path.copy} for
+     example).  This can simplify path processing in some cases as it
+     may not be necessary to save the "last move_to point" during
+     processing as the [MOVE_TO] immediately after the [CLOSE_PATH]
+     will provide that point. *)
 
   val glyph : context -> Glyph.t array -> unit
-    (** Adds closed paths for the glyphs to the current path. The
-        generated path if filled, achieves an effect similar to that
-        of {!Cairo.Glyph.show}. *)
+  (** Adds closed paths for the glyphs to the current path. The
+     generated path if filled, achieves an effect similar to that of
+     {!Cairo.Glyph.show}. *)
 
   val text : context -> string -> unit
-    (** [text cr utf8] adds closed paths for text to the current path.
-        The generated path if filled, achieves an effect similar to
-        that of {!Cairo.show_text}.  [utf8] should be a valid UTF8
-        string containing no ['\000'] characters.
+  (** [text cr utf8] adds closed paths for text to the current path.
+     The generated path if filled, achieves an effect similar to that
+     of {!Cairo.show_text}.  [utf8] should be a valid UTF8 string
+     containing no ['\000'] characters.
 
-        Text conversion and positioning is done similar to {!Cairo.show_text}.
+     Text conversion and positioning is done similar to {!Cairo.show_text}.
 
-        Like {!Cairo.show_text}, after this call the current point is
-        moved to the origin of where the next glyph would be placed in
-        this same progression.  That is, the current point will be at
-        the origin of the final glyph offset by its advance values.
-        This allows for chaining multiple calls to to [text] without
-        having to set current point in between.
+     Like {!Cairo.show_text}, after this call the current point is
+     moved to the origin of where the next glyph would be placed in
+     this same progression.  That is, the current point will be at the
+     origin of the final glyph offset by its advance values.  This
+     allows for chaining multiple calls to to [text] without having to
+     set current point in between.
 
-        Note: The [text] function call is part of what the cairo
-        designers call the "toy" text API.  It is convenient for short
-        demos and simple programs, but it is not expected to be
-        adequate for serious text-using applications.  See
-        {!Cairo.Path.glyph} for the "real" text path API in cairo. *)
+     Note: The [text] function call is part of what the cairo
+     designers call the "toy" text API.  It is convenient for short
+     demos and simple programs, but it is not expected to be adequate
+     for serious text-using applications.  See {!Cairo.Path.glyph} for
+     the "real" text path API in cairo. *)
 
   val extents : context -> rectangle
-    (** Computes a bounding box in user-space coordinates covering the
-        points on the current path. If the current path is empty,
-        returns an empty rectangle [{ x=0.; y=0.; w=0.; h=0. }].
-        Stroke parameters, fill rule, surface dimensions and clipping
-        are not taken into account.
+  (** Computes a bounding box in user-space coordinates covering the
+     points on the current path. If the current path is empty, returns
+     an empty rectangle [{ x=0.; y=0.; w=0.; h=0. }].  Stroke
+     parameters, fill rule, surface dimensions and clipping are not
+     taken into account.
 
-        Contrast with {!Cairo.fill_extents} and
-        {!Cairo.stroke_extents} which return the extents of only the
-        area that would be "inked" by the corresponding drawing
-        operations.
+     Contrast with {!Cairo.fill_extents} and {!Cairo.stroke_extents}
+     which return the extents of only the area that would be "inked"
+     by the corresponding drawing operations.
 
-        The result of [Cairo.Path.extents] is defined as equivalent to
-        the limit of {!Cairo.stroke_extents} with [ROUND] as the line
-        width approaches 0.0 (but never reaching the empty-rectangle
-        returned by {!Cairo.stroke_extents} for a line width of 0.0).
+     The result of [Cairo.Path.extents] is defined as equivalent to
+     the limit of {!Cairo.stroke_extents} with [ROUND] as the line
+     width approaches 0.0 (but never reaching the empty-rectangle
+     returned by {!Cairo.stroke_extents} for a line width of 0.0).
 
-        Specifically, this means that zero-area sub-paths such as
-        {!Cairo.move_to} and {!Cairo.line_to} segments (even degenerate
-        cases where the coordinates to both calls are identical) will
-        be considered as contributing to the extents.  However, a lone
-        {!Cairo.move_to} will not contribute to the results of
-        [Cairo.Path.extents]. *)
+     Specifically, this means that zero-area sub-paths such as
+     {!Cairo.move_to} and {!Cairo.line_to} segments (even degenerate
+     cases where the coordinates to both calls are identical) will be
+     considered as contributing to the extents.  However, a lone
+     {!Cairo.move_to} will not contribute to the results of
+     [Cairo.Path.extents]. *)
 
   val fold : t -> ('a -> path_data -> 'a) -> 'a -> 'a
   (** [fold cr f] folds [f] over all elements of the path. *)
@@ -2465,137 +2433,133 @@ end
 
 val arc : context ->
           x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
-  (** [arc xc yc radius angle1 angle2] adds a circular arc of the
-      given radius to the current path.  The arc is centered at [(xc,
-      yc)], begins at [angle1] and proceeds in the direction of
-      increasing angles to end at [angle2].  If [angle2] is less than
-      [angle1] it will be progressively increased by 2*PI until it is
-      greater than [angle1].
+(** [arc xc yc radius angle1 angle2] adds a circular arc of the given
+   radius to the current path.  The arc is centered at [(xc, yc)],
+   begins at [angle1] and proceeds in the direction of increasing
+   angles to end at [angle2].  If [angle2] is less than [angle1] it
+   will be progressively increased by 2*PI until it is greater than
+   [angle1].
 
-      If there is a current point, an initial line segment will be
-      added to the path to connect the current point to the beginning
-      of the arc. If this initial line is undesired, it can be avoided
-      by calling {!Cairo.Path.sub} before calling [arc].
+   If there is a current point, an initial line segment will be added
+   to the path to connect the current point to the beginning of the
+   arc. If this initial line is undesired, it can be avoided by
+   calling {!Cairo.Path.sub} before calling [arc].
 
-      Angles are measured in radians.  An angle of 0.0 is in the
-      direction of the positive X axis (in user space). An angle of
-      PI/2.0 radians (90 degrees) is in the direction of the positive
-      Y axis (in user space).  Angles increase in the direction from
-      the positive X axis toward the positive Y axis. So with the
-      default transformation matrix, angles increase in a clockwise
-      direction.
+   Angles are measured in radians.  An angle of 0.0 is in the
+   direction of the positive X axis (in user space). An angle of
+   π/2 radians (90 degrees) is in the direction of the positive Y
+   axis (in user space).  Angles increase in the direction from the
+   positive X axis toward the positive Y axis. So with the default
+   transformation matrix, angles increase in a clockwise direction.
 
-      (To convert from degrees to radians, use degrees * (PI / 180.).)
+   (To convert from degrees to radians, use degrees * (π / 180.).)
 
-      This function gives the arc in the direction of increasing
-      angles; see {!Cairo.arc_negative} to get the arc in the
-      direction of decreasing angles.
+   This function gives the arc in the direction of increasing angles;
+   see {!Cairo.arc_negative} to get the arc in the direction of
+   decreasing angles.
 
-      The arc is circular in user space.  To achieve an elliptical
-      arc, you can scale the current transformation matrix by
-      different amounts in the X and Y directions.  For example, to
-      draw an ellipse in the box given by [x], [y], [width], [height]
-      (we suppose [pi] holds the value of PI):
-      {[
-      open Cairo
+   The arc is circular in user space.  To achieve an elliptical arc,
+   you can scale the current transformation matrix by different
+   amounts in the X and Y directions.  For example, to draw an ellipse
+   in the box given by [x], [y], [width], [height] (we suppose [pi]
+   holds the value of π):
+   {[
+   open Cairo
 
-      save cr;
-      translate cr (x +. width /. 2.) (y +. height /. 2.);
-      scale cr (width /. 2.) (height /. 2.);
-      arc cr 0. 0. 1. 0. (2 * pi);
-      restore cr;
-      ]}
-  *)
+   save cr;
+   translate cr (x +. width /. 2.) (y +. height /. 2.);
+   scale cr (width /. 2.) (height /. 2.);
+   arc cr 0. 0. 1. 0. (2 * pi);
+   restore cr;
+   ]} *)
 
 val arc_negative : context ->
                    x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
-  (** [arc_negative xc yc radius angle1 angle2] adds a circular arc of
-      the given radius to the current path.  The arc is centered at
-      [(xc, yc)], begins at [angle1] and proceeds in the direction of
-      decreasing angles to end at [angle2].  If [angle2] is greater
-      than [angle1] it will be progressively decreased by 2*PI until
-      it is less than [angle1].
+(** [arc_negative xc yc radius angle1 angle2] adds a circular arc of
+   the given radius to the current path.  The arc is centered at [(xc,
+   yc)], begins at [angle1] and proceeds in the direction of
+   decreasing angles to end at [angle2].  If [angle2] is greater than
+   [angle1] it will be progressively decreased by 2*PI until it is
+   less than [angle1].
 
-      See {!Cairo.arc} for more details.  This function differs only
-      in the direction of the arc between the two angles. *)
+   See {!Cairo.arc} for more details.  This function differs only in
+   the direction of the arc between the two angles. *)
 
 val curve_to : context ->
                x1:float -> y1:float -> x2:float -> y2:float ->
                x3:float -> y3:float -> unit
-  (** Adds a cubic Bézier spline to the path from the current point to
-      position (x3, y3) in user-space coordinates, using (x1, y1) and
-      (x2, y2) as the control points.  After this call the current
-      point will be (x3, y3).
+(** Adds a cubic Bézier spline to the path from the current point to
+   position (x3, y3) in user-space coordinates, using (x1, y1) and
+   (x2, y2) as the control points.  After this call the current point
+   will be (x3, y3).
 
-      If there is no current point before the call to [curve_to] this
-      function will behave as if preceded by a call to
-      {!Cairo.move_to}[ cr x1 y1]. *)
+   If there is no current point before the call to [curve_to] this
+   function will behave as if preceded by a call to
+   {!Cairo.move_to}[ cr x1 y1]. *)
 
 val line_to : context -> x:float -> y:float -> unit
-  (** Adds a line to the path from the current point to position (x,
-      y) in user-space coordinates. After this call the current point
-      will be (x, y).
+(** Adds a line to the path from the current point to position (x, y)
+   in user-space coordinates. After this call the current point will
+   be (x, y).
 
-      If there is no current point before the call to [Cairo.line_to],
-      this function will behave as {!Cairo.move_to}[ cr x y]. *)
+   If there is no current point before the call to [Cairo.line_to],
+   this function will behave as {!Cairo.move_to}[ cr x y]. *)
 
 val move_to : context -> x:float -> y:float -> unit
-  (** Begin a new sub-path.  After this call the current point will be
-      (x, y). *)
+(** Begin a new sub-path.  After this call the current point will be (x, y). *)
 
 val rectangle : context ->
                 x:float -> y:float -> w:float -> h:float -> unit
-  (** Adds a closed sub-path rectangle of the given size to the
-      current path at position (x, y) in user-space coordinates.
+(** Adds a closed sub-path rectangle of the given size to the
+   current path at position (x, y) in user-space coordinates.
 
-      This function is logically equivalent to:
-      {[
-      move_to cr x y;
-      rel_line_to cr width 0;
-      rel_line_to cr 0 height;
-      rel_line_to cr (-. width) 0;
-      Path.close cr;
-      ]}
-  *)
+   This function is logically equivalent to:
+   {[
+   move_to cr x y;
+   rel_line_to cr width 0;
+   rel_line_to cr 0 height;
+   rel_line_to cr (-. width) 0;
+   Path.close cr;
+   ]}  *)
 
 val rel_curve_to : context ->
                    x1:float -> y1:float -> x2:float -> y2:float ->
                    x3:float -> y3:float -> unit
-  (** Relative-coordinate version of {!Cairo.curve_to}.  All offsets
-      are relative to the current point.  Adds a cubic Bézier spline
-      to the path from the current point to a point offset from the
-      current point by (dx3, dy3), using points offset by (dx1, dy1)
-      and (dx2, dy2) as the control points.  After this call the
-      current point will be offset by (dx3, dy3).
+(** Relative-coordinate version of {!Cairo.curve_to}.  All offsets are
+   relative to the current point.  Adds a cubic Bézier spline to the
+   path from the current point to a point offset from the current
+   point by (dx3, dy3), using points offset by (dx1, dy1) and (dx2,
+   dy2) as the control points.  After this call the current point will
+   be offset by (dx3, dy3).
 
-      Given a current point of (x, y), [rel_curve_to cr dx1 dy1 dx2
-      dy2 dx3 dy3] is logically equivalent to [curve_to cr (x+.dx1)
-      (y+.dy1) (x+.dx2) (y+.dy2) (x+.dx3) (y+.dy3)].
+   Given a current point of (x, y), [rel_curve_to cr dx1 dy1 dx2 dy2
+   dx3 dy3] is logically equivalent to [curve_to cr (x+.dx1) (y+.dy1)
+   (x+.dx2) (y+.dy2) (x+.dx3) (y+.dy3)].
 
-      It is an error to call this function with no current point.
-      Doing so will cause [Error NO_CURRENT_POINT] to be raised.  *)
+   It is an error to call this function with no current point.  Doing
+   so will cause [Error NO_CURRENT_POINT] to be raised.  *)
 
 val rel_line_to : context -> x:float -> y:float -> unit
-  (** Relative-coordinate version of {!Cairo.line_to}.  Adds a line to
-      the path from the current point to a point that is offset from the
-      current point by (dx, dy) in user space. After this call the current
-      point will be offset by (dx, dy).
+(** Relative-coordinate version of {!Cairo.line_to}.  Adds a line to
+   the path from the current point to a point that is offset from the
+   current point by (dx, dy) in user space. After this call the
+   current point will be offset by (dx, dy).
 
-      Given a current point of (x, y), [rel_line_to cr dx dy] is
-      logically equivalent to [line_to cr (x +. dx) (y +. dy)].
+   Given a current point of (x, y), [rel_line_to cr dx dy] is
+   logically equivalent to [line_to cr (x +. dx) (y +. dy)].
 
-      It is an error to call this function with no current point.
-      Doing so will cause [Error NO_CURRENT_POINT] to be raised.  *)
+   It is an error to call this function with no current point.  Doing
+   so will cause [Error NO_CURRENT_POINT] to be raised.  *)
 
 val rel_move_to : context -> x:float -> y:float -> unit
-  (** Begin a new sub-path. After this call the current point will
-      offset by (x, y).
+(** Begin a new sub-path. After this call the current point will
+   offset by (x, y).
 
-      Given a current point of (x, y), [rel_move_to cr dx dy] is
-      logically equivalent to [move_to cr (x +. dx) (y +. dy)].
+   Given a current point of (x, y), [rel_move_to cr dx dy] is
+   logically equivalent to [move_to cr (x +. dx) (y +. dy)].
 
-      It is an error to call this function with no current point.
-      Doing so will cause [Error NO_CURRENT_POINT] to be raised. *)
+   It is an error to call this function with no current point.  Doing
+   so will cause [Error NO_CURRENT_POINT] to be raised. *)
 
 
 
@@ -2611,63 +2575,63 @@ val rel_move_to : context -> x:float -> y:float -> unit
 
 
 val translate : context -> x:float -> y:float -> unit
-  (** [translate cr tx ty] modifies the current transformation matrix
-      (CTM) by translating the user-space origin by ([tx], [ty]).
-      This offset is interpreted as a user-space coordinate according
-      to the CTM in place before the new call to [translate].  In
-      other words, the translation of the user-space origin takes
-      place after any existing transformation. *)
+(** [translate cr tx ty] modifies the current transformation matrix
+   (CTM) by translating the user-space origin by ([tx], [ty]).  This
+   offset is interpreted as a user-space coordinate according to the
+   CTM in place before the new call to [translate].  In other words,
+   the translation of the user-space origin takes place after any
+   existing transformation. *)
 
 val scale : context -> x:float -> y:float -> unit
-  (** [scale sx sy] modifies the current transformation matrix (CTM)
-      by scaling the X and Y user-space axes by [sx] and [sy]
-      respectively.  The scaling of the axes takes place after any
-      existing transformation of user space. *)
+(** [scale sx sy] modifies the current transformation matrix (CTM) by
+   scaling the X and Y user-space axes by [sx] and [sy] respectively.
+   The scaling of the axes takes place after any existing
+   transformation of user space. *)
 
 val rotate : context -> angle:float -> unit
-  (** Modifies the current transformation matrix (CTM) by rotating the
-      user-space axes by [angle] radians.  The rotation of the axes
-      takes places after any existing transformation of user space.
-      The rotation direction for positive angles is from the positive
-      X axis toward the positive Y axis. *)
+(** Modifies the current transformation matrix (CTM) by rotating the
+   user-space axes by [angle] radians.  The rotation of the axes takes
+   places after any existing transformation of user space.  The
+   rotation direction for positive angles is from the positive X axis
+   toward the positive Y axis. *)
 
 val transform : context -> Matrix.t -> unit
-  (** [transform cr matrix] modifies the current transformation matrix
-      (CTM) by applying [matrix] as an additional transformation.  The
-      new transformation of user space takes place after any existing
-      transformation. *)
+(** [transform cr matrix] modifies the current transformation matrix
+   (CTM) by applying [matrix] as an additional transformation.  The
+   new transformation of user space takes place after any existing
+   transformation. *)
 
 val set_matrix : context -> Matrix.t -> unit
-  (** [set_matrix cr matrix] Modifies the current transformation
-      matrix (CTM) by setting it equal to [matrix]. *)
+(** [set_matrix cr matrix] Modifies the current transformation matrix
+   (CTM) by setting it equal to [matrix]. *)
 
 val get_matrix : context -> Matrix.t
-  (** Return the current transformation matrix (CTM). *)
+(** Return the current transformation matrix (CTM). *)
 
 val identity_matrix : context -> unit
-  (** Resets the current transformation matrix (CTM) by setting it
-      equal to the identity matrix.  That is, the user-space and
-      device-space axes will be aligned and one user-space unit will
-      transform to one device-space unit. *)
+(** Resets the current transformation matrix (CTM) by setting it equal
+   to the identity matrix.  That is, the user-space and device-space
+   axes will be aligned and one user-space unit will transform to one
+   device-space unit. *)
 
 val user_to_device : context -> x:float -> y:float -> float * float
-  (** [user_to_device cr x y] transform a coordinate from user space
-      to device space by multiplying the given point by the current
-      transformation matrix (CTM). *)
+(** [user_to_device cr x y] transform a coordinate from user space to
+   device space by multiplying the given point by the current
+   transformation matrix (CTM). *)
 
 val user_to_device_distance : context -> x:float -> y:float -> float * float
-  (** [user_to_device_distance cr dx dy] transform a distance vector
-      from user space to device space.  This function is similar to
-      {!Cairo.user_to_device} except that the translation components
-      of the CTM will be ignored when transforming ([dx],[dy]). *)
+(** [user_to_device_distance cr dx dy] transform a distance vector
+   from user space to device space.  This function is similar to
+   {!Cairo.user_to_device} except that the translation components of
+   the CTM will be ignored when transforming ([dx],[dy]). *)
 
 val device_to_user : context -> x:float -> y:float -> float * float
-  (** Transform a coordinate from device space to user space by
-      multiplying the given point by the inverse of the current
-      transformation matrix (CTM). *)
+(** Transform a coordinate from device space to user space by
+   multiplying the given point by the inverse of the current
+   transformation matrix (CTM). *)
 
 val device_to_user_distance : context -> x:float -> y:float -> float * float
-  (** [device_to_user_distance cr dx dy] transform a distance vector
-      from device space to user space.  This function is similar to
-      {!Cairo.device_to_user} except that the translation components
-      of the inverse CTM will be ignored when transforming ([dx],[dy]). *)
+(** [device_to_user_distance cr dx dy] transform a distance vector
+   from device space to user space.  This function is similar to
+   {!Cairo.device_to_user} except that the translation components of
+   the inverse CTM will be ignored when transforming ([dx],[dy]). *)
