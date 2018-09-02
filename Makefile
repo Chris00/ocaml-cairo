@@ -1,24 +1,23 @@
-# Makefile for developers (users use jbuilder/dune exclusively).
+# Makefile for developers (users use dune exclusively).
 PKGVERSION = $(shell git describe --always)
 PACKAGES = $(basename $(wildcard *.opam))
 
 build:
-	jbuilder build @install #--dev
-	jbuilder build @examples
+	dune build @install @examples
 
 test:
-	jbuilder runtest
+	dune runtest
 	@cd _build/default/tests/ && for p in *.exe; do \
 	  echo "▸ $$p"; ./$$p; \
 	done
 
 install uninstall:
-	jbuilder $@
+	dune $@
 
 doc:
 	sed -e 's/%%VERSION%%/$(PKGVERSION)/' src/cairo.mli \
 	  > _build/default/src/cairo.mli
-	jbuilder build @doc
+	dune build @doc
 	echo '.def { background: #f9f9de; }' >> _build/default/_doc/odoc.css
 
 submit:
@@ -52,7 +51,7 @@ lint:
 	@opam lint cairo2-gtk.opam
 
 clean:
-	jbuilder clean
+	dune clean
 	$(RM) $(wildcard *~ *.pdf *.ps *.png *.svg)
 
 .PHONY: build install uninstall doc submit lint clean

@@ -55,7 +55,7 @@ let rec tree cr n square =
 
 
 let () =
-  let surface = Cairo.PDF.create "pythagoras_tree.pdf" 300. 250. in
+  let surface = Cairo.PDF.create "pythagoras_tree.pdf" ~w:300. ~h:250. in
   let cr = Cairo.create surface in
   translate cr 150. 220.;
   scale cr 45. (-45.);

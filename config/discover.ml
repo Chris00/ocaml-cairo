@@ -1,5 +1,4 @@
 open Stdio
-open Printf
 module C = Configurator
 module P = Configurator.Pkg_config
 

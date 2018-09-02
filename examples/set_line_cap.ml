@@ -5,7 +5,7 @@ open Cairo
 let two_pi = 8. *. atan 1.
 
 let () =
-  let cr = Cairo.create(Cairo.PDF.create "set_line_cap.pdf" 400. 300.) in
+  let cr = Cairo.create(Cairo.PDF.create "set_line_cap.pdf" ~w:400. ~h:300.) in
 
   let line x =
     set_source_rgb cr 0. 0. 0.;

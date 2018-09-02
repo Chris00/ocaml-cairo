@@ -5,7 +5,7 @@ open Cairo
 let two_pi = 8. *. atan 1.
 
 let () =
-  let cr = Cairo.create(Cairo.PDF.create "text_rotate.pdf" 400. 400.) in
+  let cr = Cairo.create(Cairo.PDF.create "text_rotate.pdf" ~w:400. ~h:400.) in
 
   (* Take the cont from the command line if given: *)
   let font = try Sys.argv.(1) with _ -> "Georgia" in
@@ -30,7 +30,7 @@ let () =
 
     show_text cr (sprintf "j φ=%g°" (360. *. float i /. float n));
     set_source_rgba cr 0. 0. 1. 0.3;
-    arc cr 0. 0. 2. 0. two_pi;
+    arc cr 0. 0. ~r:2. ~a1:0. ~a2:two_pi;
     fill cr;
     restore cr;
   done;

@@ -3,7 +3,7 @@
 open Cairo
 
 let () =
-  let cr = Cairo.create(Cairo.PDF.create "set_line_join.pdf" 400. 300.) in
+  let cr = Cairo.create(Cairo.PDF.create "set_line_join.pdf" ~w:400. ~h:300.) in
 
   set_line_width cr 40.96;
 

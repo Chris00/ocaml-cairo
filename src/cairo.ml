@@ -118,11 +118,6 @@ type 'a pattern
 type any_pattern = [`Solid | `Surface | `Gradient | `Linear | `Radial] pattern
 type glyph = { index: int;  x: float;  y: float }
 
-(* [hold_value v] just keep [v] in its closure but do nothing with it.
-   This serves to avoid that dependencies are grabage collected before
-   the value that needs them. *)
-let hold_value _v _ = ()
-
 external create : surface -> context = "caml_cairo_create"
 external save : context -> unit = "caml_cairo_save"
 external restore : context -> unit = "caml_cairo_restore"
@@ -146,11 +141,11 @@ struct
   external get_target : context -> surface = "caml_cairo_get_group_target"
 end
 
-external set_source_rgb : context -> r:float -> g:float -> b:float -> unit
+external set_source_rgb : context -> float -> float -> float -> unit
   = "caml_cairo_set_source_rgb"
 
 external set_source_rgba :
-  context -> r:float -> g:float -> b:float -> a:float -> unit
+  context -> float -> float -> float -> float -> unit
   = "caml_cairo_set_source_rgba"
 
 external set_source : context -> 'a pattern -> unit = "caml_cairo_set_source"
@@ -253,7 +248,7 @@ external fill_preserve : context -> unit = "caml_cairo_fill_preserve"
 
 external fill_extents : context -> rectangle = "caml_cairo_fill_extents"
 
-external in_fill : context -> x:float -> y:float -> bool = "caml_cairo_in_fill"
+external in_fill : context -> float -> float -> bool = "caml_cairo_in_fill"
 
 external mask : context -> 'a pattern -> unit = "caml_cairo_mask"
 external mask_surface : context -> surface -> x:float -> y:float -> unit
@@ -273,7 +268,7 @@ external stroke_preserve : context -> unit = "caml_cairo_stroke_preserve"
 
 external stroke_extents : context -> rectangle = "caml_cairo_stroke_extents"
 
-external in_stroke : context -> x:float -> y:float -> bool
+external in_stroke : context -> float -> float -> bool
   = "caml_cairo_in_stroke"
 
 external copy_page : context -> unit = "caml_cairo_copy_page"
@@ -311,28 +306,28 @@ struct
 end
 
 
-external arc : context -> x:float -> y:float -> r:float -> a1:float -> a2:float
+external arc : context -> float -> float -> r:float -> a1:float -> a2:float
   -> unit = "caml_cairo_arc_bc" "caml_cairo_arc"
-external arc_negative : context -> x:float -> y:float -> r:float -> a1:float ->
+external arc_negative : context -> float -> float -> r:float -> a1:float ->
   a2:float -> unit = "caml_cairo_arc_negative_bc" "caml_cairo_arc_negative"
 
-external curve_to : context -> x1:float -> y1:float -> x2:float -> y2:float ->
-  x3:float -> y3:float -> unit
+external curve_to : context -> float -> float -> float -> float ->
+                    float -> float -> unit
   = "caml_cairo_curve_to_bc" "caml_cairo_curve_to"
 
-external line_to : context -> x:float -> y:float -> unit = "caml_cairo_line_to"
-external move_to : context -> x:float -> y:float -> unit = "caml_cairo_move_to"
+external line_to : context -> float -> float -> unit = "caml_cairo_line_to"
+external move_to : context -> float -> float -> unit = "caml_cairo_move_to"
 external rectangle :
-  context -> x:float -> y:float -> w:float -> h:float -> unit
+  context -> float -> float -> w:float -> h:float -> unit
   = "caml_cairo_rectangle"
 
-external rel_curve_to : context -> x1:float -> y1:float ->
-  x2:float -> y2:float -> x3:float -> y3:float -> unit
+external rel_curve_to : context -> float -> float ->
+                        float -> float -> float -> float -> unit
   = "caml_cairo_rel_curve_to_bc" "caml_cairo_rel_curve_to"
 
-external rel_line_to : context -> x:float -> y:float -> unit
+external rel_line_to : context -> float -> float -> unit
   = "caml_cairo_rel_line_to"
-external rel_move_to : context -> x:float -> y:float -> unit
+external rel_move_to : context -> float -> float -> unit
   = "caml_cairo_rel_move_to"
 
 
@@ -350,27 +345,27 @@ struct
 
   let init_identity () = { xx=1.; yx=0.; xy=0.; yy=1.; x0=0.; y0=0. }
 
-  let init_translate ~x ~y =
+  let init_translate x y =
     { xx=1.; yx=0.; xy=0.; yy=1.;  x0=x;  y0=y }
 
-  let init_scale ~x ~y =
+  let init_scale x y =
     { xx=x; yx=0.; xy=0.; yy=y;  x0=0.;  y0=0. }
 
-  let init_rotate ~angle =
+  let init_rotate angle =
     { xx=cos(angle);    yx=sin(angle);
       xy= -. sin(angle); yy=cos(angle);  x0=0.;  y0=0. }
 
-  let translate m ~x ~y =
+  let translate m x y =
     m.x0 <- m.x0 +. m.xx *. x +. m.xy *. y;
     m.y0 <- m.y0 +. m.yx *. x +. m.yy *. y
 
-  let scale m ~x ~y =
+  let scale m x y =
     m.xx <- m.xx *. x;
     m.yx <- m.yx *. x;
     m.xy <- m.xy *. y;
     m.yy <- m.yy *. y
 
-  let rotate m ~angle =
+  let rotate m angle =
     let cosa = cos angle and sina = sin angle in
     let xx = m.xx in
     m.xx <- xx *. cosa +. m.xy *. sina;
@@ -419,7 +414,7 @@ struct
   let transform_distance m ~dx ~dy =
     (m.xx *. dx +. m.xy *. dy,  m.yx *. dx +. m.yy *. dy)
 
-  let transform_point m ~x ~y =
+  let transform_point m x y =
     (m.xx *. x +. m.xy *. y +. m.x0,  m.yx *. x +. m.yy *. y +. m.y0)
 
 end
@@ -518,7 +513,7 @@ struct
     = "caml_cairo_toy_font_face_create"
 
   let create ?(family="") slant weight =
-    create_stub family slant weight
+    create_stub ~family slant weight
 
   external get_family : [`Toy] t -> string
     = "caml_cairo_toy_font_face_get_family"
@@ -621,7 +616,7 @@ module Surface =
 struct
   type t = surface
 
-  external create_similar : t -> content -> width:int -> height:int -> t
+  external create_similar : t -> content -> w:int -> h:int -> t
     = "caml_cairo_surface_create_similar"
   external finish : t -> unit = "caml_cairo_surface_finish"
   external flush : t -> unit = "caml_cairo_surface_flush"
@@ -629,10 +624,9 @@ struct
     = "caml_cairo_surface_get_font_options"
   external get_content : t -> content = "caml_cairo_surface_get_content"
   external mark_dirty : t -> unit = "caml_cairo_surface_mark_dirty"
-  external mark_dirty_rectangle : t ->
-    x:int -> y:int -> w:int -> h:int -> unit
+  external mark_dirty_rectangle : t -> int -> int -> w:int -> h:int -> unit
     = "caml_cairo_surface_mark_dirty_rectangle"
-  external set_device_offset : t -> x:float -> y:float -> unit
+  external set_device_offset : t -> float -> float -> unit
     = "caml_cairo_surface_set_device_offset"
   external get_device_offset : t -> float * float
     = "caml_cairo_surface_get_device_offset"
@@ -677,7 +671,7 @@ struct
     | A8
     | A1
 
-  external create : format -> width:int -> height:int -> Surface.t
+  external create : format -> w:int -> h:int -> Surface.t
     = "caml_cairo_image_surface_create"
 
   external get_format : Surface.t -> format
@@ -686,7 +680,7 @@ struct
   external get_height : Surface.t -> int = "caml_cairo_image_surface_get_height"
   external get_stride : Surface.t -> int = "caml_cairo_image_surface_get_stride"
 
-  external stride_for_width : format -> width:int -> int
+  external stride_for_width : format -> int -> int
     = "caml_cairo_format_stride_for_width" [@@noalloc]
 
   open Bigarray
@@ -696,34 +690,34 @@ struct
       (int32, Bigarray.int32_elt, Bigarray.c_layout) Bigarray.Array2.t
 
   (* These direct bindings assume that the bigarray is large enough *)
-  external create_for_data8_unsafe : data:data8 ->
-    format -> width:int -> height:int -> stride:int -> Surface.t
+  external create_for_data8_unsafe : data8 ->
+    format -> w:int -> h:int -> stride:int -> Surface.t
     = "caml_cairo_image_surface_create_for_data8"
-  external create_for_data32_unsafe : data:data32 ->
-    format -> width:int -> height:int -> stride:int -> Surface.t
+  external create_for_data32_unsafe : data32 ->
+    format -> w:int -> h:int -> stride:int -> Surface.t
     = "caml_cairo_image_surface_create_for_data32"
 
-  let create_for_data8 data format ?stride width height =
-    if width <= 0 then invalid_arg "Cairo.Image.create_for_data8: width <= 0";
-    if height <= 0 then invalid_arg "Cairo.Image.create_for_data8: height <= 0";
+  let create_for_data8 data format ?stride ~w ~h =
+    if w <= 0 then invalid_arg "Cairo.Image.create_for_data8: width <= 0";
+    if h <= 0 then invalid_arg "Cairo.Image.create_for_data8: height <= 0";
     let stride = match stride with
-      | None -> stride_for_width format width
+      | None -> stride_for_width format w
       | Some s ->
-          if s < width (* thus if s <= 0 *) then raise(Error INVALID_STRIDE);
+          if s < w (* thus if s <= 0 *) then raise(Error INVALID_STRIDE);
           s in
-    if stride * height > Array1.dim data then
+    if stride * h > Array1.dim data then
       invalid_arg(Printf.sprintf "Cairo.Image.create_for_data8: bigarray too \
-	small for the required stride=%i and height=%i" stride height);
-    create_for_data8_unsafe data format width height stride
+	small for the required stride=%i and height=%i" stride h);
+    create_for_data8_unsafe data format ~w ~h ~stride
 
-  let create_for_data32 ?width ?height ?(alpha=true) data =
-    let width = match width with
+  let create_for_data32 ?w ?h ?(alpha=true) data =
+    let width = match w with
       | None -> Array2.dim1 data
       | Some w ->
           if w > Array2.dim1 data then
             invalid_arg "Cairo.Image.create_for_data32: given width too large";
           w in
-    let height = match height with
+    let height = match h with
       | None -> Array2.dim2 data
       | Some h ->
           if h > Array2.dim2 data then
@@ -731,7 +725,8 @@ struct
           h in
     let format = if alpha then ARGB32 else RGB24 in
     (* Both format use 32 bits = 4 bytes *)
-    create_for_data32_unsafe data format width height (4 * Array2.dim1 data)
+    create_for_data32_unsafe data format ~w:width ~h:height
+      ~stride:(4 * Array2.dim1 data)
 
   external get_data8 : Surface.t -> (int, int8_unsigned_elt, c_layout) Array1.t
     = "caml_cairo_image_surface_get_UINT8"
@@ -745,8 +740,8 @@ struct
 		   ARGB32 or RGB24";
     get_data32 surface
 
-  let output_ppm fh ?width ?height (data: data32) =
-    let width = match width with
+  let output_ppm fh ?w ?h (data: data32) =
+    let width = match w with
       | None -> Array2.dim1 data
       | Some w ->
           if w > Array2.dim1 data then
@@ -754,7 +749,7 @@ struct
           if w <= 0 then
             invalid_arg "Cairo.Image.output_ppm: width <= 0";
           w in
-    let height = match height with
+    let height = match h with
       | None -> Array2.dim2 data
       | Some h ->
           if h > Array2.dim2 data then
@@ -777,16 +772,16 @@ end
 
 module PDF =
 struct
-  external create_for_stream : output:(string -> unit) ->
-    width:float -> height:float -> Surface.t
+  external create_for_stream : (string -> unit) ->
+                               w:float -> h:float -> Surface.t
     = "caml_cairo_pdf_surface_create_for_stream"
 
-  external create : fname:string -> width:float -> height:float -> Surface.t
+  external create : string -> w:float -> h:float -> Surface.t
     = "caml_cairo_pdf_surface_create"
     (* Do we want to implement it in terms of [create_for_stream]?
        The "problem" is the absence of close function... *)
 
-  external set_size : Surface.t -> width:float -> height:float -> unit
+  external set_size : Surface.t -> w:float -> h:float -> unit
     = "caml_cairo_pdf_surface_set_size" [@@noalloc]
 end
 
@@ -802,16 +797,16 @@ struct
 
   external write : Surface.t -> string -> unit
     = "caml_cairo_surface_write_to_png"
-  external write_to_stream : Surface.t -> output:(string -> unit) -> unit
+  external write_to_stream : Surface.t -> (string -> unit) -> unit
     = "caml_cairo_surface_write_to_png_stream"
 end
 
 module PS =
 struct
-  external create_for_stream : output:(string -> unit) ->
-    width:float -> height:float -> Surface.t
+  external create_for_stream : (string -> unit) ->
+    w:float -> h:float -> Surface.t
     = "caml_cairo_ps_surface_create_for_stream"
-  external create : fname:string -> width:float -> height:float -> Surface.t
+  external create : string -> w:float -> h:float -> Surface.t
     = "caml_cairo_ps_surface_create"
 
   type level = LEVEL_2 | LEVEL_3
@@ -825,7 +820,7 @@ struct
     = "caml_cairo_ps_surface_set_eps"
   external get_eps : Surface.t -> bool = "caml_cairo_ps_surface_get_eps"
 
-  external set_size : Surface.t -> width:float -> height:float -> unit
+  external set_size : Surface.t -> w:float -> h:float -> unit
     = "caml_cairo_ps_surface_set_size"
 
   module Dsc =
@@ -841,11 +836,11 @@ end
 
 module SVG =
 struct
-  external create : fname:string -> width:float -> height:float -> Surface.t
+  external create : string -> w:float -> h:float -> Surface.t
     = "caml_cairo_svg_surface_create"
 
-  external create_for_stream : output:(string -> unit) ->
-    width:float -> height:float -> Surface.t
+  external create_for_stream : (string -> unit) ->
+    w:float -> h:float -> Surface.t
     = "caml_cairo_svg_surface_create_for_stream"
 
   type version = VERSION_1_1 | VERSION_1_2
@@ -876,19 +871,19 @@ struct
   type any = any_pattern
 
   external add_color_stop_rgb_stub : [> `Gradient] t -> ofs:float ->
-    r:float -> g:float -> b:float -> unit
+                                     float -> float -> float -> unit
     = "caml_cairo_pattern_add_color_stop_rgb" [@@noalloc]
 
   let add_color_stop_rgb cr ?(ofs=0.0) r g b =
-    add_color_stop_rgb_stub cr ~ofs ~r ~g ~b
+    add_color_stop_rgb_stub cr ~ofs r g b
 
   external add_color_stop_rgba_stub : [> `Gradient] t -> ofs:float ->
-    r:float -> g:float -> b:float -> a:float -> unit
+                                      float -> float -> float -> float -> unit
     = "caml_cairo_pattern_add_color_stop_rgba_bc"
     "caml_cairo_pattern_add_color_stop_rgba" [@@noalloc]
 
   let add_color_stop_rgba cr ?(ofs=0.0) r g b a =
-    add_color_stop_rgba_stub cr ~ofs ~r ~g ~b ~a
+    add_color_stop_rgba_stub cr ~ofs r g b a
 
   external get_color_stop_count : [> `Gradient] t -> int
     = "caml_cairo_pattern_get_color_stop_count"
@@ -898,10 +893,10 @@ struct
     = "caml_cairo_pattern_get_color_stop_rgba"
     (* FIXME: do we want to iterate over the colors instead ?? *)
 
-  external create_rgb : r:float -> g:float -> b:float -> [`Solid] t
+  external create_rgb : float -> float -> float -> [`Solid] t
     = "caml_cairo_pattern_create_rgb"
 
-  external create_rgba : r:float -> g:float -> b:float -> a:float -> [`Solid] t
+  external create_rgba : float -> float -> float -> float -> [`Solid] t
     = "caml_cairo_pattern_create_rgba"
 
   external get_rgba : [> `Solid] t -> float * float * float * float
@@ -960,10 +955,10 @@ end
 (* ---------------------------------------------------------------------- *)
 (* Transformations - Manipulating the current transformation matrix  *)
 
-external translate : context -> x:float -> y:float -> unit
+external translate : context -> float -> float -> unit
   = "caml_cairo_translate"
-external scale : context -> x:float -> y:float -> unit = "caml_cairo_scale"
-external rotate : context -> angle:float -> unit = "caml_cairo_rotate"
+external scale : context -> float -> float -> unit = "caml_cairo_scale"
+external rotate : context -> float -> unit = "caml_cairo_rotate"
 
 external transform : context -> Matrix.t -> unit
   = "caml_cairo_transform" [@@noalloc]
@@ -974,13 +969,13 @@ external get_matrix : context -> Matrix.t = "caml_cairo_get_matrix"
 
 external identity_matrix : context -> unit = "caml_cairo_identity_matrix"
 
-external user_to_device : context -> x:float -> y:float -> float * float
+external user_to_device : context -> float -> float -> float * float
   = "caml_cairo_user_to_device"
 external user_to_device_distance :
-  context -> x:float -> y:float -> float * float
+  context -> float -> float -> float * float
   = "caml_cairo_user_to_device_distance"
-external device_to_user : context -> x:float -> y:float -> float * float
+external device_to_user : context -> float -> float -> float * float
   = "caml_cairo_device_to_user"
 external device_to_user_distance :
-  context -> x:float -> y:float -> float * float
+  context -> float -> float -> float * float
   = "caml_cairo_device_to_user_distance"

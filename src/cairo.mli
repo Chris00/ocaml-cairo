@@ -140,32 +140,32 @@ sig
   val init_identity : unit -> t
   (** [init_identity()] returns the identity transformation. *)
 
-  val init_translate : x:float -> y:float -> t
+  val init_translate : float -> float -> t
   (** [init_translate tx ty] return a transformation that translates
      by [tx] and [ty] in the X and Y dimensions, respectively. *)
 
-  val init_scale : x:float -> y:float -> t
+  val init_scale : float -> float -> t
   (** [init_scale sx sy] return a transformation that scales by [sx]
      and [sy] in the X and Y dimensions, respectively. *)
 
-  val init_rotate : angle:float -> t
+  val init_rotate : float -> t
   (** [init_rotate radians] returns a a transformation that rotates by
      [radians]. *)
 
-  val translate : t -> x:float -> y:float -> unit
+  val translate : t -> float -> float -> unit
   (** [translate matrix tx ty] applies a translation by [tx], [ty] to
      the transformation in [matrix].  The effect of the new
      transformation is to first translate the coordinates by [tx] and
      [ty], then apply the original transformation to the
      coordinates. *)
 
-  val scale : t -> x:float -> y:float -> unit
+  val scale : t -> float -> float -> unit
   (** [scale matrix sx sy] applies scaling by [sx], [sy] to the
      transformation in [matrix].  The effect of the new transformation
      is to first scale the coordinates by [sx] and [sy], then apply
      the original transformation to the coordinates. *)
 
-  val rotate : t -> angle:float -> unit
+  val rotate : t -> float -> unit
   (** [rotate matrix radians] applies rotation by [radians] to the
      transformation in [matrix].  The effect of the new transformation
      is to first rotate the coordinates by [radians], then apply the
@@ -200,7 +200,7 @@ sig
      transforms to (x2,y2) then (x1+dx1,y1+dy1) will transform to
      (x1+dx2,y1+dy2) for all values of x1 and x2.  *)
 
-  val transform_point : t -> x:float -> y:float -> float * float
+  val transform_point : t -> float -> float -> float * float
   (** [transform_point matrix x y] transforms the point ([x], [y]) by
      [matrix]. *)
 end
@@ -867,7 +867,7 @@ sig
      creates a bitmap image in memory.  The type of a surface can be
      queried with {!Cairo.Surface.get_type}.  *)
 
-  val create_similar : t -> content -> width:int -> height:int -> t
+  val create_similar : t -> content -> w:int -> h:int -> t
   (** [create_similar other content width height] create a new surface
      that is as compatible as possible with the existing surface
      [other].  For example the new surface will have the same fallback
@@ -914,17 +914,16 @@ sig
      Note that you must call {!Cairo.Surface.flush} before doing such
      drawing.  *)
 
-  val mark_dirty_rectangle : t ->
-                             x:int -> y:int -> w:int -> h:int -> unit
-  (** Like {!Cairo.Surface.mark_dirty}, but drawing has been done only
-     to the specified rectangle, so that cairo can retain cached
-     contents for other parts of the surface.
+  val mark_dirty_rectangle : t -> int -> int -> w:int -> h:int -> unit
+  (** [mark_dirty_rectangle x y w h] like {!Cairo.Surface.mark_dirty},
+     but drawing has been done only to the specified rectangle, so
+     that cairo can retain cached contents for other parts of the surface.
 
      Any cached clip set on the surface will be reset by this
      function, to make sure that future cairo calls have the clip set
      that they expect. *)
 
-  val set_device_offset : t -> x:float -> y:float -> unit
+  val set_device_offset : t -> float -> float -> unit
   (** Sets an offset that is added to the device coordinates
      determined by the CTM when drawing to surface. One use case for
      this function is when we want to create a {!Cairo.Surface.t} that
@@ -1068,7 +1067,7 @@ sig
              the uppermost bit, on a little-endian machine the first
              pixel is in the least-significant bit. *)
 
-  val create : format -> width:int -> height:int -> Surface.t
+  val create : format -> w:int -> h:int -> Surface.t
   (** Creates an image surface of the specified format and
      dimensions. Initially the surface contents are all 0.
      (Specifically, within each pixel, each color or alpha channel
@@ -1084,7 +1083,7 @@ sig
   (** Images represented as an array of 32 bytes (RGB or RGBA) values. *)
 
   val create_for_data8 : data8 ->
-    format -> ?stride:int -> int -> int -> Surface.t
+    format -> ?stride:int -> w:int -> h:int -> Surface.t
   (** [create_for_data8 data format ?stride width height] creates an
      image surface for the provided pixel data.  The initial contents
      of buffer will be used as the initial image contents; you must
@@ -1096,13 +1095,13 @@ sig
      {!stride_for_width} before allocating the data buffer.  (that's
      what this function does if the argument is not provided).  *)
 
-  val create_for_data32 : ?width:int -> ?height:int -> ?alpha:bool ->
+  val create_for_data32 : ?w:int -> ?h:int -> ?alpha:bool ->
     data32 -> Surface.t
-  (** [create_for_data32 ?width ?height ?alpha data] same as
+  (** [create_for_data32 ?w ?h ?alpha data] same as
      {!Cairo.Image.create_for_data8} except that the stride will
      necessarily be according to the bigarray 1st dimension (so that
-     matrix coordinates correspond to pixels) and the [width] and
-     [height] will be by default taken from the bigarray 1st and 2nd
+     matrix coordinates correspond to pixels) and the width [w] and
+     height [h] will be by default taken from the bigarray 1st and 2nd
      dimensions respectively.  If [alpha] is true (default), the
      [ARGB32] format is selected, otherwise [RGB24] is used. *)
 
@@ -1140,15 +1139,15 @@ sig
       account: for [ARGB32] and [RGB24], the stride has to be divided
       by 4. *)
 
-  val stride_for_width : format -> width:int -> int
-  (** [stride_for_width format width] a stride value that will respect
+  val stride_for_width : format -> int -> int
+  (** [stride_for_width format w] a stride value that will respect
       all alignment requirements of the accelerated image-rendering code
       within cairo.  See {!create_for_data8}.  *)
 
-  val output_ppm : out_channel -> ?width:int -> ?height:int -> data32 -> unit
-  (** Convenience function to write the subarray of size ([width],
-     [height]) representing an image to the PPM format.  The possible
-     alpha channel is ignored. *)
+  val output_ppm : out_channel -> ?w:int -> ?h:int -> data32 -> unit
+  (** [output_ppm ch width height data] convenience function to write
+     the subarray of size ([width], [height]) representing an image to
+     the PPM format.  The possible alpha channel is ignored. *)
 end
 
 (** The PDF surface is used to render cairo graphics to Adobe PDF
@@ -1161,28 +1160,28 @@ end
     the file may not be fully written before. *)
 module PDF :
 sig
-  val create : fname:string -> width:float -> height:float -> Surface.t
-  (** Creates a PDF surface of the specified size in points to be
-     written to [fname].
+  val create : string -> w:float -> h:float -> Surface.t
+  (** [create fname w h] creates a PDF surface of the specified size
+     in points to be written to [fname].
 
-     @param width width of the surface, in points (1 point = 1/72.0 inch)
-     @param height height of the surface, in points (1 point = 1/72.0 inch)
+     @param w width of the surface, in points (1 point = 1/72.0 inch)
+     @param h height of the surface, in points (1 point = 1/72.0 inch)
     *)
 
-  val create_for_stream : output:(string -> unit) ->
-    width:float -> height:float -> Surface.t
-  (** Creates a PDF surface of the specified size in points to be
-     written incrementally to the stream represented by [output].  Any
-     exception that [output] raises is considered as a write error.
+  val create_for_stream : (string -> unit) -> w:float -> h:float -> Surface.t
+  (** create_for_stream output width height] creates a PDF surface of
+     the specified size in points to be written incrementally to the
+     stream represented by [output].  Any exception that [output]
+     raises is considered as a write error.
 
-     @param width width of the surface, in points (1 point = 1/72.0 inch)
-     @param height height of the surface, in points (1 point = 1/72.0 inch) *)
+     @param w width of the surface, in points (1 point = 1/72.0 inch)
+     @param h height of the surface, in points (1 point = 1/72.0 inch) *)
 
-  val set_size : Surface.t -> width:float -> height:float -> unit
+  val set_size : Surface.t -> w:float -> h:float -> unit
   (** Changes the size of a PDF surface for the current (and
      subsequent) pages.
-     @param width width of the surface, in points (1 point = 1/72.0 inch)
-     @param height height of the surface, in points (1 point = 1/72.0 inch)
+     @param w width of the surface, in points (1 point = 1/72.0 inch)
+     @param h height of the surface, in points (1 point = 1/72.0 inch)
 
      This function should only be called before any drawing operations
      have been performed on the current page.  The simplest way to do
@@ -1217,7 +1216,7 @@ sig
   (** [write surface filename] writes the contents of [surface] to a
      new file [filename] as a PNG image. *)
 
-  val write_to_stream : Surface.t -> output:(string -> unit) -> unit
+  val write_to_stream : Surface.t -> (string -> unit) -> unit
   (** Writes the image surface using the [output] function. *)
 end
 
@@ -1231,21 +1230,20 @@ end
     the file may not be fully written before.  *)
 module PS :
 sig
-  val create : fname:string -> width:float -> height:float -> Surface.t
-  (** Creates a PostScript surface of the specified size in points
-     to be written to [fname].
-     @param width width of the surface, in points (1 point = 1/72.0 inch)
-     @param height height of the surface, in points (1 point = 1/72.0 inch) *)
+  val create : string -> w:float -> h:float -> Surface.t
+  (** [create fname w h] creates a PostScript surface of the specified
+     size in points to be written to [fname].
+     @param w width of the surface, in points (1 point = 1/72 inch)
+     @param h height of the surface, in points (1 point = 1/72 inch) *)
 
-  val create_for_stream : output:(string -> unit) ->
-    width:float -> height:float -> Surface.t
-  (** Creates a PostScript surface of the specified size in points to be
-     written incrementally to the stream represented by [output].
-     Any exception that [output] raises is considered as a write
-     error.
+  val create_for_stream : (string -> unit) -> w:float -> h:float -> Surface.t
+  (** [create_for_stream output w h] creates a PostScript surface of
+     the specified size in points to be written incrementally to the
+     stream represented by [output].  Any exception that [output]
+     raises is considered as a write error.
 
-     @param width width of the surface, in points (1 point = 1/72.0 inch)
-     @param height height of the surface, in points (1 point = 1/72.0 inch) *)
+     @param w width of the surface, in points (1 point = 1/72 inch)
+     @param h height of the surface, in points (1 point = 1/72 inch) *)
 
   (** Describe the language level of the PostScript Language Reference
       that a generated PostScript file will conform to. *)
@@ -1282,7 +1280,7 @@ sig
   (** Check whether the PostScript surface will output Encapsulated
      PostScript.  *)
 
-  val set_size : Surface.t -> width:float -> height:float -> unit
+  val set_size : Surface.t -> w:float -> h:float -> unit
   (** Changes the size of a PostScript surface for the current (and
      subsequent) pages.
 
@@ -1414,21 +1412,21 @@ end
     the file may not be fully written before. *)
 module SVG :
 sig
-  val create : fname:string -> width:float -> height:float -> Surface.t
-  (** Creates a SVG surface of the specified size in points to be
-     written to [fname].
-     @param width width of the surface, in points (1 point = 1/72.0 inch)
-     @param height height of the surface, in points (1 point = 1/72.0 inch) *)
+  val create : string -> w:float -> h:float -> Surface.t
+  (** [create fname w h] creates a SVG surface of the specified size
+     in points to be written to [fname].
+     @param w width of the surface, in points (1 point = 1/72 inch)
+     @param h height of the surface, in points (1 point = 1/72 inch) *)
 
-  val create_for_stream : output:(string -> unit) ->
-                          width:float -> height:float -> Surface.t
-  (** Creates a SVG surface of the specified size in points to be
-     written incrementally to the stream represented by [output].
-     Any exception that [output] raises is considered as a write
-     error.
+  val create_for_stream : (string -> unit) ->
+                          w:float -> h:float -> Surface.t
+  (** [create_for_stream output w h] Creates a SVG surface of
+     the specified size in points to be written incrementally to the
+     stream represented by [output].  Any exception that [output]
+     raises is considered as a write error.
 
-     @param width width of the surface, in points (1 point = 1/72.0 inch)
-     @param height height of the surface, in points (1 point = 1/72.0 inch) *)
+     @param w width of the surface, in points (1 point = 1/72 inch)
+     @param h height of the surface, in points (1 point = 1/72 inch) *)
 
   (** The version number of the SVG specification that a generated SVG
       file will conform to. *)
@@ -1549,17 +1547,17 @@ sig
 
      @return (offset, red, green, blue, alpha) *)
 
-  val create_rgb : r:float -> g:float -> b:float -> [`Solid] t
-  (** Creates a new {!Cairo.Pattern.t} corresponding to an opaque
-     color. The color components are floating point numbers in the
-     range 0 to 1. If the values passed in are outside that range,
-     they will be clamped. *)
+  val create_rgb : float -> float -> float -> [`Solid] t
+  (** [create_rgb r g b] creates a new {!Cairo.Pattern.t}
+     corresponding to an opaque color. The color components are
+     floating point numbers in the range 0 to 1. If the values passed
+     in are outside that range, they will be clamped. *)
 
-  val create_rgba : r:float -> g:float -> b:float -> a:float -> [`Solid] t
-  (** Creates a new {!Cairo.Pattern.t} corresponding to a translucent
-     color.  The color components are floating point numbers in the
-     range 0 to 1.  If the values passed in are outside that range,
-     they will be clamped. *)
+  val create_rgba : float -> float -> float -> float -> [`Solid] t
+  (** [create_rgba r g b a] creates a new {!Cairo.Pattern.t}
+     corresponding to a translucent color.  The color components are
+     floating point numbers in the range 0 to 1.  If the values passed
+     in are outside that range, they will be clamped. *)
 
   val get_rgba : [> `Solid] t -> float * float * float * float
   (** Return the solid color for a solid color pattern.
@@ -1715,6 +1713,7 @@ val save : context -> unit
    called, [cr] will be restored to the saved state.  Multiple calls
    to [save] and [restore] can be nested; each call to [restore]
    restores the state from the matching paired [save].  *)
+
 val restore : context -> unit
 (** [restore cr] restores [cr] to the state saved by a preceding call
    to [save] and removes that state from the stack of saved states. *)
@@ -1783,7 +1782,7 @@ sig
      recent call to [Group.push]. *)
 end
 
-val set_source_rgb : context -> r:float -> g:float -> b:float -> unit
+val set_source_rgb : context -> float -> float -> float -> unit
 (** [set_source_rgb cr r g b] sets the source pattern within [cr] to
    an opaque color.  This opaque color will then be used for any
    subsequent drawing operation until a new source pattern is set.
@@ -1795,8 +1794,7 @@ val set_source_rgb : context -> r:float -> g:float -> b:float -> unit
    The default source pattern is opaque black (that is, it is
    equivalent to [set_source_rgb cr 0. 0. 0.]). *)
 
-val set_source_rgba : context ->
-                      r:float -> g:float -> b:float -> a:float -> unit
+val set_source_rgba : context -> float -> float -> float -> float -> unit
 (** [set_source_rgba cr r g b a] sets the source pattern within [cr]
    to a translucent color.  This color will then be used for any
    subsequent drawing operation until a new source pattern is set.
@@ -2168,7 +2166,7 @@ val fill_extents : context -> rectangle
 
    See {!Cairo.fill} and {!Cairo.set_fill_rule}. *)
 
-val in_fill : context -> x:float -> y:float -> bool
+val in_fill : context -> float -> float -> bool
 (** Tests whether the given point is inside the area that would be
    affected by a [fill] operation given the current path and filling
    parameters.  Surface dimensions and clipping are not taken into account.
@@ -2250,7 +2248,7 @@ val stroke_extents : context -> rectangle
    See {!Cairo.stroke}, {!Cairo.set_line_width}, {!Cairo.set_line_join},
    {!Cairo.set_line_cap}, and {!Cairo.set_dash}. *)
 
-val in_stroke : context -> x:float -> y:float -> bool
+val in_stroke : context -> float -> float -> bool
 (** Tests whether the given point is inside the area that would be
    affected by a {!Cairo.stroke} operation given the current path and
    stroking parameters. Surface dimensions and clipping are not taken
@@ -2432,7 +2430,7 @@ sig
 end
 
 val arc : context ->
-          x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
+          float -> float -> r:float -> a1:float -> a2:float -> unit
 (** [arc xc yc radius angle1 angle2] adds a circular arc of the given
    radius to the current path.  The arc is centered at [(xc, yc)],
    begins at [angle1] and proceeds in the direction of increasing
@@ -2474,7 +2472,7 @@ val arc : context ->
    ]} *)
 
 val arc_negative : context ->
-                   x:float -> y:float -> r:float -> a1:float -> a2:float -> unit
+                   float -> float -> r:float -> a1:float -> a2:float -> unit
 (** [arc_negative xc yc radius angle1 angle2] adds a circular arc of
    the given radius to the current path.  The arc is centered at [(xc,
    yc)], begins at [angle1] and proceeds in the direction of
@@ -2486,18 +2484,17 @@ val arc_negative : context ->
    the direction of the arc between the two angles. *)
 
 val curve_to : context ->
-               x1:float -> y1:float -> x2:float -> y2:float ->
-               x3:float -> y3:float -> unit
-(** Adds a cubic Bézier spline to the path from the current point to
-   position (x3, y3) in user-space coordinates, using (x1, y1) and
-   (x2, y2) as the control points.  After this call the current point
-   will be (x3, y3).
+               float -> float -> float -> float -> float -> float -> unit
+(** [curve_to ctx x1 y1 x2 y2 x3 y3] Adds a cubic Bézier spline to the
+   path from the current point to position (x3, y3) in user-space
+   coordinates, using (x1, y1) and (x2, y2) as the control points.
+   After this call the current point will be (x3, y3).
 
    If there is no current point before the call to [curve_to] this
    function will behave as if preceded by a call to
    {!Cairo.move_to}[ cr x1 y1]. *)
 
-val line_to : context -> x:float -> y:float -> unit
+val line_to : context -> float -> float -> unit
 (** Adds a line to the path from the current point to position (x, y)
    in user-space coordinates. After this call the current point will
    be (x, y).
@@ -2505,13 +2502,14 @@ val line_to : context -> x:float -> y:float -> unit
    If there is no current point before the call to [Cairo.line_to],
    this function will behave as {!Cairo.move_to}[ cr x y]. *)
 
-val move_to : context -> x:float -> y:float -> unit
+val move_to : context -> float -> float -> unit
 (** Begin a new sub-path.  After this call the current point will be (x, y). *)
 
 val rectangle : context ->
-                x:float -> y:float -> w:float -> h:float -> unit
-(** Adds a closed sub-path rectangle of the given size to the
-   current path at position (x, y) in user-space coordinates.
+                float -> float -> w:float -> h:float -> unit
+(** [rectangle x y w h] adds a closed sub-path rectangle of the given
+   size to the current path at position (x, y) in user-space
+   coordinates.
 
    This function is logically equivalent to:
    {[
@@ -2523,14 +2521,13 @@ val rectangle : context ->
    ]}  *)
 
 val rel_curve_to : context ->
-                   x1:float -> y1:float -> x2:float -> y2:float ->
-                   x3:float -> y3:float -> unit
-(** Relative-coordinate version of {!Cairo.curve_to}.  All offsets are
-   relative to the current point.  Adds a cubic Bézier spline to the
-   path from the current point to a point offset from the current
-   point by (dx3, dy3), using points offset by (dx1, dy1) and (dx2,
-   dy2) as the control points.  After this call the current point will
-   be offset by (dx3, dy3).
+                   float -> float -> float -> float -> float -> float -> unit
+(** [rel_curve_to x1 y1 x2 y2 x3 y3] relative-coordinate version of
+   {!Cairo.curve_to}.  All offsets are relative to the current point.
+   Adds a cubic Bézier spline to the path from the current point to a
+   point offset from the current point by (dx3, dy3), using points
+   offset by (dx1, dy1) and (dx2, dy2) as the control points.  After
+   this call the current point will be offset by (dx3, dy3).
 
    Given a current point of (x, y), [rel_curve_to cr dx1 dy1 dx2 dy2
    dx3 dy3] is logically equivalent to [curve_to cr (x+.dx1) (y+.dy1)
@@ -2539,7 +2536,7 @@ val rel_curve_to : context ->
    It is an error to call this function with no current point.  Doing
    so will cause [Error NO_CURRENT_POINT] to be raised.  *)
 
-val rel_line_to : context -> x:float -> y:float -> unit
+val rel_line_to : context -> float -> float -> unit
 (** Relative-coordinate version of {!Cairo.line_to}.  Adds a line to
    the path from the current point to a point that is offset from the
    current point by (dx, dy) in user space. After this call the
@@ -2551,7 +2548,7 @@ val rel_line_to : context -> x:float -> y:float -> unit
    It is an error to call this function with no current point.  Doing
    so will cause [Error NO_CURRENT_POINT] to be raised.  *)
 
-val rel_move_to : context -> x:float -> y:float -> unit
+val rel_move_to : context -> float -> float -> unit
 (** Begin a new sub-path. After this call the current point will
    offset by (x, y).
 
@@ -2574,7 +2571,7 @@ val rel_move_to : context -> x:float -> y:float -> unit
     See also {!Cairo.Matrix}. *)
 
 
-val translate : context -> x:float -> y:float -> unit
+val translate : context -> float -> float -> unit
 (** [translate cr tx ty] modifies the current transformation matrix
    (CTM) by translating the user-space origin by ([tx], [ty]).  This
    offset is interpreted as a user-space coordinate according to the
@@ -2582,18 +2579,18 @@ val translate : context -> x:float -> y:float -> unit
    the translation of the user-space origin takes place after any
    existing transformation. *)
 
-val scale : context -> x:float -> y:float -> unit
+val scale : context -> float -> float -> unit
 (** [scale sx sy] modifies the current transformation matrix (CTM) by
    scaling the X and Y user-space axes by [sx] and [sy] respectively.
    The scaling of the axes takes place after any existing
    transformation of user space. *)
 
-val rotate : context -> angle:float -> unit
-(** Modifies the current transformation matrix (CTM) by rotating the
-   user-space axes by [angle] radians.  The rotation of the axes takes
-   places after any existing transformation of user space.  The
-   rotation direction for positive angles is from the positive X axis
-   toward the positive Y axis. *)
+val rotate : context -> float -> unit
+(** [rotate ctx angle] modifies the current transformation matrix
+   (CTM) by rotating the user-space axes by [angle] radians.  The
+   rotation of the axes takes places after any existing transformation
+   of user space.  The rotation direction for positive angles is from
+   the positive X axis toward the positive Y axis. *)
 
 val transform : context -> Matrix.t -> unit
 (** [transform cr matrix] modifies the current transformation matrix
@@ -2614,23 +2611,23 @@ val identity_matrix : context -> unit
    axes will be aligned and one user-space unit will transform to one
    device-space unit. *)
 
-val user_to_device : context -> x:float -> y:float -> float * float
+val user_to_device : context -> float -> float -> float * float
 (** [user_to_device cr x y] transform a coordinate from user space to
    device space by multiplying the given point by the current
    transformation matrix (CTM). *)
 
-val user_to_device_distance : context -> x:float -> y:float -> float * float
+val user_to_device_distance : context -> float -> float -> float * float
 (** [user_to_device_distance cr dx dy] transform a distance vector
    from user space to device space.  This function is similar to
    {!Cairo.user_to_device} except that the translation components of
    the CTM will be ignored when transforming ([dx],[dy]). *)
 
-val device_to_user : context -> x:float -> y:float -> float * float
+val device_to_user : context -> float -> float -> float * float
 (** Transform a coordinate from device space to user space by
    multiplying the given point by the inverse of the current
    transformation matrix (CTM). *)
 
-val device_to_user_distance : context -> x:float -> y:float -> float * float
+val device_to_user_distance : context -> float -> float -> float * float
 (** [device_to_user_distance cr dx dy] transform a distance vector
    from device space to user space.  This function is similar to
    {!Cairo.device_to_user} except that the translation components of

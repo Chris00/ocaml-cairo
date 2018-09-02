@@ -9,13 +9,13 @@ bug-reports: "https://github.com/Chris00/ocaml-cairo/issues"
 doc: "https://Chris00.github.io/ocaml-cairo/doc"
 tags: [ "Cairo" "stroke" "drawing" "tutorial"  ]
 build: [
-  [ "jbuilder" "subst" ] {pinned}
-  [ "jbuilder" "build" "-p" name "-j" jobs ]
+  [ "dune" "subst" ] {pinned}
+  [ "dune" "build" "-p" name "-j" jobs ]
 ]
-build-doc: [ "jbuilder" "build" "@doc" ]
+build-doc: [ "dune" "build" "@doc" ]
 depends: [
   "base-bigarray"
-  "jbuilder" {build}
+  "dune" {build}
   "configurator" {build}
   "stdio" {build}
   "base" {build}

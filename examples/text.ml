@@ -5,7 +5,7 @@ open Cairo
 let two_pi = 8. *. atan 1.
 
 let () =
-  let cr = Cairo.create(Cairo.PDF.create "text.pdf" 400. 300.) in
+  let cr = Cairo.create(Cairo.PDF.create "text.pdf" ~w:400. ~h:300.) in
 
   (* Take the cont from the command line if given: *)
   let font = try Sys.argv.(1) with _ -> "Sans" in
@@ -25,9 +25,9 @@ let () =
 
   (* draw helping lines *)
   set_source_rgba cr 1. 0.2 0.2 0.6;
-  arc cr 10. 135.  5.12 0. two_pi;
+  arc cr 10. 135. ~r:5.12 ~a1:0. ~a2:two_pi;
   Path.close cr;
-  arc cr 70. 165.  5.12 0. two_pi;
+  arc cr 70. 165. ~r:5.12 ~a1:0. ~a2:two_pi;
   fill cr;
 
   Surface.finish(get_target cr)

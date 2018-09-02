@@ -15,7 +15,6 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the file
    LICENSE for more details. *)
 
-open Printf
 open Cairo
 
 type rgba = float * float * float * float
@@ -42,6 +41,7 @@ let outside r canvas =
 (* Return a random number between [-0.5 *. x] and [0.5 *. x]. *)
 let rand x = Random.float x -. 0.5 *. x
 
+[@@@warning "-37"]
 type position =
   | C    (* center around both x and y *)
   | R    (* right of (x,y) *)

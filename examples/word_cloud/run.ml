@@ -47,7 +47,7 @@ let () =
   try
     let canvas = { Cairo.x=50.; y=50.; w=500.; h=300. } in
 
-    let cr = Cairo.create (Cairo.PDF.create "cloud.pdf" 600. 400.) in
+    let cr = Cairo.create (Cairo.PDF.create "cloud.pdf" ~w:600. ~h:400.) in
     Random.self_init();
     Cairo.select_font_face cr font;
 
@@ -55,14 +55,14 @@ let () =
     let size fq word =
       let te = text_extents cr word in
       size0 /. sqrt te.width  /. (1.4 -. fq) in
-    let color fq _ = Palette.random Palette.rainbow  in
+    let color _fq _ = Palette.random Palette.rainbow  in
 
     (* Show canvas *)
     save cr;
     let ux, uy = Cairo.device_to_user_distance cr 1. 1. in
     set_line_width cr (max ux uy);
     set_dash cr [| 5. |];
-    rectangle cr canvas.x canvas.y canvas.w canvas.h;   stroke cr;
+    rectangle cr canvas.x canvas.y ~w:canvas.w ~h:canvas.h;  stroke cr;
     restore cr;
     Cloud.make cr canvas words ~size ~color ~rotate:0.1;
 

@@ -6,7 +6,8 @@ open Cairo
 let two_pi = 8. *. atan 1.
 
 let () =
-  let cr = Cairo.create(Cairo.PDF.create "text_align_center.pdf" 400. 300.) in
+  let cr =
+    Cairo.create(Cairo.PDF.create "text_align_center.pdf" ~w:400. ~h:300.) in
 
   (* Take the cont from the command line if given: *)
   let font = try Sys.argv.(1) with _ -> "Sans" in
@@ -29,9 +30,9 @@ let () =
   (* draw helping lines *)
   set_source_rgba cr 1. 0.2 0.2 0.6;
   set_line_width cr 6.0;
-  arc cr x y 10.0 0. two_pi;
+  arc cr x y ~r:10.0 ~a1:0. ~a2:two_pi;
   fill cr;
-  arc cr 0. (2. *. y0) 10.0 0. two_pi;
+  arc cr 0. (2. *. y0) ~r:10.0 ~a1:0. ~a2:two_pi;
   fill cr;
   move_to cr x0 0.;  line_to cr x0 (2. *. y0);
   move_to cr 0. y0;  line_to cr (2. *. x0) y0;
