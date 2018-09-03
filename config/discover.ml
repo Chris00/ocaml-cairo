@@ -27,9 +27,19 @@ let discover_cairo c =
     match Sys.getenv "CAIRO_LIBS" with
     | exception Not_found -> p.P.libs
     | alt_libs -> C.Flags.extract_blank_separated_words alt_libs in
-  (* FIXME: find cairo.h and check that
-     CAIRO_VERSION_MAJOR > 1 ||
-     (CAIRO_VERSION_MAJOR = 1 && CAIRO_VERSION_MINOR >= 6) *)
+  (* Check Cairo version *)
+  let d = C.C_define.(import c ~includes:["cairo.h"] ~c_flags:cflags
+                        ["CAIRO_VERSION_MAJOR", Type.Int;
+                         "CAIRO_VERSION_MINOR", Type.Int ]) in
+  let version_major = match List.assoc "CAIRO_VERSION_MAJOR" d with
+    | C.C_define.Value.Int d -> d
+    | _ -> assert false in
+  let version_minor = match List.assoc "CAIRO_VERSION_MINOR" d with
+    | C.C_define.Value.Int d -> d
+    | _ -> assert false in
+  if not(version_major > 1 || (version_major = 1 && version_minor >= 6)) then
+    C.die "Cairo version us %d.%02d but must be at least 1.06\n"
+      version_major version_minor;
   write ~cflags ~libs
 
 let default_gtk c =
