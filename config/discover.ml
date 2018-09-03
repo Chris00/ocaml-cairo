@@ -40,6 +40,28 @@ let discover_cairo c =
   if not(version_major > 1 || (version_major = 1 && version_minor >= 6)) then
     C.die "Cairo version us %d.%02d but must be at least 1.06\n"
       version_major version_minor;
+  (*
+   * Add fontconfig flags and libs if available in Cairo.
+   *)
+  let d = C.C_define.(import c ~includes:["cairo-ft.h"] ~c_flags:cflags
+                        ["CAIRO_HAS_FT_FONT", Type.Switch;
+                         "CAIRO_HAS_FC_FONT", Type.Switch ]) in
+  let has_ft_font = match List.assoc "CAIRO_HAS_FT_FONT" d with
+    | C.C_define.Value.Switch b -> b
+    | _ -> false in
+  let has_fc_font = match List.assoc "CAIRO_HAS_FC_FONT" d with
+    | C.C_define.Value.Switch b -> b
+    | _ -> false in
+  let libs =
+    if has_ft_font && has_fc_font then (
+      match P.get c with
+      | Some p -> (match P.query p ~package:"fontconfig" with
+                   | Some p -> p.libs @ libs
+                   | None -> C.die "Cairo was compiled with FreeType but \
+                                    fontconfig cannot be found.")
+      | None -> libs
+    )
+    else libs in
   write ~cflags ~libs
 
 let default_gtk c =

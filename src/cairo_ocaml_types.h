@@ -311,6 +311,8 @@ CAMLexport value caml_cairo_font_type_init(value unit)
 
 #define FONT_FACE_VAL(v) (* (cairo_font_face_t**) Data_custom_val(v))
 
+#define FONT_FACE_ASSIGN(v, x) v = ALLOC(font_face);  FONT_FACE_VAL(v) = x
+
 DEFINE_CUSTOM_OPERATIONS(font_face, cairo_font_face_destroy, FONT_FACE_VAL)
 
 
@@ -341,7 +343,19 @@ DEFINE_CUSTOM_OPERATIONS(scaled_font,
 #define WEIGHT_VAL(v) ((cairo_font_weight_t) Int_val(v))
 #define VAL_WEIGHT(v) Val_int(v)
 
+/* FreeType
+***********************************************************************/
+
+#if CAIRO_HAS_FT_FONT && CAIRO_HAS_FC_FONT
+#include <cairo-ft.h>
+
+#define FT_FACE_ASSIGN(v, x) v = ALLOC(ft_face);  FT_FACE_VAL(v) = x
+
+DEFINE_CUSTOM_OPERATIONS(ft_face, FT_Done_Face, FT_FACE_VAL)
+
+#endif
+
 
 /* Local Variables: */
-/* compile-command: "make -k cairo_stubs.o" */
+/* compile-command: "make -k -C.." */
 /* End: */

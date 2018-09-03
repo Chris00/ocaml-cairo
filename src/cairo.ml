@@ -587,6 +587,68 @@ struct
   external get_type : _ t -> font_type = "caml_cairo_scaled_font_get_type"
 end
 
+module Ft = struct
+  type face
+
+  type ft_library
+
+  let ft_library = ref None
+  (* FIXME: is it important to have to possibility to create more than
+     one library resource? *)
+
+  external init_FreeType : unit -> ft_library = "caml_cairo_Ft_init_FreeType"
+
+  let get_ft_library () = match !ft_library with
+    | None -> let ft = init_FreeType() in
+              ft_library := Some ft;
+              ft
+    | Some ft -> ft
+
+  external new_face : ft_library -> string -> int -> face
+    = "caml_cairo_Ft_new_face"
+
+  let face ?(index=0) pathname =
+    new_face (get_ft_library()) pathname index
+
+  external create_for_ft_face_ :
+    face -> vertical:bool -> autohint:bool -> [`Ft] Font_face.t
+    = "caml_cairo_ft_create_for_ft_face"
+
+  type flag = [`Vertical_layout | `Force_autohint]
+
+  let create_for_ft_face ?(flags=[]) face =
+    let vertical = ref false in
+    let autohint = ref false in
+    List.iter (function `Vertical_layout -> vertical := true
+                      | `Force_autohint -> autohint := true) flags;
+    create_for_ft_face_ face ~vertical:!vertical ~autohint:!autohint
+
+  external create_for_pattern :
+    ?options:Font_options.t -> string -> [`Ft] Font_face.t
+    = "caml_cairo_ft_create_for_pattern"
+
+  external scaled_font_lock_face : [`Ft] Scaled_font.t -> face
+    = "caml_cairo_ft_scaled_font_lock_face"
+  external scaled_font_unlock_face : [`Ft] Scaled_font.t -> unit
+    = "caml_cairo_ft_scaled_font_unlock_face"
+
+  module Synthesize = struct
+    type t = { bold: bool;
+               oblique: bool }
+
+    external get : [`Ft] Font_face.t -> t
+      = "caml_cairo_ft_synthesize_get"
+    external set_ : [`Ft] Font_face.t -> bold:bool -> oblique:bool -> unit
+      = "caml_cairo_ft_synthesize_set"
+    external unset_ : [`Ft] Font_face.t -> bold:bool -> oblique:bool -> unit
+      = "caml_cairo_ft_synthesize_unset"
+
+    let set ?(bold=false) ?(oblique=false) ff = set_ ff ~bold ~oblique
+
+    let unset ?(bold=false) ?(oblique=false) ff = unset_ ff ~bold ~oblique
+  end
+end
+
 
 external select_font_face : context -> slant -> weight -> string -> unit
   = "caml_cairo_select_font_face"

@@ -739,6 +739,55 @@ sig
 end
 
 
+(** A minimal Interface to FreeType/Fontconfig.  Functions in this
+   module will raie {!Unavailable} if Cairo has not been compiled with
+   FreeType support (and fonconfig is available).  This module is not
+   thread safe. *)
+module Ft : sig
+  type face
+  (** A FreeType face. *)
+
+  val face : ?index:int -> string -> face
+  (** [face pathname] open the face contained in the [pathname].
+     @param index See the documentation for
+     {{:https://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_Open_Face}face_index}. *)
+
+  type flag = [`Vertical_layout | `Force_autohint]
+
+  val create_for_ft_face : ?flags:flag list -> face -> [`Ft] Font_face.t
+  (** [create_for_ft_face face] create a new font face for the
+     FreeType font backend from a FreeType [face]. *)
+
+  val create_for_pattern : ?options:Font_options.t ->
+                           string -> [`Ft] Font_face.t
+  (** [create_for_pattern pattern] creates a new font face for the
+     FreeType font backend based on a fontconfig [pattern] (in text
+     form). *)
+
+  val scaled_font_lock_face : [`Ft] Scaled_font.t -> face
+
+  val scaled_font_unlock_face : [`Ft] Scaled_font.t -> unit
+  (** [scaled_font_unlock_face font] releases a face obtained with
+     {!scaled_font_lock_face}. *)
+
+  module Synthesize : sig
+    type t = { bold: bool;
+               oblique: bool }
+
+    val get : [`Ft] Font_face.t -> t
+    (** [get font] returns the synthesized information. *)
+
+    val set : ?bold:bool -> ?oblique:bool -> [`Ft] Font_face.t -> unit
+    (** [set font] synthesize different glyphs from a base [font],
+       which is useful if you lack those glyphs from a true bold or
+       oblique font. *)
+
+    val unset : ?bold:bool -> ?oblique:bool -> [`Ft] Font_face.t -> unit
+    (** [unset font] undo what {!set} did. *)
+  end
+end
+
+
 val select_font_face : context -> ?slant:slant -> ?weight:weight -> string ->
                        unit
 (** [select_font_face cr family ?slant ?weight] selects a family and

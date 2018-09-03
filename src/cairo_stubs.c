@@ -876,8 +876,7 @@ CAMLexport value caml_cairo_get_font_face(value vcr)
      increase the reference count (to avoid that destroying one of
      these object leaves a dangling pointer for the other).  */
   cairo_font_face_reference(ff);
-  vff = ALLOC(font_face);
-  FONT_FACE_VAL(vff) = ff;
+  FONT_FACE_ASSIGN(vff, ff);
   CAMLreturn(vff);
 }
 
@@ -889,8 +888,8 @@ CAMLexport value caml_cairo_toy_font_face_create
   cairo_font_face_t* ff;
   ff = cairo_toy_font_face_create(String_val(vfamily), SLANT_VAL(vslant),
                                   WEIGHT_VAL(vweight));
-  vff = ALLOC(font_face);
-  FONT_FACE_VAL(vff) = ff;
+  caml_cairo_raise_Error(cairo_font_face_status(ff));
+  FONT_FACE_ASSIGN(vff, ff);
   CAMLreturn(vff);
 }
 
@@ -1076,6 +1075,166 @@ CAMLexport value caml_cairo_scaled_font_get_type(value vff)
   cairo_font_type_t ft = cairo_scaled_font_get_type(SCALED_FONT_VAL(vff));
   CAMLreturn(VAL_FONT_TYPE(ft));
 }
+
+
+/* Ft : TrueType fonts
+***********************************************************************/
+
+#if CAIRO_HAS_FT_FONT && CAIRO_HAS_FC_FONT
+#include <cairo-ft.h>
+
+CAMLexport value caml_cairo_Ft_init_FreeType(value unit)
+{
+  FT_Library ft;
+  if (FT_Init_FreeType (&ft) != 0) {
+    caml_failwith("Cairo.Ft: cannot initialize the FreeType library");
+  }
+  return((value) ft);  /* FT_Library is a pointer */
+  /* FIXME: on the OCaml side the pointer will never be released so we
+   * do not bother to destroy it. */
+}
+
+CAMLexport
+value caml_cairo_Ft_new_face(value vftlib, value vpath, value vindex)
+{
+  CAMLparam3(vftlib, vpath, vindex);
+  CAMLlocal1(vface);
+  FT_Face face;
+
+  if (FT_New_Face((FT_Library) vftlib,
+                  (const char*) String_val(vpath),
+                  Int_val(vindex),
+                  &face) != 0) {
+    caml_failwith("Cairo.Ft.face");
+  }
+  FT_FACE_ASSIGN(vface, face);
+  CAMLreturn(vface);
+}
+
+CAMLexport value caml_cairo_ft_create_for_ft_face(
+  value vface, value vertical, value autohint)
+{
+  CAMLparam3(vface, vertical, autohint);
+  CAMLlocal1(vff);
+  FT_Int32 flags = FT_LOAD_DEFAULT;
+  cairo_font_face_t *ff;
+
+  if (Bool_val(vertical)) flags |= FT_LOAD_VERTICAL_LAYOUT;
+  if (Bool_val(autohint)) flags |= FT_LOAD_FORCE_AUTOHINT;
+
+  ff = cairo_ft_font_face_create_for_ft_face(FT_FACE_VAL(vface), flags);
+  caml_cairo_raise_Error(cairo_font_face_status(ff));
+  FONT_FACE_ASSIGN(vff, ff);
+  CAMLreturn(vff);
+}
+
+CAMLexport value caml_cairo_ft_create_for_pattern(
+  value voptions, value vpattern)
+{
+  CAMLparam2(voptions, vpattern);
+  CAMLlocal1(vff);
+  FcPattern *p1, *p2;
+  FcResult res;
+  cairo_font_face_t *ff;
+
+  p1 = FcNameParse((const FcChar8 *) String_val(vpattern));
+  if (FcConfigSubstitute(NULL, p1, FcMatchPattern) == FcFalse)
+    caml_failwith("Cairo.Ft.create_for_pattern:");
+  if (Is_block (voptions)) {
+      cairo_ft_font_options_substitute(FONT_OPTIONS_VAL(Field(voptions, 0)),
+                                       p1);
+  }
+  FcDefaultSubstitute(p1);
+  p2 = FcFontMatch(NULL, p1, &res);
+  FcPatternDestroy(p1);
+  switch (res) {
+  case FcResultMatch:  break;
+  case FcResultNoMatch:
+    caml_failwith("Cairo.Ft.create_for_pattern: no match");
+  case FcResultTypeMismatch:
+    caml_failwith("Cairo.Ft.create_for_pattern: type mismatch");
+  case FcResultNoId:
+    caml_failwith("Cairo.Ft.create_for_pattern: font exists but does not "
+                  "have enough values");
+  case FcResultOutOfMemory:
+    caml_failwith("Cairo.Ft.create_for_pattern: out of memory ");
+  }
+
+  ff = cairo_ft_font_face_create_for_pattern(p2);
+  FONT_FACE_ASSIGN(vff, ff);  
+  FcPatternDestroy(p2);
+  CAMLreturn(vff);
+}
+
+CAMLexport value caml_cairo_ft_scaled_font_lock_face(value vsf)
+{
+  CAMLparam1(vsf);
+  CAMLlocal1(vface);
+  FT_Face face;
+
+  face = cairo_ft_scaled_font_lock_face(SCALED_FONT_VAL(vsf));
+  FT_FACE_ASSIGN(vface, face);
+  CAMLreturn(vface);
+}
+
+CAMLexport value caml_cairo_ft_scaled_font_unlock_face(value vsf)
+{
+  CAMLparam1(vsf);
+  cairo_ft_scaled_font_unlock_face(SCALED_FONT_VAL(vsf));
+  CAMLreturn(Val_unit);
+}
+
+CAMLexport value caml_cairo_ft_synthesize_get(value vff)
+{
+  CAMLparam1(vff);
+  CAMLlocal1(vsyn);
+  unsigned int syn;
+  
+  syn = cairo_ft_font_face_get_synthesize(FONT_FACE_VAL(vff));
+  vsyn = caml_alloc(2, 0);
+  Store_field(vsyn, 0, Val_bool(syn & CAIRO_FT_SYNTHESIZE_BOLD));
+  Store_field(vsyn, 1, Val_bool(syn & CAIRO_FT_SYNTHESIZE_OBLIQUE));
+  CAMLreturn(vsyn);
+}
+
+CAMLexport value caml_cairo_ft_synthesize_set(
+  value vff, value vbold, value voblique)
+{
+  CAMLparam3(vff, vbold, voblique);
+  unsigned int synth_flags = 0;
+
+  if (Bool_val(vbold)) synth_flags |= CAIRO_FT_SYNTHESIZE_BOLD;
+  if (Bool_val(voblique)) synth_flags |= CAIRO_FT_SYNTHESIZE_OBLIQUE;
+  cairo_ft_font_face_set_synthesize(FONT_FACE_VAL(vff), synth_flags);
+  CAMLreturn(Val_unit);
+}
+
+CAMLexport value caml_cairo_ft_synthesize_unset(
+  value vff, value vbold, value voblique)
+{
+  CAMLparam3(vff, vbold, voblique);
+  unsigned int synth_flags = 0;
+
+  if (Bool_val(vbold)) synth_flags |= CAIRO_FT_SYNTHESIZE_BOLD;
+  if (Bool_val(voblique)) synth_flags |= CAIRO_FT_SYNTHESIZE_OBLIQUE;
+  cairo_ft_font_face_unset_synthesize(FONT_FACE_VAL(vff), synth_flags);
+  CAMLreturn(Val_unit);
+}
+
+
+#else
+
+UNAVAILABLE1(Ft_init_FreeType)
+UNAVAILABLE2(caml_Ft_new_face)
+UNAVAILABLE3(caml_cairo_ft_create_for_ft_face)
+UNAVAILABLE2(caml_cairo_ft_create_for_pattern)
+UNAVAILABLE1(caml_cairo_ft_scaled_font_lock_face)
+UNAVAILABLE1(caml_cairo_ft_scaled_font_unlock_face)
+UNAVAILABLE1(caml_cairo_ft_synthesize_get)
+UNAVAILABLE3(caml_cairo_ft_synthesize_set)
+UNAVAILABLE3(caml_cairo_ft_synthesize_unset)
+
+#endif
 
 /* Glyphs
 ***********************************************************************/
@@ -1819,5 +1978,5 @@ UNAVAILABLE1(cairo_recording_surface_ink_extents)
 
 
 /* Local Variables: */
-/* compile-command: "make -k cairo_stubs.o" */
+/* compile-command: "make -k -C.." */
 /* End: */
