@@ -124,8 +124,11 @@ struct custom_operations caml_path_ops;
 #if CAIRO_HAS_FT_FONT && CAIRO_HAS_FC_FONT
 #include <cairo-ft.h>
 
+#define FT_LIBRARY_VAL(v) (* (FT_Library*) Data_custom_val(v))
+struct custom_operations caml_cairo_ft_library_ops;
+
 #define FT_FACE_VAL(v) (* (FT_Face*) Data_custom_val(v))
-struct custom_operations caml_ft_face_ops;
+struct custom_operations caml_cairo_ft_face_ops;
 
 #endif /* CAIRO_HAS_FT_FONT && CAIRO_HAS_FC_FONT */
 

@@ -1085,13 +1085,15 @@ CAMLexport value caml_cairo_scaled_font_get_type(value vff)
 
 CAMLexport value caml_cairo_Ft_init_FreeType(value unit)
 {
+  CAMLparam1(unit);
+  CAMLlocal1(vft);
   FT_Library ft;
+
   if (FT_Init_FreeType (&ft) != 0) {
     caml_failwith("Cairo.Ft: cannot initialize the FreeType library");
   }
-  return((value) ft);  /* FT_Library is a pointer */
-  /* FIXME: on the OCaml side the pointer will never be released so we
-   * do not bother to destroy it. */
+  FT_LIBRARY_ASSIGN(vft, ft);
+  CAMLreturn(vft);
 }
 
 CAMLexport

@@ -747,10 +747,19 @@ module Ft : sig
   type face
   (** A FreeType face. *)
 
-  val face : ?index:int -> string -> face
+  type library
+  (** A FreeType library value.  *)
+
+  val init_freetype : unit -> library
+  (** [init_freetype()] Initialize a new FreeType library value.  In
+     multi-threaded applications it is recommended to use a different
+     library value for each thread. *)
+
+  val face : ?library:library -> ?index:int -> string -> face
   (** [face pathname] open the face contained in the [pathname].
      @param index See the documentation for
-     {{:https://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_Open_Face}face_index}. *)
+     {{:https://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_Open_Face}face_index}.
+     @param library Use the provided library as the "root" of the font. *)
 
   type flag = [`Vertical_layout | `Force_autohint]
 

@@ -348,10 +348,17 @@ DEFINE_CUSTOM_OPERATIONS(scaled_font,
 
 #if CAIRO_HAS_FT_FONT && CAIRO_HAS_FC_FONT
 #include <cairo-ft.h>
+#include <freetype/ftmodapi.h>
 
-#define FT_FACE_ASSIGN(v, x) v = ALLOC(ft_face);  FT_FACE_VAL(v) = x
+#define FT_LIBRARY_ASSIGN(v, x) \
+  v = ALLOC(cairo_ft_library);  FT_LIBRARY_VAL(v) = x
 
-DEFINE_CUSTOM_OPERATIONS(ft_face, FT_Done_Face, FT_FACE_VAL)
+DEFINE_CUSTOM_OPERATIONS(cairo_ft_library, FT_Done_Library, FT_LIBRARY_VAL)
+
+
+#define FT_FACE_ASSIGN(v, x) v = ALLOC(cairo_ft_face);  FT_FACE_VAL(v) = x
+
+DEFINE_CUSTOM_OPERATIONS(cairo_ft_face, FT_Done_Face, FT_FACE_VAL)
 
 #endif
 

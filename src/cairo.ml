@@ -590,25 +590,28 @@ end
 module Ft = struct
   type face
 
-  type ft_library
+  type library
 
   let ft_library = ref None
   (* FIXME: is it important to have to possibility to create more than
      one library resource? *)
 
-  external init_FreeType : unit -> ft_library = "caml_cairo_Ft_init_FreeType"
+  external init_freetype : unit -> library = "caml_cairo_Ft_init_FreeType"
 
   let get_ft_library () = match !ft_library with
-    | None -> let ft = init_FreeType() in
+    | None -> let ft = init_freetype() in
               ft_library := Some ft;
               ft
     | Some ft -> ft
 
-  external new_face : ft_library -> string -> int -> face
+  external new_face : library -> string -> int -> face
     = "caml_cairo_Ft_new_face"
 
-  let face ?(index=0) pathname =
-    new_face (get_ft_library()) pathname index
+  let face ?library ?(index=0) pathname =
+    let ft = match library with
+      | Some l -> l
+      | None -> get_ft_library() in
+    new_face ft pathname index
 
   external create_for_ft_face_ :
     face -> vertical:bool -> autohint:bool -> [`Ft] Font_face.t
