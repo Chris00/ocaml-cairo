@@ -39,6 +39,28 @@ struct custom_operations caml_pattern_ops;
 #define FILTER_VAL(v) ((cairo_filter_t) Int_val(v))
 #define VAL_FILTER(v) Val_int(v)
 
+/* cairo_font_options_t
+***********************************************************************/
+
+#define FONT_OPTIONS_VAL(v) (* (cairo_font_options_t**) Data_custom_val(v))
+struct custom_operations caml_font_options_ops;
+
+/* cairo_font_type_t
+***********************************************************************/
+
+value caml_cairo_font_type[5];
+
+cairo_font_type_t caml_cairo_font_type_val(value vft);
+
+#define FONT_TYPE_VAL(vft) caml_cairo_font_type_val(vft)
+#define VAL_FONT_TYPE(v) caml_cairo_font_type[v]
+
+/* cairo_scaled_font_t
+***********************************************************************/
+
+#define SCALED_FONT_VAL(v) (* (cairo_scaled_font_t**) Data_custom_val(v))
+struct custom_operations caml_scaled_font_ops;
+
 /* cairo_surface_t
 ***********************************************************************/
 

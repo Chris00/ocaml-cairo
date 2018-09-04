@@ -1,0 +1,8 @@
+
+(executables
+ (names    pango_demo)
+ (libraries cairo2-pango))
+
+(alias
+ (name examples)
+ (deps pango_demo.exe))

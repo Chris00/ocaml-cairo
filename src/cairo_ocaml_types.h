@@ -258,7 +258,6 @@ DEFINE_CUSTOM_OPERATIONS(path, cairo_path_destroy, PATH_VAL)
 /* Text
 ***********************************************************************/
 
-#define FONT_OPTIONS_VAL(v) (* (cairo_font_options_t**) Data_custom_val(v))
 #define FONT_OPTIONS_ASSIGN(vfo, fo) \
   vfo = ALLOC(font_options);         \
   FONT_OPTIONS_VAL(vfo) = fo
@@ -284,7 +283,7 @@ static intnat caml_cairo_font_options_hash(value v)
   return(cairo_font_options_hash(FONT_OPTIONS_VAL(v)));
 }
 
-static struct custom_operations caml_font_options_ops = {
+struct custom_operations caml_font_options_ops = {
   "font_options_t", /* identifier for serialization and deserialization */
   &caml_cairo_font_options_finalize,
   &caml_cairo_font_options_compare,
@@ -293,20 +292,27 @@ static struct custom_operations caml_font_options_ops = {
   custom_deserialize_default };
 
 
-static value caml_cairo_font_type[5];
-
+/* caml_cairo_font_type is defined in "cairo_ocaml.h". */
 CAMLexport value caml_cairo_font_type_init(value unit)
 {
   /* noalloc */
-  caml_cairo_font_type[0] = caml_hash_variant("Toy");
-  caml_cairo_font_type[1] = caml_hash_variant("Ft");
-  caml_cairo_font_type[2] = caml_hash_variant("Win32");
-  caml_cairo_font_type[3] = caml_hash_variant("Quartz");
-  caml_cairo_font_type[4] = caml_hash_variant("User");
+  caml_cairo_font_type[CAIRO_FONT_TYPE_TOY] = caml_hash_variant("Toy");
+  caml_cairo_font_type[CAIRO_FONT_TYPE_FT] = caml_hash_variant("Ft");
+  caml_cairo_font_type[CAIRO_FONT_TYPE_WIN32] = caml_hash_variant("Win32");
+  caml_cairo_font_type[CAIRO_FONT_TYPE_QUARTZ] = caml_hash_variant("Quartz");
+  caml_cairo_font_type[CAIRO_FONT_TYPE_USER] = caml_hash_variant("User");
   return(Val_unit);
 }
 
-#define VAL_FONT_TYPE(v) caml_cairo_font_type[v]
+cairo_font_type_t caml_cairo_font_type_val(value vft)
+{
+  if (vft == caml_cairo_font_type[0]) return(CAIRO_FONT_TYPE_TOY);
+  else if (vft == caml_cairo_font_type[1]) return(CAIRO_FONT_TYPE_FT);
+  else if (vft == caml_cairo_font_type[2]) return(CAIRO_FONT_TYPE_WIN32);
+  else if (vft == caml_cairo_font_type[3]) return(CAIRO_FONT_TYPE_QUARTZ);
+  else if (vft == caml_cairo_font_type[4]) return(CAIRO_FONT_TYPE_USER);
+  caml_failwith("Cairo.font_type conversion failed. Contact the developers.");
+}
 
 
 #define FONT_FACE_VAL(v) (* (cairo_font_face_t**) Data_custom_val(v))
@@ -314,9 +320,6 @@ CAMLexport value caml_cairo_font_type_init(value unit)
 #define FONT_FACE_ASSIGN(v, x) v = ALLOC(font_face);  FONT_FACE_VAL(v) = x
 
 DEFINE_CUSTOM_OPERATIONS(font_face, cairo_font_face_destroy, FONT_FACE_VAL)
-
-
-#define SCALED_FONT_VAL(v) (* (cairo_scaled_font_t**) Data_custom_val(v))
 
 DEFINE_CUSTOM_OPERATIONS(scaled_font,
                          cairo_scaled_font_destroy, SCALED_FONT_VAL)
