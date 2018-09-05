@@ -1,21 +1,17 @@
 language: c
-sudo: false
-addons:
-  apt:
-    sources:
-    - avsm
-    packages:
-    - ocaml
-    - ocaml-native-compilers
-    - opam
-    - pkg-config
-    - libcairo2-dev
-    - libexpat1-dev
-    - libgtk2.0-dev
-
+sudo: required
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh
 script: bash -ex .travis-opam.sh
 env:
-  - OPAM_SWITCH=system
-  - OPAM_SWITCH=4.02.2
-  - OPAM_SWITCH=4.03.0
-  - OPAM_SWITCH=4.04.0
+  global:
+    - PACKAGE=cairo2
+  matrix:
+    - OCAML_VERSION=4.02
+    - OCAML_VERSION=4.03
+    - OCAML_VERSION=4.04
+    - OCAML_VERSION=4.05
+    - OCAML_VERSION=4.06
+    - OCAML_VERSION=4.07
+os:
+  - linux
+  - osx
