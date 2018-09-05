@@ -14,9 +14,9 @@ test:
 install uninstall:
 	dune $@
 
-doc:
-	sed -e 's/%%VERSION%%/$(PKGVERSION)/' src/cairo.mli \
-	  > _build/default/src/cairo.mli
+doc: build
+	sed -e 's/%%VERSION%%/$(PKGVERSION)/' --in-place \
+	  _build/default/src/cairo.mli
 	dune build @doc
 	echo '.def { background: #f9f9de; }' >> _build/default/_doc/odoc.css
 
