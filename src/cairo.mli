@@ -1227,7 +1227,7 @@ sig
     *)
 
   val create_for_stream : (string -> unit) -> w:float -> h:float -> Surface.t
-  (** create_for_stream output width height] creates a PDF surface of
+  (** [create_for_stream output width height] creates a PDF surface of
      the specified size in points to be written incrementally to the
      stream represented by [output].  Any exception that [output]
      raises is considered as a write error.
