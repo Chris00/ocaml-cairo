@@ -1,4 +1,4 @@
-/* File: cairo_ocaml.h
+/* File: cairo_ocaml.h                                           -*-c-*-
 
    Copyright (C) 2009
 
@@ -143,7 +143,9 @@ struct custom_operations caml_path_ops;
 /* FreeType
 ***********************************************************************/
 
-#if CAIRO_HAS_FT_FONT && CAIRO_HAS_FC_FONT
+/* #define OCAML_CAIRO_HAS_FT 1 */
+
+#ifdef OCAML_CAIRO_HAS_FT
 #include <cairo-ft.h>
 
 #define FT_LIBRARY_VAL(v) (* (FT_Library*) Data_custom_val(v))
@@ -152,6 +154,6 @@ struct custom_operations caml_cairo_ft_library_ops;
 #define FT_FACE_VAL(v) (* (FT_Face*) Data_custom_val(v))
 struct custom_operations caml_cairo_ft_face_ops;
 
-#endif /* CAIRO_HAS_FT_FONT && CAIRO_HAS_FC_FONT */
+#endif /* OCAML_CAIRO_HAS_FT */
 
 #endif /* __CAIRO_OCAML_H__ */

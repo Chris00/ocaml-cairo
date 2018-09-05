@@ -14,6 +14,16 @@ let default_cairo c =
       libs = ["/LC:\\gtk\\lib"; "cairo.lib"] }
   else { P.cflags = ["-I/usr/include/cairo"];  libs = ["-lcairo"] }
 
+let c_header_has_ft () =
+  let fh = open_in "cairo_ocaml.h.p" in
+  let s = really_input_string fh (in_channel_length fh) in
+  close_in fh;
+  let re = Str.regexp "/\\* *#define *OCAML_CAIRO_HAS_FT .*\\*/" in
+  let s = Str.global_replace re "#define OCAML_CAIRO_HAS_FT 1" s in
+  let fh = open_out "cairo_ocaml.h" in
+  output_string fh s;
+  close_out fh
+
 let discover_cairo c =
   let p = match P.get c with
     | Some p -> (match P.query p ~package:"cairo" with
@@ -55,10 +65,15 @@ let discover_cairo c =
   let libs =
     if has_ft_font && has_fc_font then (
       match P.get c with
-      | Some p -> (match P.query p ~package:"fontconfig" with
-                   | Some p -> p.libs @ libs
-                   | None -> C.die "Cairo was compiled with FreeType but \
-                                    fontconfig cannot be found.")
+      | Some p ->
+         (match P.query p ~package:"fontconfig" with
+          | Some fc ->
+             (match P.query p ~package:"freetype2" with
+              | Some ft -> c_header_has_ft ();
+                           ft.libs @ fc.libs @ libs
+              | None -> libs)
+          | None -> C.die "Cairo was compiled with FreeType but \
+                           fontconfig cannot be found.")
       | None -> libs
     )
     else libs in

@@ -349,7 +349,7 @@ DEFINE_CUSTOM_OPERATIONS(scaled_font,
 /* FreeType
 ***********************************************************************/
 
-#if CAIRO_HAS_FT_FONT && CAIRO_HAS_FC_FONT
+#ifdef OCAML_CAIRO_HAS_FT
 #include <cairo-ft.h>
 #include <freetype/ftmodapi.h>
 
