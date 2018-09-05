@@ -1,6 +1,7 @@
 (library
  (name        cairo)
  (public_name cairo2)
+ (flags       :standard -w -50); Remove warning 50 for OCaml 4.02.3
  (c_names     cairo_stubs)
  (c_flags     :standard (:include c_flags.sexp))
  (c_library_flags :standard (:include c_library_flags.sexp))
