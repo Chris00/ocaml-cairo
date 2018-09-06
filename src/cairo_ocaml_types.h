@@ -351,7 +351,7 @@ DEFINE_CUSTOM_OPERATIONS(scaled_font,
 
 #ifdef OCAML_CAIRO_HAS_FT
 #include <cairo-ft.h>
-#include <freetype/ftmodapi.h>
+#include <ftmodapi.h>
 
 #define FT_LIBRARY_ASSIGN(v, x) \
   v = ALLOC(cairo_ft_library);  FT_LIBRARY_VAL(v) = x

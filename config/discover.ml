@@ -62,21 +62,29 @@ let discover_cairo c =
   let has_fc_font = match List.assoc "CAIRO_HAS_FC_FONT" d with
     | C.C_define.Value.Switch b -> b
     | _ -> false in
-  let libs =
+  let cflags, libs =
     if has_ft_font && has_fc_font then (
       match P.get c with
       | Some p ->
          (match P.query p ~package:"fontconfig" with
           | Some fc ->
              (match P.query p ~package:"freetype2" with
-              | Some ft -> c_header_has_ft ();
-                           ft.libs @ fc.libs @ libs
-              | None -> libs)
+              | Some ft ->
+                 (* freetype/ftmodapi.h on Debian but no prefix
+                    directory on Ubuntu. *)
+                 let freetype l f =
+                   if String.length f > 2 && f.[0] = '-' && f.[1] = 'I' then
+                     f :: (f ^ "/freetype") :: l
+                   else f :: l in
+                 c_header_has_ft ();
+                 (List.fold_left freetype [] ft.cflags @ ft.cflags @ cflags,
+                  ft.libs @ fc.libs @ libs)
+              | None -> cflags, libs)
           | None -> C.die "Cairo was compiled with FreeType but \
                            fontconfig cannot be found.")
-      | None -> libs
+      | None -> cflags, libs
     )
-    else libs in
+    else cflags, libs in
   write ~cflags ~libs
 
 let default_gtk c =
