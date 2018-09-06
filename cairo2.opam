@@ -18,6 +18,9 @@ depends: [
   "dune" {build}
   "conf-cairo"
 ]
+depopts: [
+  "conf-freetype"
+]
 conflicts: [
   "cairo" {= "0.4.1"}
   "cairo" {= "0.4.2"}
