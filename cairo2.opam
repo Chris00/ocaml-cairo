@@ -12,6 +12,9 @@ build: [
   [ "dune" "subst" ] {pinned}
   [ "dune" "build" "-p" name "-j" jobs ]
 ]
+build-test: [
+  [ "dune" "runtest" ]
+]
 build-doc: [ "dune" "build" "@doc" ]
 depends: [
   "base-bigarray"
