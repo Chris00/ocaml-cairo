@@ -4,6 +4,7 @@ platform:
 environment:
   global:
     PACKAGE: cairo2
+#    DEPOPTS: "*"
     CYG_ROOT: "C:\\cygwin"
     CYG_BASH: "%CYG_ROOT%\\bin\\bash -lc"
     FORK_USER: ocaml
