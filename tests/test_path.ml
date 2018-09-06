@@ -16,7 +16,9 @@ let print_path ppf p =
   fprintf ppf "@]|]"
 
 let () =
-  let surface = Cairo.PDF.create "/tmp/test_path.pdf" ~w:300. ~h:300. in
+  let tmp = Filename.get_temp_dir_name() in
+  let surface = Cairo.PDF.create (Filename.concat tmp "test_path.pdf")
+                  ~w:300. ~h:300. in
   let cr = Cairo.create surface in
 
   move_to cr 0. 0.;

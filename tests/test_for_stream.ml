@@ -15,6 +15,7 @@ let make create fname =
   printf "Wrote %S.\n" fname
 
 let () =
-  make Cairo.SVG.create_for_stream "/tmp/cairo-test.svg";
+  let tmp = Filename.get_temp_dir_name() in
+  make Cairo.SVG.create_for_stream (Filename.concat tmp "cairo-test.svg");
   Gc.major();
-  make Cairo.PDF.create_for_stream "/tmp/cairo-test.pdf";
+  make Cairo.PDF.create_for_stream (Filename.concat tmp "cairo-test.pdf");
