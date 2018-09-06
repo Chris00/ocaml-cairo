@@ -2,7 +2,7 @@ open Printf
 
 let make create fname =
   let fh = open_out fname in
-  let surface = create ~output:(output_string fh) ~width:100. ~height:100. in
+  let surface = create (output_string fh) ~w:100. ~h:100. in
   let ctx = Cairo.create surface in
 
   Cairo.set_line_width ctx 1.;

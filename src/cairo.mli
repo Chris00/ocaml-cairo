@@ -1140,8 +1140,8 @@ sig
       (int32, Bigarray.int32_elt, Bigarray.c_layout) Bigarray.Array2.t
   (** Images represented as an array of 32 bytes (RGB or RGBA) values. *)
 
-  val create_for_data8 : data8 ->
-    format -> ?stride:int -> w:int -> h:int -> Surface.t
+  val create_for_data8 : data8 -> ?stride:int ->
+                         format -> w:int -> h:int -> Surface.t
   (** [create_for_data8 data format ?stride width height] creates an
      image surface for the provided pixel data.  The initial contents
      of buffer will be used as the initial image contents; you must

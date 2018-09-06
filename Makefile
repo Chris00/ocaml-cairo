@@ -6,10 +6,7 @@ build:
 	dune build @install @examples
 
 test:
-	dune runtest
-	@cd _build/default/tests/ && for p in *.exe; do \
-	  echo "▸ $$p"; ./$$p; \
-	done
+	dune runtest --force
 
 install uninstall:
 	dune $@

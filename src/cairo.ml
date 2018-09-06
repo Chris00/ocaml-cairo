@@ -762,7 +762,7 @@ struct
     format -> w:int -> h:int -> stride:int -> Surface.t
     = "caml_cairo_image_surface_create_for_data32"
 
-  let create_for_data8 data format ?stride ~w ~h =
+  let create_for_data8 data ?stride format ~w ~h =
     if w <= 0 then invalid_arg "Cairo.Image.create_for_data8: width <= 0";
     if h <= 0 then invalid_arg "Cairo.Image.create_for_data8: height <= 0";
     let stride = match stride with

@@ -4,7 +4,7 @@ open Cairo
 (* Test that using the ref-count of the surface to express its
    dependency on the context works. *)
 let image_context () =
-  let surf = Image.create Image.ARGB32 100 100 in
+  let surf = Image.create Image.ARGB32 ~w:100 ~h:100 in
   Gc.finalise (fun _ -> eprintf "`surf' is collected by the GC.\n%!") surf;
   create surf
 

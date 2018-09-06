@@ -9,10 +9,10 @@
  (deps image_create.exe matrix_set.exe surface_gc.exe test_for_stream.exe
        test_finish.exe test_path.exe test_exn.exe)
  (action (progn
-          (run ${path:image_create.exe})
-          (run ${path:matrix_set.exe})
-          (run ${path:surface_gc.exe})
-          (run ${path:test_for_stream.exe})
-          (run ${path:test_finish.exe})
-          (run ${path:test_path.exe})
-          (run ${path:test_exn.exe}))))
+          (run %{dep:image_create.exe})
+          (run %{dep:matrix_set.exe})
+          (run %{dep:surface_gc.exe})
+          (run %{dep:test_for_stream.exe})
+          (run %{dep:test_finish.exe})
+          (run %{dep:test_path.exe})
+          (run %{dep:test_exn.exe}))))

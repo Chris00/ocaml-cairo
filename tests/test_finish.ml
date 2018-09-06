@@ -1,7 +1,7 @@
 open Printf
 
 let () =
-  let surface = Cairo.Image.(create ARGB32 100 100) in
+  let surface = Cairo.Image.(create ARGB32 ~w:100 ~h:100) in
   let ctx = Cairo.create surface in
 
   Cairo.set_line_width ctx 1.;

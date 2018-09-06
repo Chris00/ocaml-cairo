@@ -5,13 +5,13 @@ open Bigarray
 let create() =
   let data = Array1.create int8_unsigned c_layout 360_000 in
   Gc.finalise (fun _ -> eprintf "DESTROY bigarray 'data'\n%!") data;
-  let surf = Image.create_for_data8 data Image.RGB24 300 300 in
+  let surf = Image.create_for_data8 data Image.RGB24 ~w:300 ~h:300 in
   Cairo.create surf
 
 let () =
   let cr = create() in
   set_source_rgb cr 1. 1. 1.;
-  rectangle cr 0. 0. 300. 300.;
+  rectangle cr 0. 0. ~w:300. ~h:300.;
   fill cr;
 
   Gc.compact();  Gc.compact();
@@ -34,7 +34,7 @@ let () =
   let mat = Array1.create int8_unsigned c_layout 80_000 in
   let test_stride stride =
     try
-      let surf = Image.create_for_data8 mat Image.A8 100 100 ~stride in
+      let surf = Image.create_for_data8 mat Image.A8 ~w:100 ~h:100 ~stride in
       assert(Image.get_stride surf = stride)
     with Error INVALID_STRIDE ->
       assert(stride < 100)
