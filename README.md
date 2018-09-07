@@ -1,4 +1,4 @@
-[![Travis Build Status](https://travis-ci.org/ocaml/tuareg.svg?branch=master)](https://travis-ci.org/ocaml/tuareg)
+[![Build Status](https://travis-ci.org/Chris00/ocaml-cairo.svg?branch=master)](https://travis-ci.org/Chris00/ocaml-cairo)
 [![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/5dp8aftaq7ohyflq?svg=true)](https://ci.appveyor.com/project/Chris00/ocaml-cairo)
 
 OCaml interface to Cairo
