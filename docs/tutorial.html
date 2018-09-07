@@ -168,7 +168,7 @@ also a data type for the surface, called
 <code><a href="html/Cairo/Surface/#TYPEt">Cairo.Surface.t</a></code>.
 You can initialize your cairo context like this:</p>
 
-<pre><code>let surface = <a href="html/Cairo/Image/#VALcreate">Cairo.Image.create</a> Cairo.Image.ARGB32 120 120
+<pre><code>let surface = <a href="html/Cairo/Image/#VALcreate">Cairo.Image.create</a> Cairo.Image.ARGB32 ~w:120 ~h:120
 let cr = <a href="html/Cairo/#VALcreate">Cairo.create</a> surface
 </code></pre>
 
@@ -203,7 +203,7 @@ and <a href="html/Cairo/#VALset_line_cap">line caps</a>.</p>
 
 <pre><code>Cairo.set_line_width cr 0.1;
 Cairo.set_source_rgb cr 0. 0. 0.;
-Cairo.rectangle cr 0.25 0.25 0.5 0.5;
+Cairo.rectangle cr 0.25 0.25 ~w:0.5 ~h:0.5;
 Cairo.stroke cr;
 </code></pre>
 
@@ -225,7 +225,7 @@ each side of the path, filling a path fills directly up to the edge of
 the path and no further.</p>
 
 <pre><code>Cairo.set_source_rgb cr 0. 0. 0.;
-Cairo.rectangle cr 0.25 0.25 0.5 0.5;
+Cairo.rectangle cr 0.25 0.25 ~w:0.5 ~h:0.5;
 Cairo.fill cr;
 </code></pre>
 
@@ -287,11 +287,12 @@ second source pattern or surface. Where the pattern or surface is
 opaque, the current source is transferred to the destination.  Where
 the pattern or surface is transparent, nothing is transferred.</p>
 
-<pre><code>let linpat = Cairo.Pattern.create_linear 0. 0. 1. 1. in
+<pre><code>let linpat = Cairo.Pattern.create_linear ~x0:0. ~y0:0. ~x1:1. ~y1:1. in
 Cairo.Pattern.add_color_stop_rgb linpat 0. 0.3 0.8;
 Cairo.Pattern.add_color_stop_rgb linpat ~ofs:1. 0. 0.8 0.3;
 
-let radpat = Cairo.Pattern.create_radial 0.5 0.5 0.25 0.5 0.5 0.75 in
+let radpat = Cairo.Pattern.create_radial ~x0:0.5 ~y0:0.5 ~r0:0.25
+                                         ~x1:0.5 ~y1:0.5 ~r1:0.75 in
 Cairo.Pattern.add_color_stop_rgba radpat 0. 0. 0. 1.;
 Cairo.Pattern.add_color_stop_rgba radpat ~ofs:0.5 0. 0. 0. 0.;
 
@@ -344,15 +345,15 @@ Cairo.line_to cr 0. 1.;
 Cairo.set_line_width cr 0.2;
 Cairo.stroke cr;
 
-Cairo.rectangle cr 0. 0. 0.5 0.5;
+Cairo.rectangle cr 0. 0. ~w:0.5 ~h:0.5;
 Cairo.set_source_rgba cr 1. 0. 0. 0.80;
 Cairo.fill cr;
 
-Cairo.rectangle cr 0. 0.5 0.5 0.5;
+Cairo.rectangle cr 0. 0.5 ~w:0.5 ~h:0.5;
 Cairo.set_source_rgba cr 0. 1. 0. 0.60;
 Cairo.fill cr;
 
-Cairo.rectangle cr 0.5 0. 0.5 0.5;
+Cairo.rectangle cr 0.5 0. ~w:0.5 ~h:0.5;
 Cairo.set_source_rgba cr 0. 0. 1. 0.40;
 Cairo.fill cr;
 </code></pre>
@@ -381,27 +382,29 @@ with
 <div class="tutright"><a href="../examples/setsourcegradient.ml"
 ><img src="setsourcegradient.png" alt=""></a></div>
 
-<pre><code>let radpat = Cairo.Pattern.create_radial 0.25 0.25 0.1  0.5 0.5 0.5 in
+<pre><code>let radpat = Cairo.Pattern.create_radial ~x0:0.25 ~y0:0.25 ~r0:0.1
+                                         ~x1:0.5  ~y1:0.5  ~r1:0.5 in
 Cairo.Pattern.add_color_stop_rgb radpat  1.0 0.8 0.8;
 Cairo.Pattern.add_color_stop_rgb radpat ~ofs:1.  0.9 0.0 0.0;
 
 for i=1 to 9 do
   for j=1 to 9 do
     Cairo.rectangle cr (float i /. 10. -. 0.04)
-                       (float j /. 10. -. 0.04) 0.08 0.08;
+                       (float j /. 10. -. 0.04) ~w:0.08 ~h:0.08;
   done
 done;
 Cairo.set_source cr radpat;
 Cairo.fill cr;
 
-let linpat = Cairo.Pattern.create_linear 0.25 0.35 0.75 0.65 in
+let linpat = Cairo.Pattern.create_linear ~x0:0.25 ~y0:0.35
+                                         ~x1:0.75 ~y1:0.65 in
 Cairo.Pattern.add_color_stop_rgba linpat ~ofs:0.00  1. 1. 1. 0.0;
 Cairo.Pattern.add_color_stop_rgba linpat ~ofs:0.25  0. 1. 0. 0.5;
 Cairo.Pattern.add_color_stop_rgba linpat ~ofs:0.50  1. 1. 1. 0.0;
 Cairo.Pattern.add_color_stop_rgba linpat ~ofs:0.75  0. 0. 1. 0.5;
 Cairo.Pattern.add_color_stop_rgba linpat ~ofs:1.00  1. 1. 1. 0.0;
 
-Cairo.rectangle cr 0.0 0.0 1. 1.;
+Cairo.rectangle cr 0.0 0.0 ~w:1. ~h:1.;
 Cairo.set_source cr linpat;
 Cairo.fill cr;
 </code></pre>
@@ -512,7 +515,7 @@ then updated to where the arc ends. There are only absolute
 versions.</p>
 
 <pre><code>let pi_4 = atan 1. in
-Cairo.arc cr 0.5 0.5 (0.25 *. sqrt 2) (-. pi_4) pi_4;
+Cairo.arc cr 0.5 0.5 ~r:(0.25 *. sqrt 2) ~a1:(-. pi_4) ~a2:pi_4;
 </code></pre>
 
 <h3 id="Curves">Curves</h3>
@@ -741,11 +744,11 @@ the right is stroked under a uniform scale.</p>
 
 Cairo.save cr;
 Cairo.scale cr 0.5 1.;
-Cairo.arc cr 0.5 0.5 0.40 0. two_pi;
+Cairo.arc cr 0.5 0.5 ~r:0.40 ~a1:0. ~a2:two_pi;
 Cairo.stroke cr;
 
 Cairo.translate cr 1. 0.;
-Cairo.arc cr 0.5 0.5 0.40 0. two_pi;
+Cairo.arc cr 0.5 0.5 ~r:0.40 ~a1:0. ~a2:two_pi;
 Cairo.restore cr;
 Cairo.stroke cr;
 </code></pre>
