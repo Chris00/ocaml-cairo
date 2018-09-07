@@ -1,0 +1,74 @@
+body {
+    margin-left: 4%;
+    margin-right: 4%;
+    color: black;
+    background-color: white;
+  font-family: verdana,arial,helvetica,sans-serif;
+}
+
+img {
+	border: none;
+}
+
+h1, .header, #footer, #title {
+    clear: both;
+}
+
+h1,h2,h3,h4,h5,h6, .header, #title {
+  font-family: verdana,arial,helvetica,sans-serif;
+  clear: both;
+  color: #01004e;
+}
+
+h1, #title {
+    font-weight: bold;
+    font-size: 170%;
+}
+
+h2 {
+    margin-left: 0%;
+    margin-right: 2%;
+    font-size: 150%;
+}
+
+h3,h4,h5,h6 {
+    margin-left: 2%;
+    margin-right: 2%;
+    font-size: 125%;
+}
+
+p, ol, ul, hr, table {
+    margin-left: 2%;
+    margin-right: 4%;
+}
+
+
+
+div.tutright {
+	float:right;
+	background-color: #eee;
+	border: solid 1px #888;
+	padding: 0.5em;
+	margin-left: 1em;
+}
+
+div.tutright img {
+	margin: 0px;
+}
+div.clear {
+	clear: both;
+}
+
+pre {
+    font-family: mono;
+    margin-left: 10%;
+    margin-right: 10%;
+    border: 1px solid #c5c5f6;
+    background-color: #dbdbf7;
+    padding: .5em;
+}
+
+a:link { text-decoration:none }
+a:visited { text-decoration:none }
+a:active { text-decoration:none }
+a:hover { text-decoration:underline; color:red }

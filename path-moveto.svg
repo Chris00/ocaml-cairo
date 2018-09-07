@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120pt" height="120pt" viewBox="0 0 120 120" version="1.1">
+<g id="surface14">
+<rect x="0" y="0" width="120" height="120" style="fill:rgb(100%,100%,100%);fill-opacity:1;stroke:none;"/>
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(0%,60%,0%);fill-opacity:0.5;" d="M 35 30 C 35 36.667969 25 36.667969 25 30 C 25 23.332031 35 23.332031 35 30 "/>
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(0%,0%,75%);fill-opacity:0.5;" d="M 35 30 C 35 36.667969 25 36.667969 25 30 C 25 23.332031 35 23.332031 35 30 "/>
+<path style="fill:none;stroke-width:0.0166667;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%,0%,0%);stroke-opacity:1;stroke-miterlimit:10;" d="M 0 0 L 1 0 L 1 1 L 0 1 Z M 0 0 " transform="matrix(120,0,0,120,0,0)"/>
+</g>
+</svg>
