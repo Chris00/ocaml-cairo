@@ -15,7 +15,8 @@ doc: build
 	sed -e 's/%%VERSION%%/$(PKGVERSION)/' --in-place \
 	  _build/default/src/cairo.mli
 	dune build @doc
-	echo '.def { background: #f9f9de; }' >> _build/default/_doc/odoc.css
+	echo '.def { background: #f1f1f1; }' >> \
+	  _build/default/_doc/_html/odoc.css
 
 submit:
 	topkg distrib --skip-tests
@@ -37,11 +38,8 @@ submit:
 #	CONDUIT_TLS=native topkg opam submit $(addprefix -n, $(PACKAGES))
 
 
-.PHONY: web web-html tutorial
-web-html: doc
-	$(MAKE) -C doc $@
-web tutorial: all doc
-	$(MAKE) -C doc $@
+tutorial-submit: build doc
+	$(MAKE) -C docs $@
 
 lint:
 	for p in $(PACKAGES); do opam lint $$p.opam; done
@@ -50,4 +48,4 @@ clean:
 	dune clean
 	$(RM) $(wildcard *~ *.pdf *.ps *.png *.svg)
 
-.PHONY: build install uninstall doc submit lint clean
+.PHONY: build install uninstall doc submit tutorial-submit lint clean
