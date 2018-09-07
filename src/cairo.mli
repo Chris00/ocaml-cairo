@@ -812,8 +812,8 @@ val select_font_face : context -> ?slant:slant -> ?weight:weight -> string ->
    For "real" font selection, see the font-backend-specific
    [font_face_create] functions for the font backend you are using.
    (For example, if you are using the freetype-based cairo-ft font
-   backend, see {!Cairo.Ft.font_face_create_for_ft_face} or
-   {!Cairo.Ft.font_face_create_for_pattern}.)  The resulting font face
+   backend, see {!Cairo.Ft.create_for_ft_face} or
+   {!Cairo.Ft.create_for_pattern}.)  The resulting font face
    could then be used with {!Cairo.Scaled_font.create} and
    {!Cairo.Scaled_font.set}.
 
