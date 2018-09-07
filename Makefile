@@ -44,8 +44,7 @@ web tutorial: all doc
 	$(MAKE) -C doc $@
 
 lint:
-	@opam lint cairo2.opam
-	@opam lint cairo2-gtk.opam
+	for p in $(PACKAGES); do opam lint $$p.opam; done
 
 clean:
 	dune clean
