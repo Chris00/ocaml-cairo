@@ -9,16 +9,19 @@ This is an OCaml binding for the
 with support for multiple output devices.
 
 You can read the API of
-[Cairo](http://cairo.forge.ocamlcore.org/tutorial/Cairo.html) and
-[Cairo_gtk](http://cairo.forge.ocamlcore.org/tutorial/Cairo_gtk.html)
+[Cairo](http://chris00.github.io/ocaml-cairo/doc/cairo2/Cairo2/),
+[Cairo_gtk](http://chris00.github.io/ocaml-cairo/doc/cairo2-gtk/Cairo2_gtk/),
+and
+[Cairo_pango](http://chris00.github.io/ocaml-cairo/doc/cairo2-pango/Cairo2_pango/)
 online.
 
 Prerequisites
 -------------
 
-You need the development files of Cairo (e.g. on Debian, you must
-install the package ``libcairo2-dev``, on Mageia `libcairo-devel`, and
-on Fedora `cairo-devel`) and the OCaml package
+You need the development files of Cairo (see the
+[conf-cairo](https://github.com/ocaml/opam-repository/blob/master/packages/conf-cairo/conf-cairo.1/opam#L7)
+package)
+and the OCaml package
 ``lablgtk2`` (in the [OPAM](http://opam.ocamlpro.com/) package
 ``lablgtk``).
 
@@ -30,32 +33,29 @@ up — is to use [opam](http://opam.ocaml.org/):
 
     opam install cairo2
 
-If you would like to compile from the sources, install
-[OASIS](http://oasis.forge.ocamlcore.org/):
+If you would like to compile from the sources, install [Dune][]
 
-    opam install oasis
+    opam install dune
 
 and do:
 
-	oasis setup
-    ocaml setup.ml -configure
-	ocaml setup.ml -build
+    dune build @install
 
-You can then install it with:
+or just `make`.  You can then install it with:
 
-	ocaml setup.ml -install
+	dune install
 
+[Dune]: https://github.com/ocaml/dune
 
 Examples
 --------
 
 You can read a version of the
-[Cairo tutorial](http://cairo.forge.ocamlcore.org/tutorial/) using
+[Cairo tutorial](http://chris00.github.io/ocaml-cairo/tutorial.html) using
 this module.  The code of this tutorial is available in the
-``examples/`` directory.  To compile it, you must configure the
-project with
+``examples/`` directory.  To compile it, just do
 
-    ocaml setup.ml -configure --enable-examples
+    dune build @examples
 
 All the examples below are available (with some comments) by clicking
 on images in the [tutorial](http://cairo.forge.ocamlcore.org/tutorial/).
