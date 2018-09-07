@@ -9,10 +9,10 @@ This is an OCaml binding for the
 with support for multiple output devices.
 
 You can read the API of
-[Cairo](http://chris00.github.io/ocaml-cairo/doc/cairo2/Cairo2/),
-[Cairo_gtk](http://chris00.github.io/ocaml-cairo/doc/cairo2-gtk/Cairo2_gtk/),
+[Cairo](http://chris00.github.io/ocaml-cairo/doc/cairo2/Cairo/),
+[Cairo_gtk](http://chris00.github.io/ocaml-cairo/doc/cairo2-gtk/Cairo_gtk/),
 and
-[Cairo_pango](http://chris00.github.io/ocaml-cairo/doc/cairo2-pango/Cairo2_pango/)
+[Cairo_pango](http://chris00.github.io/ocaml-cairo/doc/cairo2-pango/Cairo_pango/)
 online.
 
 Prerequisites
@@ -22,7 +22,7 @@ You need the development files of Cairo (see the
 [conf-cairo](https://github.com/ocaml/opam-repository/blob/master/packages/conf-cairo/conf-cairo.1/opam#L7)
 package)
 and the OCaml package
-``lablgtk2`` (in the [OPAM](http://opam.ocamlpro.com/) package
+``lablgtk2`` (in the [OPAM](https://opam.ocaml.org/) package
 ``lablgtk``).
 
 Compilation & Installation
@@ -51,7 +51,7 @@ Examples
 --------
 
 You can read a version of the
-[Cairo tutorial](http://chris00.github.io/ocaml-cairo/tutorial.html) using
+[Cairo tutorial](http://chris00.github.io/ocaml-cairo/) using
 this module.  The code of this tutorial is available in the
 ``examples/`` directory.  To compile it, just do
 
