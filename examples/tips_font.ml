@@ -6,7 +6,7 @@ open Cairo
 
 let () =
   let alphabet = "AbCdEfGhIjKlMnOpQrStUvWxYz" in
-  let surface = Cairo.Image.create Cairo.Image.ARGB32 780 30 in
+  let surface = Cairo.Image.create Cairo.Image.ARGB32 ~w:780 ~h:30 in
   let cr = Cairo.create surface in
   (* Examples are in 26.0 x 1.0 coordinate space *)
   Cairo.scale cr 30. 30.;

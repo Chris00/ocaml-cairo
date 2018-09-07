@@ -3,7 +3,7 @@ PKGVERSION = $(shell git describe --always)
 PACKAGES = $(basename $(wildcard *.opam))
 
 build:
-	dune build @install @examples
+	dune build @install @examples @tutorial
 
 test:
 	dune runtest --force

@@ -17,7 +17,7 @@ let draw_path_lineto cr =
 
 let draw_path_arcto cr =
   draw_path_lineto cr;
-  Cairo.arc cr 0.5 0.5 (0.25 *. sqrt 2.) (-. pi_4) pi_4
+  Cairo.arc cr 0.5 0.5 ~r:(0.25 *. sqrt 2.) ~a1:(-. pi_4) ~a2:pi_4
 
 let draw_path_curveto cr =
   draw_path_arcto cr;
@@ -60,7 +60,7 @@ let draw_textextents cr =
   Cairo.set_line_width cr px;
   Cairo.set_dash cr [| 3. *. px |];
   Cairo.rectangle cr (x +. te.Cairo.x_bearing)
-    (y +. te.Cairo.y_bearing) te.Cairo.width te.Cairo.height;
+    (y +. te.Cairo.y_bearing) ~w:te.Cairo.width ~h:te.Cairo.height;
   Cairo.stroke cr;
 
   (* text *)
@@ -79,37 +79,39 @@ let draw_textextents cr =
   (* text's advance (blue dot) *)
   Cairo.set_source_rgba cr 0. 0. 0.75 0.5;
   Cairo.arc cr (x +. te.Cairo.x_advance) (y +. te.Cairo.y_advance)
-    (6. *. px) 0. two_pi;
+    ~r:(6. *. px) ~a1:0. ~a2:two_pi;
   Cairo.fill cr;
 
   (* reference point (x,y) (red dot) *)
-  Cairo.arc cr x y (6. *. px) 0. two_pi;
+  Cairo.arc cr x y ~r:(6. *. px) ~a1:0. ~a2:two_pi;
   Cairo.set_source_rgba cr 0.75 0. 0. 0.5;
   Cairo.fill cr
 ;;
 
 
 let draw_setsourcegradient cr =
-  let radpat = Cairo.Pattern.create_radial 0.25 0.25 0.1 0.5 0.5 0.5 in
+  let radpat = Cairo.Pattern.create_radial ~x0:0.25 ~y0:0.25 ~r0:0.1
+                                           ~x1:0.5  ~y1:0.5  ~r1:0.5 in
   Cairo.Pattern.add_color_stop_rgb radpat 1.0 0.8 0.8;
   Cairo.Pattern.add_color_stop_rgb radpat ~ofs:1. 0.9 0.0 0.0;
 
   for i = 1 to 9 do
     for j = 1 to 9 do
       Cairo.rectangle cr (float i /. 10.0 -. 0.04) (float j /. 10.0 -. 0.04)
-	0.08 0.08;
+        ~w:0.08 ~h:0.08;
     done;
   done;
   Cairo.set_source cr radpat;
   Cairo.fill cr;
 
-  let linpat = Cairo.Pattern.create_linear 0.25 0.35 0.75 0.65 in
+  let linpat = Cairo.Pattern.create_linear ~x0:0.25 ~y0:0.35
+                                           ~x1:0.75 ~y1:0.65 in
   Cairo.Pattern.add_color_stop_rgba linpat ~ofs:0.00  1. 1. 1. 0.;
   Cairo.Pattern.add_color_stop_rgba linpat ~ofs:0.25  0. 1. 0. 0.5;
   Cairo.Pattern.add_color_stop_rgba linpat ~ofs:0.50  1. 1. 1. 0.;
   Cairo.Pattern.add_color_stop_rgba linpat ~ofs:0.75  0. 0. 1. 0.5;
   Cairo.Pattern.add_color_stop_rgba linpat ~ofs:1.00  1. 1. 1. 0.;
-  Cairo.rectangle cr 0.0 0.0 1. 1.;
+  Cairo.rectangle cr 0.0 0.0 ~w:1. ~h:1.;
   Cairo.set_source cr linpat;
   Cairo.fill cr
 ;;
@@ -141,12 +143,12 @@ let path_diagram cr =
     let x, y = get_point path.(0) in
     let px, py = Cairo.device_to_user_distance cr 5. 5. in
     let px = max px py in
-    Cairo.arc cr x y px 0. two_pi;
+    Cairo.arc cr x y ~r:px ~a1:0. ~a2:two_pi;
     Cairo.set_source_rgba cr 0.0 0.6 0.0 0.5;
     Cairo.fill cr;
 
     let x, y = get_point path.(len - 1) in
-    Cairo.arc cr x y px 0. two_pi;
+    Cairo.arc cr x y ~r:px ~a1:0. ~a2:two_pi;
     Cairo.set_source_rgba cr 0.0 0.0 0.75 0.5;
     Cairo.fill cr;
   )
@@ -158,9 +160,9 @@ let draw_path_curveto_hints cr =
   let px = max px py in
   Cairo.set_source_rgba cr 0.5 0. 0. 0.5;
   Cairo.Path.sub cr;
-  Cairo.arc cr 0.5 0.625 px 0. two_pi;
+  Cairo.arc cr 0.5 0.625 ~r:px ~a1:0. ~a2:two_pi;
   Cairo.fill cr;
-  Cairo.arc cr 0.5 0.875 px 0. two_pi;
+  Cairo.arc cr 0.5 0.875 ~r:px ~a1:0. ~a2:two_pi;
   Cairo.fill cr;
 
   let px, py = Cairo.device_to_user_distance cr 2. 2. in
@@ -187,15 +189,15 @@ let draw_setsourcergba cr =
   Cairo.set_line_width cr 0.2;
   Cairo.stroke cr;
 
-  Cairo.rectangle cr 0. 0. 0.5 0.5;
+  Cairo.rectangle cr 0. 0. ~w:0.5 ~h:0.5;
   Cairo.set_source_rgba cr 1. 0. 0. 0.80;
   Cairo.fill cr;
 
-  Cairo.rectangle cr 0. 0.5 0.5 0.5;
+  Cairo.rectangle cr 0. 0.5 ~w:0.5 ~h:0.5;
   Cairo.set_source_rgba cr 0. 1. 0. 0.60;
   Cairo.fill cr;
 
-  Cairo.rectangle cr 0.5 0. 0.5 0.5;
+  Cairo.rectangle cr 0.5 0. ~w:0.5 ~h:0.5;
   Cairo.set_source_rgba cr 0. 0. 1. 0.40;
   Cairo.fill cr
 ;;
@@ -220,13 +222,13 @@ let diagram name =
   let width = 120. and height = 120. in
   let svg_filename = name ^ ".svg"
   and png_filename = name ^ ".png" in
-  let surf = Cairo.SVG.create svg_filename width height in
+  let surf = Cairo.SVG.create svg_filename ~w:width ~h:height in
   let cr = Cairo.create surf in
 
   Cairo.scale cr width height;
   Cairo.set_line_width cr 0.01;
 
-  Cairo.rectangle cr 0. 0. 1. 1.;
+  Cairo.rectangle cr 0. 0. ~w:1. ~h:1.;
   Cairo.set_source_rgb cr 1. 1. 1.;
   Cairo.fill cr;
 
@@ -235,7 +237,7 @@ let diagram name =
   let ux, uy = Cairo.device_to_user_distance cr 2. 2. in
   Cairo.set_line_width cr (max ux uy);
   Cairo.set_source_rgb cr 0. 0. 0.;
-  Cairo.rectangle cr 0. 0. 1. 1.;
+  Cairo.rectangle cr 0. 0. ~w:1. ~h:1.;
   Cairo.stroke cr;
 
   (* write output *)

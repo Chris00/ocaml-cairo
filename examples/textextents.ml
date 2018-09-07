@@ -6,7 +6,7 @@ open Cairo
 
 let () =
   let text = "joy" in
-  let surface = Cairo.Image.create Cairo.Image.ARGB32 600 600 in
+  let surface = Cairo.Image.create Cairo.Image.ARGB32 ~w:600 ~h:600 in
   let cr = Cairo.create surface in
   (* Examples are in 1.0 x 1.0 coordinate space *)
   Cairo.scale cr 600. 600.;
@@ -41,7 +41,8 @@ let () =
   Cairo.set_source_rgba cr 0. 0. 0.75 0.5;
   Cairo.set_line_width cr px;
   Cairo.set_dash cr [| 3. *. px |];
-  Cairo.rectangle cr (x +. te.x_bearing) (y +. te.y_bearing) te.width te.height;
+  Cairo.rectangle cr (x +. te.x_bearing) (y +. te.y_bearing)
+    ~w:te.width ~h:te.height;
   Cairo.stroke cr;
 
   (* text *)
@@ -60,11 +61,12 @@ let () =
   (* text's advance (blue dot) *)
   Cairo.set_source_rgba cr 0. 0. 0.75 0.5;
   let two_pi = 8. *. atan 1. in
-  Cairo.arc cr (x +. te.x_advance) (y +. te.y_advance) (6. *. px) 0. two_pi;
+  Cairo.arc cr (x +. te.x_advance) (y +. te.y_advance) ~r:(6. *. px)
+    ~a1:0. ~a2:two_pi;
   Cairo.fill cr;
 
   (* reference point (x,y) (red dot) *)
-  Cairo.arc cr x y (6. *. px) 0. two_pi;
+  Cairo.arc cr x y ~r:(6. *. px) ~a1:0. ~a2:two_pi;
   Cairo.set_source_rgba cr 0.75 0. 0. 0.5;
   Cairo.fill cr;
 

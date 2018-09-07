@@ -6,12 +6,12 @@ open Cairo
 
 let diagram_draw_source cr =
   Cairo.set_source_rgb cr 0. 0. 0.;
-  Cairo.rectangle cr 0. 0. 1. 1.;
+  Cairo.rectangle cr 0. 0. ~w:1. ~h:1.;
   Cairo.fill cr
 
 let diagram_draw_mask cr =
   Cairo.set_source_rgb cr 1. 0.9 0.6;
-  Cairo.rectangle cr 0. 0. 1. 1.;
+  Cairo.rectangle cr 0. 0. ~w:1. ~h:1.;
   Cairo.fill cr
 
 let diagram_draw_mask_pattern cr pat =
@@ -20,21 +20,21 @@ let diagram_draw_mask_pattern cr pat =
 
 let diagram_draw_dest cr =
   Cairo.set_source_rgb cr 1. 1. 1.;
-  Cairo.rectangle cr 0. 0. 1. 1.;
+  Cairo.rectangle cr 0. 0. ~w:1. ~h:1.;
   Cairo.fill cr
 
 let stroke_draw_mask cr =
   Cairo.Group.push cr;
-  Cairo.rectangle cr 0. 0. 1. 1.;
-  Cairo.rectangle cr 0.20 0.20 0.6 0.6;
-  Cairo.rectangle cr 0.30 0.30 0.4 0.4;
+  Cairo.rectangle cr 0. 0. ~w:1. ~h:1.;
+  Cairo.rectangle cr 0.20 0.20 ~w:0.6 ~h:0.6;
+  Cairo.rectangle cr 0.30 0.30 ~w:0.4 ~h:0.4;
   Cairo.set_fill_rule cr EVEN_ODD;
   Cairo.fill cr;
   Cairo.set_fill_rule cr WINDING;
 
   diagram_draw_mask_pattern cr (Cairo.Group.pop cr);
 
-  Cairo.rectangle cr 0.25 0.25 0.5 0.5;
+  Cairo.rectangle cr 0.25 0.25 ~w:0.5 ~h:0.5;
   Cairo.set_source_rgb cr 0. 0.6 0.;
 
   let px, py = Cairo.device_to_user_distance cr 1. 1. in
@@ -45,20 +45,20 @@ let stroke_draw_dest cr =
   diagram_draw_dest cr;
   Cairo.set_line_width cr 0.1;
   Cairo.set_source_rgb cr 0. 0. 0.;
-  Cairo.rectangle cr 0.25 0.25 0.5 0.5;
+  Cairo.rectangle cr 0.25 0.25 ~w:0.5 ~h:0.5;
   Cairo.stroke cr
 
 let fill_draw_mask cr =
   Cairo.Group.push cr;
-  Cairo.rectangle cr 0. 0. 1. 1.;
-  Cairo.rectangle cr 0.25 0.25 0.5 0.5;
+  Cairo.rectangle cr 0. 0. ~w:1. ~h:1.;
+  Cairo.rectangle cr 0.25 0.25 ~w:0.5 ~h:0.5;
   Cairo.set_fill_rule cr EVEN_ODD;
   Cairo.fill cr;
   Cairo.set_fill_rule cr WINDING;
 
   diagram_draw_mask_pattern cr (Cairo.Group.pop cr);
 
-  Cairo.rectangle cr 0.25 0.25 0.5 0.5;
+  Cairo.rectangle cr 0.25 0.25 ~w:0.5 ~h:0.5;
   Cairo.set_source_rgb cr 0. 0.6 0.;
   let px, py = Cairo.device_to_user_distance cr 1. 1. in
   Cairo.set_line_width cr (max px py);
@@ -67,7 +67,7 @@ let fill_draw_mask cr =
 let fill_draw_dest cr =
   diagram_draw_dest cr;
   Cairo.set_source_rgb cr 0. 0. 0.;
-  Cairo.rectangle cr 0.25 0.25 0.5 0.5;
+  Cairo.rectangle cr 0.25 0.25 ~w:0.5 ~h:0.5;
   Cairo.fill cr
 
 let showtext_draw_mask cr =
@@ -79,7 +79,7 @@ let showtext_draw_mask cr =
   Cairo.set_font_size cr 1.2;
   let te = Cairo.text_extents cr "a" in
   Cairo.Group.push cr;
-  Cairo.rectangle cr 0. 0. 1. 1.;
+  Cairo.rectangle cr 0. 0. ~w:1. ~h:1.;
   Cairo.move_to cr (0.5 -. te.width /. 2. -. te.x_bearing)
     (0.5 -. te.height /. 2. -. te.y_bearing);
   Cairo.Path.text cr "a";
@@ -102,7 +102,7 @@ let showtext_draw_mask cr =
 let showtext_draw_dest cr =
   (* white background *)
   Cairo.set_source_rgb cr 1. 1. 1.;
-  Cairo.rectangle cr 0. 0. 1. 1.;
+  Cairo.rectangle cr 0. 0. ~w:1. ~h:1.;
   Cairo.fill cr;
 
   (* black letter "a" *)
@@ -116,7 +116,7 @@ let showtext_draw_dest cr =
 
 let paint_draw_source cr =
   Cairo.set_source_rgb cr 0. 0. 0.;
-  Cairo.rectangle cr 0. 0. 1. 1.;
+  Cairo.rectangle cr 0. 0. ~w:1. ~h:1.;
   Cairo.fill cr
 
 let paint_draw_dest cr =
@@ -125,35 +125,37 @@ let paint_draw_dest cr =
   Cairo.paint cr ~alpha:0.5
 
 let mask_draw_source cr =
-  let linpat = Cairo.Pattern.create_linear 0. 0. 1. 1. in
+  let linpat = Cairo.Pattern.create_linear ~x0:0. ~y0:0. ~x1:1. ~y1:1. in
   Cairo.Pattern.add_color_stop_rgb linpat 0. 0.3 0.8;
   Cairo.Pattern.add_color_stop_rgb linpat 0. 0.8 0.3 ~ofs:1.;
   Cairo.set_source cr linpat;
-  Cairo.rectangle cr 0. 0. 1. 1.;
+  Cairo.rectangle cr 0. 0. ~w:1. ~h:1.;
   Cairo.fill cr
 
 let mask_draw_mask cr =
-  let radialinv = Cairo.Pattern.create_radial 0.5 0.5 0.25  0.5 0.5 0.75 in
+  let radialinv = Cairo.Pattern.create_radial ~x0:0.5 ~y0:0.5 ~r0:0.25
+                                              ~x1:0.5 ~y1:0.5 ~r1:0.75 in
   Cairo.Pattern.add_color_stop_rgba radialinv 0. 0. 0. 0.;
   Cairo.Pattern.add_color_stop_rgba radialinv ~ofs:0.5 0. 0. 0. 1.;
   Cairo.save cr;
-  Cairo.rectangle cr 0. 0. 1. 1.;
+  Cairo.rectangle cr 0. 0. ~w:1. ~h:1.;
   Cairo.clip cr;
   diagram_draw_mask_pattern cr radialinv;
   Cairo.restore cr
 
 let mask_draw_dest cr =
-  let linpat = Cairo.Pattern.create_linear 0. 0. 1. 1. in
+  let linpat = Cairo.Pattern.create_linear ~x0:0. ~y0:0. ~x1:1. ~y1:1. in
   Cairo.Pattern.add_color_stop_rgb linpat 0. 0.3 0.8;
   Cairo.Pattern.add_color_stop_rgb linpat ~ofs:1. 0. 0.8 0.3;
 
-  let radpat = Cairo.Pattern.create_radial 0.5 0.5 0.25 0.5 0.5 0.75 in
+  let radpat = Cairo.Pattern.create_radial ~x0:0.5 ~y0:0.5 ~r0:0.25
+                                           ~x1:0.5 ~y1:0.5 ~r1:0.75 in
   Cairo.Pattern.add_color_stop_rgba radpat 0. 0. 0. 1.;
   Cairo.Pattern.add_color_stop_rgba radpat ~ofs:0.5  0. 0. 0. 0.;
 
   diagram_draw_dest cr;
   Cairo.save cr;
-  Cairo.rectangle cr 0. 0. 1. 1.;
+  Cairo.rectangle cr 0. 0. ~w:1. ~h:1.;
   Cairo.clip cr;
   Cairo.set_source cr linpat;
   Cairo.mask cr radpat;
@@ -188,7 +190,7 @@ let diagram fname alpha0 alpha1 alpha2 =
   let width=160. and height=120. in
   let svg_filename = fname ^ ".svg"
   and png_filename = fname ^ ".png" in
-  let surf = Cairo.SVG.create svg_filename width height in
+  let surf = Cairo.SVG.create svg_filename ~w:width ~h:height in
   let cr = Cairo.create surf in
 
   (*
@@ -197,7 +199,7 @@ let diagram fname alpha0 alpha1 alpha2 =
   let layer draw =
     Cairo.save cr;
     Cairo.Group.push cr;
-    Cairo.rectangle cr 0. 0. 1. 1.;
+    Cairo.rectangle cr 0. 0. ~w:1. ~h:1.;
     Cairo.clip cr;
     draw fname cr;
     Cairo.Group.pop_to_source cr;
@@ -223,10 +225,10 @@ let diagram fname alpha0 alpha1 alpha2 =
   Cairo.translate cr (3. *. width /. height -. 1.) 0.;
   let ux, uy = Cairo.device_to_user_distance cr 2. 2. in
   Cairo.set_line_width cr (max ux uy);
-  Cairo.rectangle cr 0. 0. 1. 3.;
+  Cairo.rectangle cr 0. 0. ~w:1. ~h:3.;
   Cairo.clip_preserve cr;
   Cairo.stroke cr;
-  Cairo.rectangle cr 0. 1. 1. 1.;
+  Cairo.rectangle cr 0. 1. ~w:1. ~h:1.;
   Cairo.stroke cr;
   Cairo.restore cr;
 
@@ -238,7 +240,7 @@ let diagram fname alpha0 alpha1 alpha2 =
     Cairo.scale cr (width -. height /. 3.) height;
     Cairo.transform cr { xx=0.6; yx=0.; xy=1./.3.; yy=0.5; x0=tx; y0=ty };
     Cairo.Group.push cr;
-    Cairo.rectangle cr 0. 0. 1. 1.;
+    Cairo.rectangle cr 0. 0. ~w:1. ~h:1.;
     Cairo.clip cr;
     draw fname cr;
     Cairo.Group.pop_to_source cr;
@@ -252,7 +254,7 @@ let diagram fname alpha0 alpha1 alpha2 =
     Cairo.set_source_rgb cr 0. 0. 0.;
     let ux, uy = Cairo.device_to_user_distance cr 2. 2. in
     Cairo.set_line_width cr (max ux uy);
-    Cairo.rectangle cr 0. 0. 1. 1.;
+    Cairo.rectangle cr 0. 0. ~w:1. ~h:1.;
     Cairo.stroke cr
   end;
   (* mask layer *)
