@@ -42,7 +42,7 @@ things:</p>
 <li><a href="http://cairographics.org/">Cairo</a> itself. You will
 need both the library and the development files. See Download if you
 don't have it
-already.</li><li><a href="http://caml.inria.fr/">OCaml</a> to run the
+already.</li><li><a href="https://ocaml.org/">OCaml</a> to run the
 code snippets,
 and</li><li>The <a href="https://github.com/Chris00/ocaml-cairo">OCaml
 Cairo bindings</a> to join the previous two.</li>
@@ -91,7 +91,7 @@ small OCaml program which includes the described drawing code.</p>
       <li><a href="#textalign">Text Alignment</a></li>
     </ul>
 </li>
-<li><a href="html/Cairo.html">OCaml Cairo API</a>
+<li><a href="html/Cairo/">OCaml Cairo API</a>
 </li>
 </ol>
 
@@ -116,7 +116,7 @@ relevant. The final noun, the context, isn't shown.</p>
 <div class="tutright"><img src="destination.png" alt=""></div>
 
 <p>The destination is the
-<a href="html/Cairo.html">surface</a> on which
+<a href="html/Cairo/">surface</a> on which
 you're drawing. It may be tied to an array of pixels like in this
 tutorial, or it might be tied to a SVG or PDF file, or something else.
 This surface collects the elements of your graphic as you apply them,
@@ -130,9 +130,9 @@ allowing you to build up a complex work as though painting on a canvas.</p>
 is the "paint" you're about to work with. I show this as it
 is&#8212;plain black for several examples&#8212;but translucent to
 show lower layers.  Unlike real paint, it doesn't have to be a single
-color; it can be a <a href="html/Cairo.Pattern.html">pattern</a>
+color; it can be a <a href="html/Cairo/Pattern/">pattern</a>
 or even a previously created
-destination <a href="html/Cairo.html">surface</a>. Also unlike
+destination <a href="html/Cairo/">surface</a>. Also unlike
 real paint it can contain transparency information&#8212;the Alpha
 channel.</p>
 
@@ -161,21 +161,21 @@ into a mask by drawing verbs.</p>
 
 <p>Before you can start to draw something with cairo, you need to create
 the context. The context is stored in cairo's central data type, called
-<code><a href="html/Cairo.html#TYPEcontext">Cairo.context</a></code>. When
+<code><a href="html/Cairo/#TYPEcontext">Cairo.context</a></code>. When
 you create a cairo context, it must be tied to a specific surface-for
 example, an image surface if you want to create a PNG file.  There is
 also a data type for the surface, called
-<code><a href="html/Cairo.Surface.html#TYPEt">Cairo.Surface.t</a></code>.
+<code><a href="html/Cairo/Surface/#TYPEt">Cairo.Surface.t</a></code>.
 You can initialize your cairo context like this:</p>
 
-<pre><code>let surface = <a href="html/Cairo.Image.html#VALcreate">Cairo.Image.create</a> Cairo.Image.ARGB32 120 120
-let cr = <a href="html/Cairo.html#VALcreate">Cairo.create</a> surface
+<pre><code>let surface = <a href="html/Cairo/Image/#VALcreate">Cairo.Image.create</a> Cairo.Image.ARGB32 120 120
+let cr = <a href="html/Cairo/#VALcreate">Cairo.create</a> surface
 </code></pre>
 
 <p>The cairo context in this example is tied to an image surface of
 dimension 120&nbsp;x&nbsp;120 and 32 bits per pixel to store RGB and
 Alpha information. Surfaces can be created specific to most cairo
-backends, see the <a href="html/Cairo.html">manual</a> for details.</p>
+backends, see the <a href="html/Cairo/">manual</a> for details.</p>
 
 <h3 id="Verbs">Verbs</h3>
 
@@ -193,13 +193,13 @@ similar. They differ by how they construct the mask.</p>
   <a href="../examples/stroke.ml"><img src="stroke.png" alt=""></a></div>
 
 <p>The
-<a href="html/Cairo.html#VALstroke"><code>Cairo.stroke</code></a>
+<a href="html/Cairo/#VALstroke"><code>Cairo.stroke</code></a>
 operation takes a virtual pen along the path. It allows the source to
 transfer through the mask in a thin (or thick) line around the path,
 according to the pen's
-<a href="html/Cairo.html#VALset_line_width">line width</a>,
-<a href="html/Cairo.html#VALset_dash">dash style</a>,
-and <a href="html/Cairo.html#VALset_line_cap">line caps</a>.</p>
+<a href="html/Cairo/#VALset_line_width">line width</a>,
+<a href="html/Cairo/#VALset_dash">dash style</a>,
+and <a href="html/Cairo/#VALset_line_cap">line caps</a>.</p>
 
 <pre><code>Cairo.set_line_width cr 0.1;
 Cairo.set_source_rgb cr 0. 0. 0.;
@@ -214,12 +214,12 @@ Cairo.stroke cr;
 alt=""></a></div>
 
 <p>The
-<a href="html/Cairo.html#VALfill"><code>Cairo.fill</code></a> operation
+<a href="html/Cairo/#VALfill"><code>Cairo.fill</code></a> operation
 instead uses the path like the lines of a coloring book, and allows
 the source through the mask within the hole whose boundaries are the
 path. For complex paths (paths with multiple closed sub-paths-like a
 donut-or paths that self-intersect) this is influenced by the
-<a href="html/Cairo.html#VALset_fill_rule">fill rule</a>.  Note that while
+<a href="html/Cairo/#VALset_fill_rule">fill rule</a>.  Note that while
 stroking the path transfers the source for half of the line width on
 each side of the path, filling a path fills directly up to the edge of
 the path and no further.</p>
@@ -236,19 +236,19 @@ Cairo.fill cr;
 alt=""></a></div>
 
 <p>The
-<a href="html/Cairo.html#VALshow_text"><code>Cairo.show_text</code></a>
+<a href="html/Cairo/#VALshow_text"><code>Cairo.show_text</code></a>
 operation forms the mask from text. It may be easier to think of
 <code>Cairo.show_text</code> as a shortcut for creating a path with
-<a href="html/Cairo.Path.html#VALtext"><code>Cairo.Path.text</code></a>
+<a href="html/Cairo/Path/#VALtext"><code>Cairo.Path.text</code></a>
 and then using
-<a href="html/Cairo.html#VALfill"><code>Cairo.fill</code></a> to transfer
+<a href="html/Cairo/#VALfill"><code>Cairo.fill</code></a> to transfer
 it.  Be aware <code>Cairo.show_text</code> caches glyphs so is much
 more efficient if you work with a lot of text.</p>
 
 <pre><code>Cairo.set_source_rgb cr 0.0 0.0 0.0;
-<a href="html/Cairo.html#VALselect_font_face">Cairo.select_font_face</a> cr "Georgia" ~weight:Cairo.Bold;
+<a href="html/Cairo/#VALselect_font_face">Cairo.select_font_face</a> cr "Georgia" ~weight:Cairo.Bold;
 Cairo.set_font_size cr 1.2;
-let te = <a href="html/Cairo.html#VALtext_extents">Cairo.text_extents</a> cr "a" in
+let te = <a href="html/Cairo/#VALtext_extents">Cairo.text_extents</a> cr "a" in
 Cairo.move_to cr (0.5 -. te.width /. 2. -. te.x_bearing)
     (0.5 -. te.height /. 2. -. te.y_bearing);
 Cairo.show_text cr "a";
@@ -260,12 +260,12 @@ Cairo.show_text cr "a";
 alt=""></a></div>
 
 <p>The
-<a href="html/Cairo.html#VALpaint"><code>Cairo.paint</code></a>
+<a href="html/Cairo/#VALpaint"><code>Cairo.paint</code></a>
 operation uses a mask that transfers the entire source to the
 destination. Some people consider this an infinitely large mask, and
 others consider it no mask; the result is the same. The related
 operation
-<a href="html/Cairo.html#VALpaint"><code>Cairo.paint ~alpha:true</code></a>
+<a href="html/Cairo/#VALpaint"><code>Cairo.paint ~alpha:true</code></a>
 similarly allows transfer of the full source to destination, but it
 transfers only the provided percentage of the color.</p>
 
@@ -279,9 +279,9 @@ Cairo.paint cr ~alpha:0.5;
 alt=""></a></div>
 
 <p>The
-<a href="html/Cairo.html#VALmask"><code>Cairo.mask</code></a>
+<a href="html/Cairo/#VALmask"><code>Cairo.mask</code></a>
 and
-<a href="html/Cairo.html#VALmask_surface"><code>Cairo.mask_surface</code></a>
+<a href="html/Cairo/#VALmask_surface"><code>Cairo.mask_surface</code></a>
 operations allow transfer according to the transparency/opacity of a
 second source pattern or surface. Where the pattern or surface is
 opaque, the current source is transferred to the destination.  Where
@@ -304,19 +304,19 @@ Cairo.mask cr radpat;
 <h1 id="drawing_with_cairo">Drawing with Cairo</h1>
 
 <p>In order to create an image you desire, you have to prepare the
-<a href="html/Cairo.html#TYPEcontext">context</a> for each of the drawing
+<a href="html/Cairo/#TYPEcontext">context</a> for each of the drawing
 verbs.  To use
-<a href="html/Cairo.html#VALstroke"><code>Cairo.stroke</code></a> or
-<a href="html/Cairo.html#VALfill"><code>Cairo.fill</code></a>
+<a href="html/Cairo/#VALstroke"><code>Cairo.stroke</code></a> or
+<a href="html/Cairo/#VALfill"><code>Cairo.fill</code></a>
 you first need a path.  To use
-<a href="html/Cairo.html#VALshow_text"><code>Cairo.show_text</code></a>
+<a href="html/Cairo/#VALshow_text"><code>Cairo.show_text</code></a>
 you must position your text by its insertion point. To use
-<a href="html/Cairo.html#VALmask"><code>Cairo.mask</code></a>
+<a href="html/Cairo/#VALmask"><code>Cairo.mask</code></a>
 you need a second source
-<a href="html/Cairo.Pattern.html">pattern</a> or
-<a href="html/Cairo.Surface.html">surface</a>.
+<a href="html/Cairo/Pattern/">pattern</a> or
+<a href="html/Cairo/Surface/">surface</a>.
 And to use any of the operations, including
-<a href="html/Cairo.html#VALpaint"><code>Cairo.paint</code></a>,
+<a href="html/Cairo/#VALpaint"><code>Cairo.paint</code></a>,
 you need a primary source.</p>
 
 <h2 id="preparesource">Preparing and Selecting a Source</h2>
@@ -325,9 +325,9 @@ you need a primary source.</p>
 and images. Colors are the simplest; they use a uniform hue and
 opacity for the entire source. You can select these without any
 preparation with
-<a href="html/Cairo.html#VALset_source_rgb"><code>Cairo.set_source_rgb</code></a>
+<a href="html/Cairo/#VALset_source_rgb"><code>Cairo.set_source_rgb</code></a>
 and
-<a href="html/Cairo.html#VALset_source_rgba"><code>Cairo.set_source_rgba</code></a>.
+<a href="html/Cairo/#VALset_source_rgba"><code>Cairo.set_source_rgba</code></a>.
 Using <code>Cairo.set_source_rgb cr r g b</code> is equivalent to
 using
 <code>Cairo.set_source_rgba cr r g b 1.0</code>, and it sets your source
@@ -359,23 +359,23 @@ Cairo.fill cr;
 
 <p>Gradients describe a progression of colors by setting a start and
 stop reference location and a series of "stops" along the
-way. <a href="html/Cairo.Pattern.html#VALcreate_linear">Linear
+way. <a href="html/Cairo/Pattern/#VALcreate_linear">Linear
 gradients</a> are built from two points which pass through parallel
 lines to define the start and stop
-locations. <a href="html/Cairo.Pattern.html#VALcreate_radial">Radial
+locations. <a href="html/Cairo/Pattern/#VALcreate_radial">Radial
 gradients</a> are also built from two points, but each has an
 associated radius of the circle on which to define the start and stop
 locations. Stops are added to the gradient with
-<a href="html/Cairo.Pattern.html#VALadd_color_stop_rgb"
+<a href="html/Cairo/Pattern/#VALadd_color_stop_rgb"
 ><code>Cairo.Pattern.add_color_stop_rgb</code></a> and
-<a href="html/Cairo.Pattern.html#VALadd_color_stop_rgba"
+<a href="html/Cairo/Pattern/#VALadd_color_stop_rgba"
 ><code>Cairo.Pattern.add_color_stop_rgba</code></a> which take a
 color like <code>Cairo.set_source_rgb*</code>, as well as an offset
 to indicate where it lies between the reference locations. The colors
 between adjacent stops are averaged over space to form a smooth blend.
 Finally, the behavior beyond the reference locations can be controlled
 with
-<a href="html/Cairo.Pattern.html#VALset_extend"
+<a href="html/Cairo/Pattern/#VALset_extend"
 ><code>Cairo.Pattern.set_extend</code></a>.</p>
 
 <div class="tutright"><a href="../examples/setsourcegradient.ml"
@@ -407,20 +407,20 @@ Cairo.fill cr;
 </code></pre>
 
 <p>Images include both surfaces loaded from existing files with
-<a href="html/Cairo.PNG.html#VALcreate"
+<a href="html/Cairo/PNG/#VALcreate"
 ><code>Cairo.PNG.create</code></a> and surfaces created
 from within cairo as an earlier destination. As of cairo 1.2, the
 easiest way to make and use an earlier destination as a source is with
-<a href="html/Cairo.Group.html#VALpush"><code>Cairo.Group.push</code></a>
+<a href="html/Cairo/Group/#VALpush"><code>Cairo.Group.push</code></a>
 and either
-<a href="html/Cairo.Group.html#VALpop"><code>Cairo.Group.pop</code></a>
+<a href="html/Cairo/Group/#VALpop"><code>Cairo.Group.pop</code></a>
 or
-<a href="html/Cairo.Group.html#VALpop_to_source"
+<a href="html/Cairo/Group/#VALpop_to_source"
 ><code>Cairo.Group.pop_to_source</code></a>.
 Use <code>Cairo.Group.pop_to_source</code> to use it just until you
 select a new source, and <code>Cairo.Group.pop</code> when you want
 to save it so you can select it over and over again with
-<a href="html/Cairo.html#VALset_source"
+<a href="html/Cairo/#VALset_source"
 ><code>Cairo.set_source</code></a>.</p>
 
 
@@ -446,13 +446,13 @@ times, but a lot of paths are more complex.</p>
 <p>Cairo supports easily reusing paths by having alternate versions of
 its operations. Both draw the same thing, but the alternate doesn't
 reset the path.  For stroking, alongside
-<a href="html/Cairo.html#VALstroke"><code>Cairo.stroke()</code></a>
+<a href="html/Cairo/#VALstroke"><code>Cairo.stroke()</code></a>
 there is
-<a href="html/Cairo.html#VALstroke"><code>Cairo.stroke
+<a href="html/Cairo/#VALstroke"><code>Cairo.stroke
 ~preserve:true</code></a>; for filling,
-<a href="html/Cairo.html#VALfill"><code>Cairo.fill
+<a href="html/Cairo/#VALfill"><code>Cairo.fill
 ~preserve:true</code></a> joins
-<a href="html/Cairo.html#VALfill"><code>Cairo.fill</code></a>.
+<a href="html/Cairo/#VALfill"><code>Cairo.fill</code></a>.
 Even setting the clip has a preserve option.  Apart from choosing when
 to preserve your path, there are only a couple common operations.</p>
 
@@ -464,10 +464,10 @@ to preserve your path, there are only a couple common operations.</p>
 at 1, draw a line to 2, then 3, and so forth. When you start a path, or
 when you need to start a new sub-path, you want it to be like point 1:
 it has nothing connecting to it. For this, use
-<a href="html/Cairo.html#VALmove_to"><code>Cairo.move_to</code></a>.
+<a href="html/Cairo/#VALmove_to"><code>Cairo.move_to</code></a>.
 This sets the current reference point without making the path connect
 the previous point to it. There is also a relative coordinate variant,
-<a href="html/Cairo.html#VALrel_move_to"><code>Cairo.rel_move_to</code></a>,
+<a href="html/Cairo/#VALrel_move_to"><code>Cairo.rel_move_to</code></a>,
 which sets the new reference a specified distance away from the
 current reference instead. After setting your first reference point,
 use the other path operations which both update the reference point
@@ -481,10 +481,10 @@ and connect to it in some way.</p>
 <div class="tutright"><img src="path-lineto.png" alt=""></div>
 
 <p>Whether with absolute coordinates
-<a href="html/Cairo.html#VALline_to"><code>Cairo.line_to</code></a>
+<a href="html/Cairo/#VALline_to"><code>Cairo.line_to</code></a>
 (extend the path from the reference to this point), or relative
 coordinates
-<a href="html/Cairo.html#VALrel_line_to"
+<a href="html/Cairo/#VALrel_line_to"
 ><code>Cairo.rel_line_to</code></a> (extend the path from the
 reference this far in this direction), the path connection will be a
 straight line. The new reference point will be at the other end of the
@@ -503,9 +503,9 @@ the point you directly specify is not on the path. Instead it is the
 center of the circle that makes up the addition to the path. Both a
 starting and ending point on the circle must be specified, and these
 points are connected either clockwise by
-<a href="html/Cairo.html#VALarc"><code>Cairo.arc</code></a>
+<a href="html/Cairo/#VALarc"><code>Cairo.arc</code></a>
 or counter-clockwise by
-<a href="html/Cairo.html#VALarc_negative"><code>Cairo.arc_negative</code></a>.
+<a href="html/Cairo/#VALarc_negative"><code>Cairo.arc_negative</code></a>.
 If the previous reference point is not on this new curve, a straight
 line is added from it to where the arc begins. The reference point is
 then updated to where the arc ends. There are only absolute
@@ -523,8 +523,8 @@ Cairo.arc cr 0.5 0.5 (0.25 *. sqrt 2) (-. pi_4) pi_4;
 reference point and smoothly follow the direction of two other points
 (without going through them) to get to a third specified point. Like
 lines, there are both absolute
-(<a href="html/Cairo.html#VALcurve_to"><code>Cairo.curve_to</code></a>)
-and relative (<a href="html/Cairo.html#VALrel_curve_to"
+(<a href="html/Cairo/#VALcurve_to"><code>Cairo.curve_to</code></a>)
+and relative (<a href="html/Cairo/#VALrel_curve_to"
 ><code>Cairo.rel_curve_to</code></a>) versions.  Note that the
 relative variant specifies all points relative to the previous
 reference point, rather than each relative to the preceding control
@@ -551,7 +551,7 @@ path has no line caps for there is no place to put them.</p>
 <h3 id="Text">Text</h3>
 
 <p>Finally text can be turned into a path with
-<a href="html/Cairo.Path.html#VALtext"><code>Cairo.Path.text</code></a>.
+<a href="html/Cairo/Path/#VALtext"><code>Cairo.Path.text</code></a>.
 Paths created from text are like any other path, supporting stroke or
 fill operations. This path is placed anchored to the current reference
 point, so <a href="#Moving"><code>Cairo.move_to</code></a> your
@@ -569,9 +569,9 @@ and <a href="#Fill"><code>Cairo.fill</code></a>.</p>
 ><img src="textextents.png" alt=""></a></div>
 
 <p>To use text effectively you need to know where it will go. The methods
-<a href="html/Cairo.html#VALfont_extents"><code>Cairo.font_extents</code></a>
+<a href="html/Cairo/#VALfont_extents"><code>Cairo.font_extents</code></a>
 and
-<a href="html/Cairo.html#VALtext_extents"><code>Cairo.text_extents</code></a>
+<a href="html/Cairo/#VALtext_extents"><code>Cairo.text_extents</code></a>
 get you this information. Since this diagram is hard to see so small,
 I suggest running the <a href="../examples/textextents.ml">source</a>
 and looking at its output.  It shows the relation between the
@@ -601,17 +601,17 @@ than the width would suggest.</p>
 
 <p>In addition to placement, you also need to specify a face, style,
 and size.  Set the face and style together with
-<a href="html/Cairo.html#VALselect_font_face"
+<a href="html/Cairo/#VALselect_font_face"
 ><code>Cairo.select_font_face</code></a>, and the size with
-<a href="html/Cairo.html#VALset_font_size"
+<a href="html/Cairo/#VALset_font_size"
 ><code>Cairo.set_font_size</code></a>.  If you need even finer
 control, try getting a
-<a href="html/Cairo.Font_options.html#TYPEfont_options"
+<a href="html/Cairo/Font_options/#TYPEfont_options"
 ><code>Cairo.Font_options.t</code></a> with
-<a href="html/Cairo.Font_options.html#VALget"
+<a href="html/Cairo/Font_options/#VALget"
 ><code>Cairo.Font_options.get</code></a>,
 tweaking it, and setting it with
-<a href="html/Cairo.Font_options.html#VALset"
+<a href="html/Cairo/Font_options/#VALset"
 ><code>Cairo.Font_options.set</code></a>.</p>
 
 
@@ -627,17 +627,17 @@ setting up a relation between two coordinate systems. The device-space
 coordinate system is tied to the surface, and cannot change. The
 user-space coordinate system matches that space by default, but can be
 changed for the above reasons. The helper functions
-<a href="html/Cairo.html#VALuser_to_device"
+<a href="html/Cairo/#VALuser_to_device"
 ><code>Cairo.user_to_device</code></a>
 and
-<a href="html/Cairo.html#VALuser_to_device_distance"
+<a href="html/Cairo/#VALuser_to_device_distance"
 ><code>Cairo.user_to_device_distance</code></a> tell you what the
 device-coordinates are for a user-coordinates position or distance.
 Correspondingly
-<a href="html/Cairo.html#VALdevice_to_user"
+<a href="html/Cairo/#VALdevice_to_user"
 ><code>Cairo.device_to_user</code></a>
 and
-<a href="html/Cairo.html#VALdevice_to_user_distance"
+<a href="html/Cairo/#VALdevice_to_user_distance"
 ><code>Cairo.device_to_user_distance</code></a> tell you
 user-coordinates for a device-coordinates position or distance.
 Remember to send positions through the non-distance variant, and
@@ -646,16 +646,16 @@ relative moves or other distances through the distance variant.</p>
 <p>I leverage all of these reasons to draw the diagrams in this
 document.  Whether I'm drawing 120&nbsp;&times;&nbsp;120 or
 600&nbsp;&times;&nbsp;600, I use
-<a href="html/Cairo.html#VALscale"><code>Cairo.scale</code></a> to
+<a href="html/Cairo/#VALscale"><code>Cairo.scale</code></a> to
 give me a 1.0&nbsp;&times;&nbsp;1.0 workspace. To place the results
 along the right column, such as in the discussion
 of <a href="#drawing_model">cairo's drawing model</a>, I use
-<a href="html/Cairo.html#VALtranslate"><code>Cairo.translate</code></a>.
+<a href="html/Cairo/#VALtranslate"><code>Cairo.translate</code></a>.
 And to add the perspective view for the overlapping layers, I set up
 an arbitrary deformation with
-<a href="html/Cairo.html#VALtransform"><code>Cairo.transform</code></a>
+<a href="html/Cairo/#VALtransform"><code>Cairo.transform</code></a>
 on a
-<a href="html/Cairo.Matrix.html#TYPEt"><code>Cairo.Matrix.t</code></a>.</p>
+<a href="html/Cairo/Matrix/#TYPEt"><code>Cairo.Matrix.t</code></a>.</p>
 
 <p>To understand your transforms, read them bottom to top, applying
 them to the point you're drawing. To figure out which transforms to
@@ -680,7 +680,7 @@ set your line width while the scale factor was 1, the line width setting
 is always in user-coordinates and isn't modified by setting the scale.
 While you're operating under a scale, the width of your line is
 multiplied by that scale. To specify a width of a line in pixels, use
-<a href="html/Cairo.html#VALdevice_to_user_distance"
+<a href="html/Cairo/#VALdevice_to_user_distance"
 ><code>Cairo.device_to_user_distance</code></a> to turn
 a <code>(1,1)</code> device-space distance into, for example,
 a <code>(0.01, 0.01)</code> user-space distance. Note that if your
