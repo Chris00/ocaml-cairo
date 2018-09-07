@@ -13,7 +13,7 @@ build: [
   [ "dune" "build" "-p" name "-j" jobs ]
 ]
 build-test: [
-  [ "dune" "runtest" ]
+  [ "dune" "runtest" "-p" name "-j" jobs ]
 ]
 build-doc: [ "dune" "build" "@doc" ]
 depends: [
