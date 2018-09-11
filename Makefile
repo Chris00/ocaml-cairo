@@ -6,7 +6,7 @@ build:
 	dune build @install @examples @tutorial
 
 test:
-	dune runtest --force
+	dune build @runtest @tests-gtk --force
 
 install uninstall:
 	dune $@

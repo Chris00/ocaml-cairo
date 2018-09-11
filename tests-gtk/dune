@@ -1,0 +1,10 @@
+
+(executables
+ (names     alloc)
+ (libraries cairo2-gtk))
+
+(alias
+ (name tests-gtk)
+ (deps alloc.exe)
+ (action (progn
+          (run %{dep:alloc.exe}))))
