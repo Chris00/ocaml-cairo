@@ -40,23 +40,7 @@ static intnat caml_cairo_hash_pointer(value v)
 
 #define CAIRO_ASSIGN(v, x) v = ALLOC(cairo); CAIRO_VAL(v) = x
 
-/* The only way to create a context is from a surface.  To express the
-  dependency of the context on the surface (and avoid the context to
-  be in bad shape if the surface is garbage collected -- thus
-  destroyed by the finalizer), the ref count of the surface will be
-  increased.  This however requires that the context finalizer
-  decreases it.
-
-  FIXME: a context can also be created from a GdkDrawable object
-  whose ref count needs to be handled too. */
-static void caml_cairo_cairo_finalize(value v)
-{
-  cairo_surface_t *surface = cairo_get_target(CAIRO_VAL(v));
-  /* fprintf(stderr, "DESTROY cairo\n");  fflush(stderr); */
-  cairo_destroy(CAIRO_VAL(v));
-  cairo_surface_destroy(surface);
-}
-CUSTOM_OPERATIONS(cairo)
+DEFINE_CUSTOM_OPERATIONS(cairo, cairo_destroy, CAIRO_VAL)
 
 /* raise [Error] if the status indicates a failure. */
 void caml_cairo_raise_Error(cairo_status_t status)
@@ -78,7 +62,7 @@ void caml_cairo_raise_Error(cairo_status_t status)
   }
 }
 
-/* For non Raise the corresponding OCaml exception. */
+/* Raise the corresponding OCaml exception for errors. */
 static void caml_check_status(cairo_t *cr)
 {
   caml_cairo_raise_Error(cairo_status(cr));

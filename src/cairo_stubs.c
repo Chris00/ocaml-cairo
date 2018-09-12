@@ -45,9 +45,11 @@ CAMLexport value caml_cairo_create(value vsurf)
 
   cr = cairo_create(SURFACE_VAL(vsurf));
   caml_check_status(cr);
-  /* Express the dependency of [vcr] on [vsurf] by increasing its
-     ref. count.  It will be released by the finalizer of [vcr].  */
-  cairo_surface_reference(SURFACE_VAL(vsurf));
+  /* Cairo documentation says that [cairo_create] "references target,
+     so you can immediately call cairo_surface_destroy() on it if you
+     don't need to maintain a separate reference to it".  We leave
+     destroying the surface to the GC but that means there is no need
+     to increase the reference of [vsurf]. */
   CAIRO_ASSIGN(vcontext, cr);
   CAMLreturn(vcontext);
 }
