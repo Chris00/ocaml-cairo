@@ -19,6 +19,8 @@
 #define __CAIRO_OCAML_H__
 
 #include <cairo.h>
+#include <caml/mlvalues.h>
+#include <caml/custom.h>
 
 /* cairo_t
 ***********************************************************************/
