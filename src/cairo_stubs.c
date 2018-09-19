@@ -1105,7 +1105,7 @@ value caml_cairo_Ft_new_face(value vftlib, value vpath, value vindex)
   CAMLlocal1(vface);
   FT_Face face;
 
-  if (FT_New_Face((FT_Library) vftlib,
+  if (FT_New_Face(FT_LIBRARY_VAL(vftlib),
                   (const char*) String_val(vpath),
                   Int_val(vindex),
                   &face) != 0) {
