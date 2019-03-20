@@ -1156,12 +1156,14 @@ sig
   val create_for_data32 : ?w:int -> ?h:int -> ?alpha:bool ->
     data32 -> Surface.t
   (** [create_for_data32 ?w ?h ?alpha data] same as
-     {!Cairo.Image.create_for_data8} except that the stride will
-     necessarily be according to the bigarray 1st dimension (so that
-     matrix coordinates correspond to pixels) and the width [w] and
-     height [h] will be by default taken from the bigarray 1st and 2nd
-     dimensions respectively.  If [alpha] is true (default), the
-     [ARGB32] format is selected, otherwise [RGB24] is used. *)
+     {!Cairo.Image.create_for_data8} except that the stride will be
+     set so that [data.{y,x}] refers to the pixel ([x],[y]) (where
+     (0,0) is the top left pixel and the Y axis is directed downwards).
+
+     @param w the width of the image (default: [Array2.dim2 data]).
+     @param h the height of the image (default: [Array2.dim1 data]).
+     @param alpha if true (default), the [ARGB32] format is selected,
+                  otherwise [RGB24] is used. *)
 
   val get_data8 : Surface.t -> data8
   (** Get the data of the image surface (shared), for direct

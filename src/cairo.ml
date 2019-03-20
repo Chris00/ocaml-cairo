@@ -777,21 +777,25 @@ struct
 
   let create_for_data32 ?w ?h ?(alpha=true) data =
     let width = match w with
-      | None -> Array2.dim1 data
+      | None -> Array2.dim2 data
       | Some w ->
-          if w > Array2.dim1 data then
+          if w < 0 then
+            invalid_arg "Cairo.Image.create_for_data32: width < 0";
+          if w > Array2.dim2 data then
             invalid_arg "Cairo.Image.create_for_data32: given width too large";
           w in
     let height = match h with
-      | None -> Array2.dim2 data
+      | None -> Array2.dim1 data
       | Some h ->
-          if h > Array2.dim2 data then
+          if h < 0 then
+            invalid_arg "Cairo.Image.create_for_data32: height < 0";
+          if h > Array2.dim1 data then
             invalid_arg "Cairo.Image.create_for_data32: given height too large";
           h in
     let format = if alpha then ARGB32 else RGB24 in
     (* Both format use 32 bits = 4 bytes *)
     create_for_data32_unsafe data format ~w:width ~h:height
-      ~stride:(4 * Array2.dim1 data)
+      ~stride:(4 * Array2.dim2 data)
 
   external get_data8 : Surface.t -> (int, int8_unsigned_elt, c_layout) Array1.t
     = "caml_cairo_image_surface_get_UINT8"
