@@ -655,7 +655,7 @@ sig
 
   val set : context -> _ t -> unit
   (** Replaces the current font face, font matrix, and font options in
-     the {Cairo.context} with those of the {!Cairo.Scaled_font.t}.
+     the {!Cairo.context} with those of the {!Cairo.Scaled_font.t}.
      Except for some translation, the current CTM of the
      {!Cairo.context} should be the same as that of the
      {!Cairo.Scaled_font.t}, which can be accessed using
