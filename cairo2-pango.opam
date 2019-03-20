@@ -19,7 +19,7 @@ depends: [
   "dune" {build}
   "conf-pkg-config" {build}
   "conf-cairo"
-  "cairo2"
+  "cairo2" {= version}
   "lablgtk"
 ]
 synopsis: "Interface between Cairo and Pango"
