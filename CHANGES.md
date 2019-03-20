@@ -1,3 +1,10 @@
+0.6.1 2019-03-20
+----------------
+
+- Fix `create_for_data32` handling of dimensions.
+- Documentation improvements.
+- Fix dependencies for `cairo2-gtk` and `cairo2-pango`.
+
 0.6 2018-09-05
 --------------
 
