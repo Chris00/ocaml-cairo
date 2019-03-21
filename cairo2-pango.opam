@@ -22,7 +22,7 @@ depends: [
   "cairo2" {= version}
   "lablgtk"
 ]
-synopsis: "Interface between Cairo and Pango"
+synopsis: "Interface between Cairo and Pango (for Gtk2)"
 description: """
-Interface lablgtk Pango interface with Cairo.
+This package provides a way to use Pango (lablgtk, Gtk2) with Cairo.
 """

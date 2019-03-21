@@ -22,7 +22,7 @@ depends: [
   "cairo2" {= version}
   "lablgtk"
 ]
-synopsis: "Rendering Cairo on Gtk canvas"
+synopsis: "Rendering Cairo on Gtk2 canvas"
 description: """
 This provides the link between Cairo and Lablgtk.
 """
