@@ -6,6 +6,7 @@ env:
   global:
     - PACKAGE=cairo2
     - DEPOPTS='conf-freetype'
+    - PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig
   matrix:
     - OCAML_VERSION=4.02
     - OCAML_VERSION=4.03

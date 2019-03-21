@@ -27,6 +27,9 @@ conflicts: [
   "cairo" {= "0.4.1"}
   "cairo" {= "0.4.2"}
 ]
+post-messages: [
+  "Try to re-run the install command with PKG_CONFIG_PATH pointing a pkg-config path including libffi, e.g. if you use homebrew you can try PKG_CONFIG_PATH=/usr/local/opt/libffi/lib/pkgconfig" {failure & os = "macos"}
+]
 synopsis: "Binding to Cairo, a 2D Vector Graphics Library"
 description: """
 This is a binding to Cairo, a 2D graphics library with support for
