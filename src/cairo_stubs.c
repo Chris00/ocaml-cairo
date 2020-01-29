@@ -34,6 +34,27 @@
 #include "cairo_macros.h"
 #include "cairo_ocaml_types.h"
 
+CAMLexport value caml_cairo_font_type[5];
+
+CAMLexport struct custom_operations caml_cairo_ops;
+CAMLexport struct custom_operations caml_pattern_ops;
+CAMLexport struct custom_operations caml_scaled_font_ops;
+CAMLexport struct custom_operations caml_surface_ops;
+CAMLexport struct custom_operations caml_path_ops;
+
+#ifdef OCAML_CAIRO_HAS_FT
+CAMLexport struct custom_operations caml_cairo_ft_library_ops;
+CAMLexport struct custom_operations caml_cairo_ft_face_ops;
+#endif
+
+CAMLexport struct custom_operations caml_font_options_ops = {
+  "font_options_t", /* identifier for serialization and deserialization */
+  &caml_cairo_font_options_finalize,
+  &caml_cairo_font_options_compare,
+  &caml_cairo_font_options_hash,
+  custom_serialize_default,
+  custom_deserialize_default };
+
 /* cairo_t functions.
 ***********************************************************************/
 

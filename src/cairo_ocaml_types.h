@@ -267,14 +267,6 @@ static intnat caml_cairo_font_options_hash(value v)
   return(cairo_font_options_hash(FONT_OPTIONS_VAL(v)));
 }
 
-struct custom_operations caml_font_options_ops = {
-  "font_options_t", /* identifier for serialization and deserialization */
-  &caml_cairo_font_options_finalize,
-  &caml_cairo_font_options_compare,
-  &caml_cairo_font_options_hash,
-  custom_serialize_default,
-  custom_deserialize_default };
-
 
 /* caml_cairo_font_type is defined in "cairo_ocaml.h". */
 CAMLexport value caml_cairo_font_type_init(value unit)
