@@ -1681,7 +1681,7 @@ static cairo_status_t caml_cairo_output_string
   CAMLlocal2(s, r);
 
   s = caml_alloc_string(length);
-  memmove(String_val(s), data, length);
+  memmove(&Byte(String_val(s), 0), data, length);
   r = caml_callback_exn(* ((value *) fn), s);
   if (Is_exception_result(r))
     CAMLreturn(CAIRO_STATUS_WRITE_ERROR);

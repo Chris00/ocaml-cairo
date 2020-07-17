@@ -173,7 +173,7 @@
 
 /* holds the pointer to the Unavailable exception; shared several
    functions. */
-value * caml_cairo_Unavailable = NULL;
+const value * caml_cairo_Unavailable = NULL;
 
 #define RAISE_UNAVAILABLE(name, args ...)                               \
   CAMLexport value caml_##name(args)                                    \

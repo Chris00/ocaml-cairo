@@ -45,7 +45,7 @@ DEFINE_CUSTOM_OPERATIONS(cairo, cairo_destroy, CAIRO_VAL)
 /* raise [Error] if the status indicates a failure. */
 void caml_cairo_raise_Error(cairo_status_t status)
 {
-  static value * exn = NULL;
+  static const value * exn = NULL;
 
   if (status != CAIRO_STATUS_SUCCESS) {
     if (exn == NULL) {
