@@ -25,7 +25,7 @@
 /* cairo_t
 ***********************************************************************/
 #define CAIRO_VAL(v) (* (cairo_t **) Data_custom_val(v))
-struct custom_operations caml_cairo_ops;
+extern struct custom_operations caml_cairo_ops;
 
 void caml_cairo_raise_Error(cairo_status_t status);
 /* raise [Cairo.Error] if the status indicates a failure. */
@@ -33,7 +33,7 @@ void caml_cairo_raise_Error(cairo_status_t status);
 /* cairo_pattern_t
 ***********************************************************************/
 #define PATTERN_VAL(v) (* (cairo_pattern_t **) Data_custom_val(v))
-struct custom_operations caml_pattern_ops;
+extern struct custom_operations caml_pattern_ops;
 
 #define EXTEND_VAL(v) ((cairo_extend_t) Int_val(v))
 #define VAL_EXTEND(v) Val_int(v)
@@ -45,12 +45,12 @@ struct custom_operations caml_pattern_ops;
 ***********************************************************************/
 
 #define FONT_OPTIONS_VAL(v) (* (cairo_font_options_t**) Data_custom_val(v))
-struct custom_operations caml_font_options_ops;
+extern struct custom_operations caml_font_options_ops;
 
 /* cairo_font_type_t
 ***********************************************************************/
 
-value caml_cairo_font_type[5];
+extern value caml_cairo_font_type[5];
 
 cairo_font_type_t caml_cairo_font_type_val(value vft);
 
@@ -61,13 +61,13 @@ cairo_font_type_t caml_cairo_font_type_val(value vft);
 ***********************************************************************/
 
 #define SCALED_FONT_VAL(v) (* (cairo_scaled_font_t**) Data_custom_val(v))
-struct custom_operations caml_scaled_font_ops;
+extern struct custom_operations caml_scaled_font_ops;
 
 /* cairo_surface_t
 ***********************************************************************/
 
 #define SURFACE_VAL(v) (* (cairo_surface_t **) Data_custom_val(v))
-struct custom_operations caml_surface_ops;
+extern struct custom_operations caml_surface_ops;
 
 /* Type cairo_content_t */
 
@@ -93,7 +93,7 @@ struct custom_operations caml_surface_ops;
 ***********************************************************************/
 
 #define PATH_VAL(v) (* (cairo_path_t **) Data_custom_val(v))
-struct custom_operations caml_path_ops;
+extern struct custom_operations caml_path_ops;
 
 #define PATH_DATA_ASSIGN(vdata, data)                                   \
   switch (data->header.type) {                                          \
@@ -151,10 +151,10 @@ struct custom_operations caml_path_ops;
 #include <cairo-ft.h>
 
 #define FT_LIBRARY_VAL(v) (* (FT_Library*) Data_custom_val(v))
-struct custom_operations caml_cairo_ft_library_ops;
+extern struct custom_operations caml_cairo_ft_library_ops;
 
 #define FT_FACE_VAL(v) (* (FT_Face*) Data_custom_val(v))
-struct custom_operations caml_cairo_ft_face_ops;
+extern struct custom_operations caml_cairo_ft_face_ops;
 
 #endif /* OCAML_CAIRO_HAS_FT */
 

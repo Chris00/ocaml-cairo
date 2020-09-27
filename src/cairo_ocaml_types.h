@@ -275,8 +275,8 @@ struct custom_operations caml_font_options_ops = {
   custom_serialize_default,
   custom_deserialize_default };
 
+value caml_cairo_font_type[5];
 
-/* caml_cairo_font_type is defined in "cairo_ocaml.h". */
 CAMLexport value caml_cairo_font_type_init(value unit)
 {
   /* noalloc */
