@@ -1573,7 +1573,7 @@ static cairo_status_t caml_cairo_image_bigarray_attach_proxy
     if (proxy == NULL) return(CAIRO_STATUS_NO_MEMORY);
     proxy->refcount = 2;      /* original array + surface */
     proxy->data = b->data;
-    proxy->size = 0; /* CAML_BA_MANAGED_MASK excluded by the calling fun */
+    proxy->size = 0; /* CAML_BA_MAPPED_FILE excluded by the calling fun */
     b->proxy = proxy;
   }
   return cairo_surface_set_user_data(surf, &image_bigarray_key, b->proxy,
