@@ -10,6 +10,7 @@ let create() =
 
 let () =
   let cr = create() in
+  printf "With Cairo handle:\n%!";
   set_source_rgb cr 1. 1. 1.;
   rectangle cr 0. 0. ~w:300. ~h:300.;
   fill cr;
@@ -21,9 +22,9 @@ let () =
   show_text cr "Hello";
   Gc.compact();  Gc.compact();
 
-  eprintf "Write image\n%!";
+  eprintf "- Write image\n%!";
   PNG.write (get_target cr) "test_image.png";
-  eprintf "Finish surface\n%!";
+  eprintf "- Finish surface\n%!";
   Surface.finish (get_target cr);
   Gc.compact()
 

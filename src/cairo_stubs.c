@@ -1580,6 +1580,7 @@ static cairo_status_t caml_cairo_image_bigarray_attach_proxy
                                      caml_cairo_image_bigarray_finalize);
 }
 
+#define b (Caml_ba_array_val(vb))
 #define SURFACE_CREATE_DATA(name)                                       \
   CAMLexport value caml_cairo_image_surface_create_for_##name           \
   (value vb, value vformat, value vwidth, value vheight, value vstride) \
@@ -1588,7 +1589,6 @@ static cairo_status_t caml_cairo_image_bigarray_attach_proxy
     CAMLlocal1(vsurf);                                                  \
     cairo_surface_t* surf;                                              \
     const int width =  Int_val(vwidth);                                 \
-    struct caml_ba_array *b = Caml_ba_array_val(vb);                    \
     cairo_status_t status;                                              \
                                                                         \
     if ((b->flags & CAML_BA_MANAGED_MASK) == CAML_BA_MAPPED_FILE)       \
@@ -1610,6 +1610,7 @@ static cairo_status_t caml_cairo_image_bigarray_attach_proxy
 
 SURFACE_CREATE_DATA(data8)
 SURFACE_CREATE_DATA(data32)
+#undef b
 
 #define SURFACE_GET_DATA(type, num_dims, dims ...)                      \
   CAMLexport value caml_cairo_image_surface_get_##type(value vsurf)     \
