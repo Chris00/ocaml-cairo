@@ -1494,7 +1494,7 @@ static void caml_cairo_image_bigarray_finalize(void *data)
   /* Adapted from caml_ba_finalize in the OCaml library sources. */
   if (-- proxy->refcount == 0) {
     free(proxy->data);
-    caml_stat_free(proxy);
+    free(proxy);
   }
 #undef proxy
 }
