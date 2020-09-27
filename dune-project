@@ -1,3 +1,3 @@
-(lang dune 1.1)
+(lang dune 1.0)
 
 (name cairo2)

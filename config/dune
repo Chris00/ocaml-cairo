@@ -2,4 +2,4 @@
 (executable
  (name      discover)
  (modules   discover)
- (libraries dune.configurator str))
+ (libraries dune-configurator str))
