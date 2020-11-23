@@ -1,3 +1,11 @@
+0.6.2 2020-11-23
+----------------
+
+- Fix a memory leak (#19).
+- Fix GCC warnings, in particular the “multiple definition of …” (#23).
+- Clarify the license.
+- Use `dune-configurator`.
+
 0.6.1 2019-03-20
 ----------------
 
