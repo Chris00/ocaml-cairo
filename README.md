@@ -1,5 +1,4 @@
-[![Build Status](https://travis-ci.org/Chris00/ocaml-cairo.svg?branch=master)](https://travis-ci.org/Chris00/ocaml-cairo)
-[![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/5dp8aftaq7ohyflq?svg=true)](https://ci.appveyor.com/project/Chris00/ocaml-cairo)
+![Continuous Integration](https://github.com/Chris00/ocaml-cairo/actions/workflows/main.yml/badge.svg)
 
 OCaml interface to Cairo
 ========================

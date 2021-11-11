@@ -1,0 +1,57 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+        ocaml-version:
+          - 4.12.0
+        include:
+          - ocaml-version: 4.02.x
+            os: ubuntu-latest
+            skip_test: true
+          - ocaml-version: 4.08.1
+            os: ubuntu-latest
+            skip_test: true
+          - ocaml-version: 4.11.1
+            os: ubuntu-latest
+            skip_test: true
+          - ocaml-version: 4.13.0
+            os: ubuntu-latest
+            skip_test: true
+          - ocaml-version: 4.13.0
+            arch: armv6
+            os: ubuntu-latest
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      SKIP_TEST: ${{ matrix.skip_test }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up OCaml ${{ matrix.ocaml-version }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-version }}
+
+      - run: brew install xquartz
+        if: matrix.os == 'macos-latest'
+      - run: opam install . --deps-only --with-test
+      - run: opam install graphics
+      - run: opam exec -- dune build @install @examples @tutorial
+      - name: run test suite
+        run: opam exec -- dune build @runtest
+        if: env.SKIP_TEST != 'true'
