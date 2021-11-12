@@ -16,8 +16,14 @@ let default_cairo c =
 
 let c_header_has_ft () =
   let fh = open_in "cairo_ocaml.h.p" in
-  let s = really_input_string fh (in_channel_length fh) in
+  let buf = Buffer.create 4096 in
+  let b = Bytes.create 4096 in
+  let n = ref 0 in
+  while n := input fh b 0 4096;  !n > 0 do
+    Buffer.add_subbytes buf b 0 !n
+  done;
   close_in fh;
+  let s = Buffer.contents buf in
   let re = Str.regexp "/\\* *#define *OCAML_CAIRO_HAS_FT .*\\*/" in
   let s = Str.global_replace re "#define OCAML_CAIRO_HAS_FT 1" s in
   let fh = open_out "cairo_ocaml.h" in
