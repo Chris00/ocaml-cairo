@@ -1,3 +1,9 @@
+0.6.3 2022-05-20
+----------------
+
+- Fix bug in `Path.fold`.
+- Extend `Image.get_data*` to bigarrays with externally managed payload.
+
 0.6.2 2020-11-23
 ----------------
 
