@@ -393,7 +393,7 @@ CAMLexport value caml_cairo_path_fold(value vpath, value fn, value va)
   for(i = 0; i < path->num_data; i += path->data[i].header.length) {
     data = &path->data[i];
     PATH_DATA_ASSIGN(vdata, data);
-    vdata = caml_callback2(fn, vacc, vdata);
+    vacc = caml_callback2(fn, vacc, vdata);
   }
   CAMLreturn(vacc);
 }

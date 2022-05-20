@@ -25,6 +25,8 @@ let () =
   line_to cr 100. 100.;
   let p = Path.to_array (Path.copy cr) in
   printf "Current path: %a\n%!" print_path p;
+  let p_rev = Path.fold (Path.copy cr) (fun l x -> x :: l) [] in
+  assert(Array.to_list p = List.rev p_rev);
   let q = [| LINE_TO(110., 200.); LINE_TO(50., 150.) |] in
   Path.append cr (Path.of_array q);
 
