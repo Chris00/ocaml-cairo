@@ -1564,6 +1564,7 @@ static cairo_status_t caml_cairo_image_bigarray_attach_proxy
     return(CAIRO_STATUS_SUCCESS);
   if (b->proxy != NULL) {
     /* If b is already a proxy, increment refcount. */
+    /* FIXME, use caml_atomic_refcount_incr if available. */
     ++ b->proxy->refcount;
   }
   else {
@@ -1624,13 +1625,19 @@ SURFACE_CREATE_DATA(data32)
                                                                         \
     if (data == NULL)                                                   \
       invalid_argument("Cairo.Image.get_data: not an image surface.");  \
-    if (proxy == NULL)                                                  \
-      invalid_argument("Cairo.Image.get_data: not created from a bigarray"); \
-    vb = caml_ba_alloc(CAML_BA_##type | CAML_BA_C_LAYOUT | CAML_BA_MANAGED, \
-                       num_dims, data, dim);                            \
-    /* Attach the proxy of the surface to the bigarray */               \
-    ++ proxy->refcount;                                                 \
-    (Caml_ba_array_val(vb))->proxy = proxy;                             \
+    if (proxy == NULL) {                                                \
+      /* We assume the payload is externally managed */                \
+      vb = caml_ba_alloc(CAML_BA_##type | CAML_BA_C_LAYOUT              \
+                         | CAML_BA_EXTERNAL,                            \
+                         num_dims, data, dim);                          \
+    } else {                                                            \
+      vb = caml_ba_alloc(CAML_BA_##type | CAML_BA_C_LAYOUT              \
+                         | CAML_BA_MANAGED,                             \
+                         num_dims, data, dim);                          \
+      /* Attach the proxy of the surface to the bigarray */             \
+      ++ proxy->refcount;                                               \
+      (Caml_ba_array_val(vb))->proxy = proxy;                           \
+    }                                                                   \
     CAMLreturn(vb);                                                     \
   }
 
