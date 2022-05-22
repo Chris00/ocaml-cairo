@@ -16,7 +16,7 @@ build: [
 depends: [
   "ocaml" {>= "4.02"}
   "base-bigarray"
-  "dune"
+  "dune" {>= "2.7.0"}
   "conf-pkg-config" {build}
   "conf-cairo"
   "cairo2" {= version}
