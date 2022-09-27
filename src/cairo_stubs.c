@@ -1006,7 +1006,7 @@ CAMLexport value caml_cairo_scaled_font_text_to_glyphs
 
   status = cairo_scaled_font_text_to_glyphs
     (SCALED_FONT_VAL(vsf), Double_val(vx), Double_val(vy),
-     String_val(vutf8), string_length(vutf8),
+     String_val(vutf8), caml_string_length(vutf8),
      &glyphs, &num_glyphs,  &clusters, &num_clusters,  &cluster_flags);
   caml_cairo_raise_Error(status);
 
@@ -1269,7 +1269,7 @@ CAMLexport value caml_cairo_show_text_glyphs
 
   ARRAY_GLYPH_VAL(glyphs, p, vglyphs, num_glyphs);
   ARRAY_CLUSTER_VAL(clusters, q, vglyphs, num_glyphs);
-  cairo_show_text_glyphs(cr, String_val(vutf8), string_length(vutf8),
+  cairo_show_text_glyphs(cr, String_val(vutf8), caml_string_length(vutf8),
                          glyphs, num_glyphs, clusters, num_clusters,
                          /* FIXME: is it a binary | ? */
                          CLUSTER_FLAGS_VAL(vcluster_flags));
@@ -1624,7 +1624,7 @@ SURFACE_CREATE_DATA(data32)
       cairo_surface_get_user_data(SURFACE_VAL(vsurf), &image_bigarray_key); \
                                                                         \
     if (data == NULL)                                                   \
-      invalid_argument("Cairo.Image.get_data: not an image surface.");  \
+      caml_invalid_argument("Cairo.Image.get_data: not an image surface.");  \
     if (proxy == NULL) {                                                \
       /* We assume the payload is externally managed */                \
       vb = caml_ba_alloc(CAML_BA_##type | CAML_BA_C_LAYOUT              \

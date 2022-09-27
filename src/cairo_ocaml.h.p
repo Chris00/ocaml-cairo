@@ -148,6 +148,7 @@ extern struct custom_operations caml_path_ops;
 /* #define OCAML_CAIRO_HAS_FT 1 */
 
 #ifdef OCAML_CAIRO_HAS_FT
+#undef alloc
 #include <cairo-ft.h>
 
 #define FT_LIBRARY_VAL(v) (* (FT_Library*) Data_custom_val(v))
