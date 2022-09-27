@@ -32,7 +32,7 @@
 
 /* https://developer.gnome.org/pango/stable/pango-Cairo-Rendering.html */
 
-#define ALLOC(name) alloc_custom(&caml_##name##_ops, sizeof(void*), 1, 50)
+#define ALLOC(name) caml_alloc_custom(&caml_##name##_ops, sizeof(void*), 1, 50)
 
 #define DO2_NOALLOC(fn, of_val1, of_val2)                               \
   CAMLexport value caml_##fn (value v1, value v2)                       \

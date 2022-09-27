@@ -33,7 +33,7 @@ static intnat caml_cairo_hash_pointer(value v)
   }                                                                     \
   CUSTOM_OPERATIONS(name)
 
-#define ALLOC(name) alloc_custom(&caml_##name##_ops, sizeof(void*), 1, 50)
+#define ALLOC(name) caml_alloc_custom(&caml_##name##_ops, sizeof(void*), 1, 50)
 
 /* Type cairo_t
 ***********************************************************************/

@@ -66,7 +66,7 @@ CAMLexport value caml_gdk_cairo_create(value vdrawable)
   CAMLlocal1(vcontext);
   cairo_t *cr = gdk_cairo_create(GdkDrawable_val(vdrawable));
   caml_cairo_raise_Error(cairo_status(cr)); /* caml_check_status not exported */
-  vcontext = alloc_custom(&caml_cairo_ops, sizeof(void*), 1, 50);
+  vcontext = caml_alloc_custom(&caml_cairo_ops, sizeof(void*), 1, 50);
   CAIRO_VAL(vcontext) = cr;
   CAMLreturn(vcontext);
 }
