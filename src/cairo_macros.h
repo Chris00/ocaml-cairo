@@ -175,6 +175,17 @@
    functions. */
 const value * caml_cairo_Unavailable;
 
+#ifdef _MSC_VER
+#define RAISE_UNAVAILABLE(name, ...)                                    \
+  CAMLexport value caml_##name(__VA_ARGS__)                             \
+  {                                                                     \
+    if (caml_cairo_Unavailable == NULL)                                 \
+      caml_cairo_Unavailable = caml_named_value("Cairo.Unavailable");   \
+    caml_raise_constant(* caml_cairo_Unavailable);                      \
+  }                                                                     \
+
+#else
+
 #define RAISE_UNAVAILABLE(name, args ...)                               \
   CAMLexport value caml_##name(args)                                    \
   {                                                                     \
@@ -182,6 +193,8 @@ const value * caml_cairo_Unavailable;
       caml_cairo_Unavailable = caml_named_value("Cairo.Unavailable");   \
     caml_raise_constant(* caml_cairo_Unavailable);                      \
   }                                                                     \
+
+#endif
 
 #define UNAVAILABLE1(name) RAISE_UNAVAILABLE(name, value v1)
 #define UNAVAILABLE2(name) RAISE_UNAVAILABLE(name, value v1, value v2)
