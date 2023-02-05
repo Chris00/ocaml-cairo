@@ -10,7 +10,8 @@ let default_cairo c =
   (* In case pkg-config fails *)
   let sys = C.ocaml_config_var_exn c "system" in
   if sys = "msvc" || sys = "win64" then
-    { P.cflags = ["-I"; "C:\\gtk\\include\\cairo"];
+    { P.cflags = ["-I"; "C:\\gtk\\include\\cairo";
+                  "-I"; "C:\\gtk\\include\\freetype2"];
       libs = ["/LC:\\gtk\\lib"; "cairo.lib"] }
   else { P.cflags = ["-I/usr/include/cairo"];  libs = ["-lcairo"] }
 
