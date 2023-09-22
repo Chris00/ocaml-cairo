@@ -58,6 +58,9 @@ void caml_cairo_raise_Error(cairo_status_t status)
       /* Keep in sync with the OCaml def of [status]; variant without
          arguments == int.  The first 2 values of cairo_status_t are
          deleted. */
+      /* TAG_ERROR is currently the last known status of the OCaml
+         type Cairo.status */
+      if (status > CAIRO_STATUS_TAG_ERROR) status = CAIRO_STATUS_TAG_ERROR + 1;
       caml_raise_with_arg(*exn, Val_int(status - 2));
   }
 }

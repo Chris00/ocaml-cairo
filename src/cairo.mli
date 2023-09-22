@@ -98,6 +98,11 @@ type status =
   | INVALID_MESH_CONSTRUCTION
   | DEVICE_FINISHED
   | JBIG2_GLOBAL_MISSING
+  | PNG_ERROR
+  | FREETYPE_ERROR
+  | WIN32_GDI_ERROR
+  | TAG_ERROR
+  | UNKNOWN_ERROR
 
 exception Error of status
 (** [Error status]: raised by functions of this module to indicate a
